@@ -1,0 +1,188 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  // output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url = env("DATABASE_URL")
+}
+
+/* 
+  Each user should have :
+- unique id 
+- firstname
+- lastname 
+- unique username
+- password
+- profile (optional)
+- conversations
+- deleted status for account
+- account created at
+- preferences (hide email , bio , phone number , ...)
+  */
+ model User {
+  id Int @id @default(autoincrement())
+  firstname String
+  lastname String
+  username String @unique
+  password String
+  profile Profile?
+  conversations ConversationParticipant[]
+  messages Message[]
+  deleted Boolean @default(false)
+  createdAt DateTime @default(now())
+  preferences Preferences? @relation("preferences to user")
+  verificationCodes VerificationCode[]
+  @@map("users")
+  }
+
+  /* 
+    Each profile should have:
+- unique id 
+- bio
+- unique phone number 
+- birthday
+- unique Email
+- avatar
+- avatar background
+    */
+model Profile {
+id Int @id @default(autoincrement())
+user User @relation(fields: [userId],references: [id])
+userId Int @unique
+bio String?
+phoneNumber String? @unique
+birthday DateTime?
+email String? @unique
+avatar String?
+avatarBackground String?
+}
+
+    /* 
+    Each conversation should have :
+- unique id 
+- created at time
+- type (group or direct)
+- particpants
+- title (optional in direct)
+- avatar (optional)
+- messages 
+    */
+
+model Conversation {
+id Int @id @default(autoincrement())
+title String?
+avatar String?
+description String?
+type ConversationType @default(DIRECT)
+participants ConversationParticipant[]
+messages Message[]
+createdAt DateTime @default(now())
+updatedAt DateTime @updatedAt
+
+}
+
+
+
+/*
+Each converstion participant should have 
+- unique id
+- conversationId
+- userId
+*/
+
+model ConversationParticipant {
+id Int @id @default(autoincrement())
+conversation Conversation @relation(fields: [conversationId],references: [id])
+conversationId Int
+user User @relation(fields: [userId],references: [id])
+userId Int
+joinedAt DateTime @default(now())
+}
+
+/* 
+ Each prefernces table should have : 
+unique id 
+- isEmailHidden
+- isPhoneNumberHidden
+- isAvatarHidden
+- isBioHidden
+- isAvatarBackgroundHidden
+ */
+
+model Preferences {
+id Int @id @default(autoincrement())
+user User @relation("preferences to user",fields: [userId],references: [id])
+userId Int @unique 
+isEmailHidden Boolean @default(true)
+isPhoneNumberHidden Boolean @default(true)
+isAvatarHidden Boolean @default(false)
+isBioHidden Boolean @default(false)
+isAvatarBackgroundHidden Boolean @default(false)
+isBirthdayHidden Boolean @default(false)
+preferredVerification VerificationType?
+}
+
+ /* 
+Each message should have : 
+- unique id 
+- senderId and sender
+- content
+- createdAt 
+- editedAt 
+- edited
+- mimetype 
+- message type (image , file , voice message)
+*/
+
+model Message {
+  id Int @id @default(autoincrement())
+  sender User @relation(fields: [senderId],references: [id])
+  senderId Int
+  conversation Conversation @relation(fields: [conversationId],references: [id])
+  conversationId Int
+  content String?
+  createdAt DateTime @default(now())
+  editedAt DateTime? @updatedAt
+  edit Boolean @default(false)
+  type MessageType @default(TEXT)
+  fileURL String?
+  mimeType String?
+  clientOffset String?
+}
+
+model VerificationCode {
+  id Int @id @default(autoincrement())
+  user User @relation(fields: [userId], references: [id])
+  userId Int
+  code String
+  type VerificationType
+  expiresAt DateTime
+  used Boolean @default(false)
+  
+  @@unique([code,userId])
+}
+
+enum VerificationType {
+  EMAIL
+  PHONE
+}
+
+
+enum ConversationType {
+  DIRECT
+  GROUP
+}
+
+enum MessageType {
+  TEXT
+  IMAGE 
+  FILE
+}
