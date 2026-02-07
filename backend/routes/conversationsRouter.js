@@ -17,6 +17,13 @@ conversationsRouter.get(
   conversationsController.getSpecificConversationGet,
 );
 
+conversationsRouter.get("/", conversationsController.queryGroupsGet);
+
+conversationsRouter.get(
+  "/:conversationId/messages",
+  messagesCountroller.getConversationMessagesGet,
+);
+
 conversationsRouter.use(verifyToken, (req, res, next) => {
   const token = req.token;
   try {

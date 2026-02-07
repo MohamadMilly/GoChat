@@ -5,7 +5,7 @@ export function MessagesList({ messages, type }) {
   const { user } = useAuth();
 
   return (
-    <ul className="p-3">
+    <ul className="p-3 flex-1 overflow-y-auto">
       {messages.map((message) => {
         const sender = message.sender;
         const isMyMessage = user.id === sender.id;

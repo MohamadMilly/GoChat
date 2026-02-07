@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { api } from "../utils/api";
+import { api } from "../../utils/api";
 
 async function fetchContacts() {
   const response = await api.get("/users/me/contacts");

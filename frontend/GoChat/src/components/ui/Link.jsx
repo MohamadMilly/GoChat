@@ -1,10 +1,11 @@
 import { NavLink } from "react-router";
 
-export function Link({ children, route, className = "" }) {
+export function Link({ children, route, className = "rounded-md" }) {
   return (
     <NavLink
+      viewTransition={true}
       to={route}
-      className={`text-sm px-3 py-1.5 rounded-md hover:scale-105 shadow transition-all duration-300 ${className}`}
+      className={`text-sm px-3 py-1.5  hover:scale-105 shadow transition-all duration-300 ${className}`}
     >
       {children}
     </NavLink>

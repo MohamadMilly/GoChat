@@ -7,6 +7,7 @@ const SocketContext = createContext(null);
 export function SocketProvider({ children }) {
   const [isConnected, setIsConnected] = useState(socket.connected);
   const [connectedUsers, setConnectedUsers] = useState([]);
+  const [typingUsers, setTypingUsers] = useState([]);
   const { token, user } = useAuth();
   useEffect(() => {
     if (!token || !user) return;
@@ -29,19 +30,42 @@ export function SocketProvider({ children }) {
     function onUserDisconnect(userId) {
       setConnectedUsers((prev) => prev.filter((id) => id != userId));
     }
+    function onUserTyping(userId, conversationId) {
+      setTypingUsers((prev) =>
+        prev.some(
+          (typingUser) =>
+            typingUser.userId === userId &&
+            conversationId === typingUser.conversationId,
+        )
+          ? prev
+          : [...prev, { userId: userId, conversationId: conversationId }],
+      );
+    }
+    function onUserStoppedTyping(userId) {
+      setTypingUsers((prev) =>
+        prev.filter((typingUser) => typingUser.userId !== userId),
+      );
+    }
+
     socket.on("connect", onConnect);
     socket.on("disconnect", onDisconnect);
     socket.on("user connected", onUserConnect);
     socket.on("user disconnected", onUserDisconnect);
+    socket.on("typing", onUserTyping);
+    socket.on("stopped typing", onUserStoppedTyping);
     return () => {
       socket.off("connect", onConnect);
       socket.off("disconnect", onDisconnect);
       socket.off("user connected", onUserConnect);
       socket.off("user disconnected", onUserDisconnect);
+      socket.off("typing", onUserTyping);
+      socket.off("stopped typing", onUserStoppedTyping);
     };
   }, []);
   return (
-    <SocketContext.Provider value={{ isConnected, connectedUsers }}>
+    <SocketContext.Provider
+      value={{ isConnected, connectedUsers, typingUsers }}
+    >
       {children}
     </SocketContext.Provider>
   );

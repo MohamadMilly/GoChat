@@ -150,8 +150,8 @@ io.on("connection", async (socket) => {
 
   socket.on("typing", (conversationId) => {
     const userId = socket.handshake.auth.userId;
-
-    socket.broadcast.to(String(conversationId)).emit("typing", userId);
+    const convId = String(conversationId);
+    socket.broadcast.to(convId).emit("typing", userId, convId);
   });
   socket.on("stopped typing", (conversationId) => {
     const userId = socket.handshake.auth.userId;

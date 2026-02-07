@@ -1,12 +1,15 @@
-import { Navigate, useSearchParams } from "react-router";
+import { Navigate, useNavigate, useSearchParams } from "react-router";
 import { SearchBar } from "../components/ui/SearchBar";
 import { useUsers } from "../hooks/useUsers";
-import { ChatEntry } from "../components/chatListComponents/ChatEntry";
-import { abbreviateText } from "../utils/abbreviateText";
 import { useCreateConversation } from "../hooks/useCreateConversation";
 import { useSocket } from "../contexts/SocketContext";
+import { Contact } from "../components/users/Contact";
+import Button from "../components/ui/Button";
+import { ArrowBigLeft } from "lucide-react";
+
 export function NewChatPage() {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const query = searchParams.get("query");
   const { connectedUsers } = useSocket();
   const {
@@ -31,38 +34,40 @@ export function NewChatPage() {
     return <Navigate to={`/chats/${data.conversation.id}`} />;
   }
   return (
-    <main>
-      <header>
-        <SearchBar query={query} />
-      </header>
-      <section>
+    <main className="max-w-200 mx-auto bg-white font-rubik relative">
+      <div className="flex justify-start items-center p-2 bg-gray-50/30 rounded-lg mt-2 mb-4">
+        <Button onClick={() => navigate(-1)} className="text-gray-600">
+          <p className="sr-only">Go Back</p>
+          <ArrowBigLeft size={20} />
+        </Button>
+      </div>
+      <SearchBar query={query} label={"Find User"} />
+
+      <section className="p-2 mt-4">
         {usersError ? (
           <p>Error: {usersError.message}</p>
         ) : isFetchingUsers ? (
           <p>isLoading</p>
         ) : !query ? (
-          <p>Search for users</p>
+          <p className="text-xs text-gray-400 text-center">Search for users</p>
         ) : users && users.length === 0 ? (
-          <p>No users are found</p>
+          <p className="text-xs text-gray-400 text-center">
+            No users are found
+          </p>
         ) : (
-          <ul>
+          <ul className="w-full flex flex-col animate-slideup">
             {users.map((user) => {
               const isThereAvatar = !!user.profile?.avatar;
-
-              const avatar =
-                isThereAvatar ||
-                abbreviateText(user.firstname + " " + user.lastname);
-              const fullname = user.firstname + " " + user.lastname;
-              const isConnected = !!connectedUsers.find((id) => id == user.id);
+              const avatar = isThereAvatar ? user.profile.avatar : null;
               return (
-                <ChatEntry
+                <Contact
                   key={user.id}
-                  isGroup={false}
-                  chatAvatar={avatar}
-                  isThereAvatar={isThereAvatar}
-                  title={fullname}
-                  onOpenChat={() => onOpenChat(user)}
-                  isConnected={isConnected}
+                  firstname={user.firstname}
+                  lastname={user.lastname}
+                  avatar={avatar}
+                  isSelected={false}
+                  onClick={() => onOpenChat(user)}
+                  color={user?.accountColor || null}
                 />
               );
             })}

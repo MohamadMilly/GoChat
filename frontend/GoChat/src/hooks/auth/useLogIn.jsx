@@ -1,4 +1,4 @@
-import { api } from "../utils/api";
+import { api } from "../../utils/api";
 import { useMutation } from "@tanstack/react-query";
 
 const login = async (data) => {

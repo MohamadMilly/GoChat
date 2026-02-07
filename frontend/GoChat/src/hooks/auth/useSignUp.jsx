@@ -1,5 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
-import { api } from "../utils/api";
+import { api } from "../../utils/api";
 
 const signup = async (data) => {
   const response = await api.post("/auth/signup", {

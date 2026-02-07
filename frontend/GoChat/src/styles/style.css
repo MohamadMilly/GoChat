@@ -5,3 +5,76 @@
 @theme {
   --font-rubik: "Rubik", sans-serif;
 }
+
+@layer utilities {
+  .scrollbar-custom::-webkit-scrollbar {
+    width: 4px;
+  }
+  .scrollbar-custom::-webkit-scrollbar-track {
+    background: #eeeeee;
+  }
+  .scrollbar-custom::-webkit-scrollbar-thumb {
+    background-color: #41c0d1;
+    border-radius: 9999px;
+  }
+  .animate-slideup {
+    animation: slideup 0.5s 1 forwards;
+  }
+  .animate-slidedown {
+    animation: slidedown 0.5s 1 forwards;
+  }
+  .animate-pop {
+    animation: pop 0.3s 1 forwards;
+  }
+  .animate-fade {
+    animation: fade 0.3s 1 forwards;
+  }
+  @keyframes slidedown {
+    from {
+      display: block;
+      opacity: 1;
+      transform: translateY(0);
+    }
+    to {
+      display: hidden;
+      opacity: 0;
+      transform: translateY(50px);
+    }
+  }
+  @keyframes slideup {
+    from {
+      display: hidden;
+      opacity: 0;
+      transform: translateY(50px);
+    }
+    to {
+      display: block;
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  @keyframes pop {
+    from {
+      display: hidden;
+      opacity: 0;
+      transform: scale(0.9);
+    }
+    to {
+      display: black;
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  @keyframes fade {
+    from {
+      display: black;
+      opacity: 1;
+      transform: scale(1);
+    }
+    to {
+      display: hidden;
+      opacity: 0;
+      transform: scale(0.9);
+    }
+  }
+}

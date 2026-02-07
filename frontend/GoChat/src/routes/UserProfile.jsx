@@ -1,59 +1,58 @@
-import { useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import { useUser } from "../hooks/useUser";
-import { abbreviateText } from "../utils/abbreviateText";
 import { useSocket } from "../contexts/SocketContext";
+import { getGenertedTransitionId } from "../utils/transitionId";
+import Button from "../components/ui/Button";
+import { ArrowBigLeft } from "lucide-react";
+import { ProfileHeader } from "../components/profile/ProfileHeader";
+import { ProfileSection } from "../components/profile/ProfileSection";
+import { ProfileIdentity } from "../components/profile/ProfileIdentity";
+import { AtSign } from "lucide-react";
+
 export function UserProfile() {
   const { userId } = useParams();
   const { connectedUsers } = useSocket();
   const { user, isFetching, error } = useUser(userId);
+  const navigate = useNavigate();
+
   if (isFetching) return <p>Loading...</p>;
   if (error) return <p>Error: {error.message}</p>;
 
   const fullname = user.firstname + " " + user.lastname;
   const isConnected = connectedUsers.find((id) => id == userId);
+  const transitionId = getGenertedTransitionId();
+  const dynamicTransitionName = `${fullname.replaceAll(" ", "-")}-${transitionId}`;
   return (
-    <main>
-      <section
-        style={{
-          backgroundImage: `url(${user.profile?.avatarBackground || ""})`,
-        }}
-      >
-        {user.profile?.avatar ? (
-          <img src={user.profile?.avatar} />
-        ) : (
-          abbreviateText(fullname)
-        )}
-      </section>
-      <section>
-        <h1>{fullname}</h1>
-        <p>{isConnected ? "Online" : "Offline"}</p>
-      </section>
-      <section>
-        <article>
-          <h2>Username</h2>
-          <p>{user.username}</p>
-        </article>
-        <article>
-          <h2>Bio</h2>
-          <p>{user.profile?.bio || "No Bio"}</p>
-        </article>
+    <main className="max-w-200 mx-auto bg-white font-rubik relative">
+      <div className="flex justify-start items-center p-2 bg-gray-50/30 rounded-lg my-2">
+        <Button onClick={() => navigate(-1)} className="text-gray-600">
+          <p className="sr-only">Go Back</p>
+          <ArrowBigLeft size={20} />
+        </Button>
+      </div>
+      <ProfileHeader
+        user={user}
+        dynamicTransitionName={dynamicTransitionName}
+      />
+      <ProfileIdentity fullname={fullname} isConnected={isConnected} />
+      <section className="px-4 mt-4 py-2 bg-white shadow-sm rounded-md">
+        <ProfileSection
+          title={"Username"}
+          value={user.username}
+          icon={<AtSign size={20} />}
+        />
+        <ProfileSection title={"Bio"} value={user.profile?.bio} />
         {user.profile?.phoneNumber && (
-          <article>
-            <h2>Phone number</h2>
-            <p>{user.profile.phoneNumber}</p>
-          </article>
+          <ProfileSection
+            title={"Phone number"}
+            value={user.profile?.phoneNumber}
+          />
         )}
         {user.profile?.email && (
-          <article>
-            <h2>Email</h2>
-            <p>{user.profile.email}</p>
-          </article>
+          <ProfileSection title={"Email"} value={user.profile?.email} />
         )}
         {user.profile?.birthday && (
-          <article>
-            <h2>Birthday</h2>
-            <p>{user.profile.birthday}</p>
-          </article>
+          <ProfileSection title={"Birthday"} value={user.profile?.bidthday} />
         )}
       </section>
     </main>

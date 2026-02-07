@@ -10,27 +10,36 @@ const bcrypt = require("bcryptjs");
 const prisma = require("../lib/prisma");
 const filterProfile = require("../utils/filterProfile");
 
-const editProfilePatch = async (req, res) => {
+const editProfilePut = async (req, res) => {
   const currentUser = req.currentUser;
   const { bio, phoneNumber, birthday, email, avatar, avatarBackground } =
     req.body;
-  const data = {};
-  data.bio = bio ? bio : undefined;
-  data.phoneNumber = phoneNumber ? phoneNumber : undefined;
-  data.birthday = birthday ? birthday : undefined;
-  data.email = email ? email : undefined;
-  data.avatar = avatar ? avatar : undefined;
-  data.avatarBackground = avatarBackground ? avatarBackground : undefined;
+
   try {
     const updatedProfile = await prisma.profile.upsert({
       where: {
         userId: parseInt(currentUser.id),
       },
-      data: {
-        ...data,
+      update: {
+        bio,
+        phoneNumber,
+        birthday,
+        email,
+        avatar,
+        avatarBackground,
       },
       create: {
-        ...data,
+        bio,
+        phoneNumber,
+        birthday,
+        email,
+        avatar,
+        avatarBackground,
+        user: {
+          connect: {
+            id: currentUser.id,
+          },
+        },
       },
     });
     return res.json({
@@ -51,11 +60,13 @@ const preferencesPatch = async (req, res) => {
     isPhoneNumberHidden,
     isAvatarHidden,
     isAvatarBackgroundHidden,
+    isBirthdayHidden,
     preferredVerification,
   } = req.body;
-  const data = {};
-  data.isEmailHidden = isEmailHidden ? isEmailHidden : undefined;
-  data.isBioHidden = isBioHidden ? isBioHidden : undefined;
+
+  /* const data = {};
+  data.isEmailHidden = isEmailHidden;
+  data.isBioHidden = isBioHidden;
   data.isPhoneNumberHidden = isPhoneNumberHidden
     ? isPhoneNumberHidden
     : undefined;
@@ -65,17 +76,35 @@ const preferencesPatch = async (req, res) => {
     : undefined;
   data.preferredVerification = preferredVerification
     ? preferredVerification
-    : undefined;
+    : undefined; */
+
   try {
     const updatedPreferences = await prisma.preferences.upsert({
       where: {
-        userId: parseInt(currentUser.id),
+        userId: currentUser.id,
       },
-      data: {
-        ...data,
+      update: {
+        isEmailHidden,
+        isBioHidden,
+        isPhoneNumberHidden,
+        isAvatarHidden,
+        isAvatarBackgroundHidden,
+        isBirthdayHidden,
+        preferredVerification,
       },
       create: {
-        ...data,
+        isEmailHidden,
+        isBioHidden,
+        isPhoneNumberHidden,
+        isAvatarHidden,
+        isAvatarBackgroundHidden,
+        isBirthdayHidden,
+        preferredVerification,
+        user: {
+          connect: {
+            id: currentUser.id,
+          },
+        },
       },
     });
     return res.json({
@@ -84,6 +113,7 @@ const preferencesPatch = async (req, res) => {
   } catch (err) {
     return res.status(500).json({
       message: "Unxpected error happened while updating preferences",
+      error: err.message,
     });
   }
 };
@@ -214,6 +244,7 @@ const getSpecificUserGet = async (req, res) => {
         lastname: true,
         username: true,
         profile: true,
+        accountColor: true,
       },
     });
     const userPreferences = await prisma.preferences.findUnique({
@@ -234,9 +265,75 @@ const getSpecificUserGet = async (req, res) => {
   }
 };
 
+const getCurrentUserGet = async (req, res) => {
+  const currentUser = req.currentUser;
+  try {
+    const user = await prisma.user.findUnique({
+      where: {
+        id: currentUser.id,
+      },
+      select: {
+        id: true,
+        firstname: true,
+        lastname: true,
+        username: true,
+        profile: true,
+        accountColor: true,
+      },
+    });
+    if (!user) {
+      return res.json({
+        message: "This account is not found.",
+      });
+    }
+    const userPreferences = await prisma.preferences.findUnique({
+      where: {
+        userId: currentUser.id,
+      },
+    });
+
+    return res.json({
+      user: user,
+      preferences: userPreferences,
+    });
+  } catch (err) {
+    return res.status(500).json({
+      message: "Unexpected error happened while getting this user data.",
+    });
+  }
+};
+
+const getCurrentuserPreferences = async (req, res) => {
+  const currentUser = req.currentUser;
+  try {
+    const preferences = await prisma.preferences.findUnique({
+      where: {
+        userId: currentUser.id,
+      },
+    });
+    if (!preferences) {
+      return res.status(404).json({
+        message: "User or preferences are not defined.",
+      });
+    }
+
+    return res.json({
+      preferences: preferences,
+    });
+  } catch (err) {
+    return res.status(500).json({
+      message: "Unexpected error happened while getting preferences.",
+    });
+  }
+};
+
 module.exports = {
   myConversationsGet,
   queryUsersGet,
   getMyContactsGet,
   getSpecificUserGet,
+  getCurrentUserGet,
+  getCurrentuserPreferences,
+  preferencesPatch,
+  editProfilePut,
 };

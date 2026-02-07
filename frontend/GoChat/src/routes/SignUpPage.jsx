@@ -3,7 +3,7 @@ import { InputField } from "../components/ui/InputField";
 import chatBackground from "../assets/chat_background.png";
 import { Link } from "../components/ui/Link";
 import Button from "../components/ui/Button";
-import { useSignUp } from "../hooks/useSignUp";
+import { useSignUp } from "../hooks/auth/useSignUp";
 import { Navigate } from "react-router";
 import { useAuth } from "../contexts/AuthContext";
 
@@ -50,19 +50,19 @@ export function SignUpPage() {
         className="flex-2 flex flex-col items-center h-screen relative"
         style={{ backgroundImage: `url(${chatBackground})` }}
       >
-        <div className="inset-0 z-1 absolute bg-gray-800/20 backdrop-blur-xs animate-pulse"></div>
+        <div className="inset-0 z-1 absolute bg-gray-800/60 backdrop-blur-xs"></div>
         <article className="z-10 relative top-1/3">
-          <h2 className="text-5xl font-bold tracking-tight text-cyan-800 mb-6">
+          <h2 className="text-5xl font-bold tracking-tight text-cyan-200 text-shadow-cyan-100 text-shadow-xs mb-6">
             Join GoChat
           </h2>
-          <p className="max-w-120 text-sm text-gray-800">
+          <p className="max-w-120 text-sm text-gray-200">
             Create an account to start chatting with your friends. Choose a
             username and preferred verification method.
           </p>
-          <p className="text-xs mt-6">
+          <p className="text-xs text-gray-300 mt-6">
             Already have an account?{" "}
             <Link
-              className="text-xs text-cyan-800 border-2 border-cyan-800"
+              className="text-xs text-cyan-200 border-2 border-cyan-200"
               route={"/auth/login"}
             >
               Log in

@@ -10,6 +10,7 @@ export function useUser(userId) {
   const { data, isFetching, error } = useQuery({
     queryKey: ["user", userId],
     queryFn: () => fetchUser(userId),
+    staleTime: 1000 * 60 * 5,
   });
   const user = data ? data.user : null;
   return { user, isFetching, error };

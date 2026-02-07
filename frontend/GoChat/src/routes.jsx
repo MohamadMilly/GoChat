@@ -1,11 +1,18 @@
 // pages
 
 import App from "./App";
-import { About } from "./routes/about";
-import { ChatPage } from "./routes/ChatPage";
+import { About } from "./routes/About";
+import { ChatDetails } from "./routes/ChatDetails";
+
+import { ChatPageWrapper } from "./routes/ChatPageWrapper";
+import { ChatsListLanding } from "./routes/ChatsListLanding";
 import { ChatsListPage } from "./routes/ChatsListPage";
-import { LogInPage } from "./routes/LoginPage";
-import { NewChatPage } from "./routes/newChatPage";
+import { FindGroupPage } from "./routes/FindGroupPage";
+import { LogInPage } from "./routes/LogInPage";
+import { EditProfilePage } from "./routes/me/EditProfile";
+import { MyPreferences } from "./routes/me/MyPreferences";
+import { MyProfile } from "./routes/me/MyProfile";
+import { NewChatPage } from "./routes/NewChatPage";
 import { NewGroupPage } from "./routes/NewGroupPage";
 import { SignUpPage } from "./routes/SignUpPage";
 import { UserProfile } from "./routes/UserProfile";
@@ -28,12 +35,20 @@ export const routes = [
     element: <LogInPage />,
   },
   {
+    path: "/chats/groups",
+    element: <FindGroupPage />,
+  },
+  {
     path: "/chats",
     element: <ChatsListPage />,
     children: [
       {
-        path: "/chats:id",
-        element: <ChatPage />,
+        index: true,
+        element: <ChatsListLanding />,
+      },
+      {
+        path: "/chats/:id",
+        element: <ChatPageWrapper />,
       },
     ],
   },
@@ -47,10 +62,26 @@ export const routes = [
   },
   {
     path: "/chats/:id",
-    element: <ChatPage />,
+    element: <ChatPageWrapper />,
   },
   {
     path: "/users/:userId",
     element: <UserProfile />,
+  },
+  {
+    path: "/users/me/profile",
+    element: <MyProfile />,
+  },
+  {
+    path: "/users/me/profile/edit",
+    element: <EditProfilePage />,
+  },
+  {
+    path: "/users/me/preferences",
+    element: <MyPreferences />,
+  },
+  {
+    path: "/chats/:id/details",
+    element: <ChatDetails />,
   },
 ];

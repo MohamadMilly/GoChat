@@ -32,15 +32,6 @@ const getSpecificConversationGet = async (req, res) => {
         id: parseInt(conversationId),
       },
       include: {
-        messages: {
-          include: {
-            sender: {
-              include: {
-                profile: true,
-              },
-            },
-          },
-        },
         participants: {
           include: {
             user: {
@@ -50,6 +41,7 @@ const getSpecificConversationGet = async (req, res) => {
                 firstname: true,
                 lastname: true,
                 username: true,
+                accountColor: true,
               },
             },
           },
@@ -61,6 +53,11 @@ const getSpecificConversationGet = async (req, res) => {
         message: "Conversation is not found.",
       });
     }
+    const membersCount = await prisma.conversationParticipant.count({
+      where: {
+        conversationId: parseInt(conversationId),
+      },
+    });
     conversation = {
       ...conversation,
       participants: conversation.participants.map((particiant) => ({
@@ -71,6 +68,7 @@ const getSpecificConversationGet = async (req, res) => {
 
     return res.json({
       conversation: conversation,
+      membersCount,
     });
   } catch (err) {
     console.error(err);
@@ -213,7 +211,34 @@ const createNewConversationPost = async (req, res) => {
   }
 };
 
+const queryGroupsGet = async (req, res) => {
+  const { title } = req.query;
+
+  try {
+    const conversations = await prisma.conversation.findMany({
+      where: {
+        AND: [
+          {
+            title: {
+              contains: title,
+            },
+          },
+          { type: "GROUP" },
+        ],
+      },
+    });
+    return res.json({
+      conversations: conversations,
+    });
+  } catch (err) {
+    return res.status(500).json({
+      message: "Unexpected error happened while getting the conversations",
+    });
+  }
+};
+
 module.exports = {
   createNewConversationPost,
   getSpecificConversationGet,
+  queryGroupsGet,
 };

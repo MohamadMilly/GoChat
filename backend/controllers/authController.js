@@ -17,6 +17,9 @@ const {
   verifyCode,
 } = require("../utils/verificationCode");
 
+// pre defined colors for account to choose from randomly whenever a new user create an account
+const accountColors = ["#16a34a", "#a855f7", "#d97706", "#1e40af", "#ff4d91"];
+
 const signupPost = async (req, res) => {
   const {
     firstname,
@@ -27,6 +30,8 @@ const signupPost = async (req, res) => {
     email,
     phoneNumber,
   } = req.body;
+  const randomColor =
+    accountColors[Math.floor(Math.random() * (accountColors.length + 1))];
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
     const createdUser = await prisma.user.create({
@@ -46,6 +51,7 @@ const signupPost = async (req, res) => {
             preferredVerification: phoneNumber ? "PHONE" : "EMAIL",
           },
         },
+        accountColor: randomColor,
       },
     });
     const payLoad = {

@@ -1,57 +1,101 @@
-import { memo } from "react";
-import { abbreviateText } from "../../utils/abbreviateText";
+import { memo, useContext, useState } from "react";
 import { useSocket } from "../../contexts/SocketContext";
 import { NavLink } from "react-router";
 import { Avatar } from "./Avatar";
+import { useAuth } from "../../contexts/AuthContext";
+import { getTypingUsers } from "../../utils/getTypingUsers";
+import { ChatPageContext } from "../../routes/ChatPage";
+import { getChatInfo } from "../../utils/getChatInfo";
+import { getConnectedUsers } from "../../utils/getConnectedUsers";
+import { useConversation } from "../../hooks/useConversation";
+import { TransitionLink } from "../ui/TransitionLink";
 
-export const ChatHeader = memo(
-  ({ chatPartners, avatar = "", title = "", type, typingUsers = [] }) => {
-    const { connectedUsers } = useSocket();
-    const isGroup = type === "GROUP";
-    const isThereUsersTyping = typingUsers.length > 0;
-    // GROUP
-    const membersCount = chatPartners.length;
-    // DIRECT
-    const partner = chatPartners[0].user;
-    const chatAvatar = isGroup ? avatar : partner.profile?.avatar;
-    const chatTitle = isGroup
-      ? title
-      : partner.firstname + " " + partner.lastname;
-    const isConnected = !!connectedUsers.find((id) => id == partner.id);
-    const isUserTyping = isThereUsersTyping
-      ? partner.id == typingUsers[0].user.id
+export const ChatHeader = memo(() => {
+  const { connectedUsers, typingUsers } = useSocket();
+  const { user } = useAuth();
+  const { conversationId } = useContext(ChatPageContext);
+  const {
+    conversation,
+    membersCount,
+    isFetching: isFetchingConversation,
+    error: conversationError,
+  } = useConversation(conversationId);
+
+  const [transitionId, setTransitionId] = useState(null);
+
+  if (isFetchingConversation) return <p>Loading...</p>;
+  if (conversationError) return <p>Error: {conversationError.message}</p>;
+
+  const { chatTitle, chatAvatar, color, chatPartner, isGroup } = getChatInfo(
+    {
+      participants: conversation.participants,
+      title: conversation.title,
+      avatar: conversation.avatar,
+      type: conversation.type,
+    },
+    user.id,
+  );
+  const thisChatConnectedUsers = getConnectedUsers(
+    conversation.participants,
+    connectedUsers,
+  );
+
+  const connectedUsersCount = thisChatConnectedUsers.length;
+  const isOneToOneChatPartnerConnected = isGroup
+    ? null
+    : connectedUsersCount === 2
+      ? true
       : false;
-    return (
-      <header className="border-b-2 border-gray-100 px-4 py-2 shadow-lg">
-        <NavLink
-          className={"flex items-center gap-x-2"}
-          to={isGroup ? "" : `/users/${partner.id}`}
-        >
-          <Avatar chatTitle={chatTitle} avatar={chatAvatar} />
-          <div>
-            <p className="text-sm">{chatTitle}</p>
-            <span className="text-xs text-gray-700">
-              {isGroup ? (
-                isThereUsersTyping ? (
-                  typingUsers.map((userData) => {
-                    return (
-                      <span>{userData.user.firstname + " is typing..."}</span>
-                    );
-                  })
-                ) : (
-                  membersCount + " members"
-                )
-              ) : isUserTyping ? (
-                "typing..."
-              ) : isConnected ? (
-                <span className="text-cyan-600">Online</span>
+  const thisChatTypingUsers = getTypingUsers(
+    conversation.participants,
+    typingUsers,
+    conversationId,
+  );
+
+  return (
+    <header className="sticky top-0 z-20 border-b-2 border-gray-100 px-4 py-2 shadow-lg bg-white">
+      <TransitionLink
+        route={
+          isGroup
+            ? `/chats/${conversationId}/details`
+            : `/users/${chatPartner.id}`
+        }
+        setDynamicTransitionId={setTransitionId}
+        className={"flex items-center gap-x-2"}
+      >
+        <Avatar
+          dynamicTransitionId={transitionId}
+          chatTitle={chatTitle}
+          avatar={chatAvatar}
+          color={color}
+        />
+        <div className="flex flex-col justify-center items-start">
+          <p className="text-sm">{chatTitle}</p>
+          <span className="text-xs text-gray-700">
+            {isGroup ? (
+              thisChatTypingUsers.length > 0 ? (
+                thisChatTypingUsers.map((userData) => {
+                  return (
+                    <span>{userData.user.firstname + " is typing..."}</span>
+                  );
+                })
               ) : (
-                "Offline"
-              )}
-            </span>
-          </div>
-        </NavLink>
-      </header>
-    );
-  },
-);
+                membersCount +
+                " members" +
+                " | " +
+                connectedUsersCount +
+                " online"
+              )
+            ) : thisChatTypingUsers.length > 0 ? (
+              "typing..."
+            ) : isOneToOneChatPartnerConnected ? (
+              <span className="text-cyan-600">Online</span>
+            ) : (
+              "Offline"
+            )}
+          </span>
+        </div>
+      </TransitionLink>
+    </header>
+  );
+});

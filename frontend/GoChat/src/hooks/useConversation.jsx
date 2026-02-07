@@ -11,7 +11,9 @@ export function useConversation(conversationId) {
     queryKey: ["conversation", conversationId],
     queryFn: () => getConversation(conversationId),
     enabled: !!conversationId,
+    staleTime: 1000 * 60 * 5,
   });
   const conversation = data ? data.conversation : null;
-  return { conversation, isFetching, error };
+  const membersCount = data ? data.membersCount : null;
+  return { conversation, isFetching, error, membersCount };
 }

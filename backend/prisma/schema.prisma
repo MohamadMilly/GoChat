@@ -40,6 +40,7 @@ datasource db {
   createdAt DateTime @default(now())
   preferences Preferences? @relation("preferences to user")
   verificationCodes VerificationCode[]
+  accountColor String?
   @@map("users")
   }
 

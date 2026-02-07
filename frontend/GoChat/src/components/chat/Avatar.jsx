@@ -1,13 +1,50 @@
 import { abbreviateText } from "../../utils/abbreviateText";
+import { getGenertedTransitionId } from "../../utils/transitionId";
 
-export function Avatar({ avatar, chatTitle }) {
+export function Avatar({
+  avatar,
+  chatAvatar,
+  chatTitle,
+  color,
+  size = "48px",
+  className = "",
+  viewTransitionName = null,
+  dynamicTransitionId,
+}) {
+  const src = chatAvatar || avatar || null;
+
+  const dynamicTransitionName = dynamicTransitionId
+    ? `${chatTitle.replaceAll(" ", "-")}-${dynamicTransitionId}`
+    : null;
+  console.log(dynamicTransitionName);
   return (
-    <div className="flex justify-center items-center shrink-0 w-14 h-14 border rounded-full relative">
-      {avatar ? (
-        <img src={avatar} alt="chat avatar" />
-      ) : (
-        <span>{abbreviateText(chatTitle)}</span>
-      )}
+    <div className={`relative ${className}`}>
+      <div
+        className={`flex justify-center items-center shrink-0 w-[var(--size)] h-[var(--size)] rounded-full overflow-hidden ${
+          color ? "bg-[var(--chat-color)]" : "bg-gray-100"
+        }`}
+        style={{
+          "--chat-color": color,
+          "--size": size,
+          viewTransitionName: viewTransitionName
+            ? viewTransitionName
+            : dynamicTransitionName,
+        }}
+      >
+        {src ? (
+          <img
+            className="object-cover h-full w-full rounded-full"
+            src={src}
+            alt="chat avatar"
+          />
+        ) : (
+          <span
+            className={`text-lg ${color ? "text-gray-100" : "text-gray-600"}`}
+          >
+            {abbreviateText(chatTitle)}
+          </span>
+        )}
+      </div>
     </div>
   );
 }
