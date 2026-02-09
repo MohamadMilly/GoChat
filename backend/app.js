@@ -169,7 +169,7 @@ io.on("connection", async (socket) => {
 
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: "https://go-chat-dun.vercel.app",
   }),
 );
 
