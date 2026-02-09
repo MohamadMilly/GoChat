@@ -13,6 +13,7 @@ import { LogInPage } from "./routes/LogInPage";
 import { EditProfilePage } from "./routes/me/EditProfile";
 import { MyPreferences } from "./routes/me/MyPreferences";
 import { MyProfile } from "./routes/me/MyProfile";
+import { Settings } from "./routes/me/Settings";
 import { NewChatPage } from "./routes/NewChatPage";
 import { NewGroupPage } from "./routes/NewGroupPage";
 import { SignUpPage } from "./routes/SignUpPage";
@@ -79,6 +80,10 @@ export const routes = [
   {
     path: "/users/me/profile",
     element: <MyProfile />,
+  },
+  {
+    path: "/users/me/settings",
+    element: <Settings />,
   },
   {
     path: "/users/me/profile/edit",

@@ -45,9 +45,9 @@ export function SignUpPage() {
     return <Navigate to="/chats" />;
   }
   return (
-    <main className="flex">
+    <main className="md:flex">
       <section
-        className="flex-2 flex flex-col items-center h-screen relative"
+        className="max-w-250 w-full px-4 hidden md:flex flex-col items-center h-screen relative"
         style={{ backgroundImage: `url(${chatBackground})` }}
       >
         <div className="inset-0 z-1 absolute bg-gray-800/60 backdrop-blur-xs"></div>
@@ -62,7 +62,7 @@ export function SignUpPage() {
           <p className="text-xs text-gray-300 mt-6">
             Already have an account?{" "}
             <Link
-              className="text-xs text-cyan-200 border-2 border-cyan-200"
+              className="text-xs text-cyan-200 border-2 border-cyan-200 rounded"
               route={"/auth/login"}
             >
               Log in
@@ -70,7 +70,7 @@ export function SignUpPage() {
           </p>
         </article>
       </section>
-      <section className="basis-xl flex flex-col items-center">
+      <section className="basis-xl px-4 flex flex-1 flex-col items-center">
         <h2 className="font-rubik text-4xl font-bold text-center my-12 tracking-tight text-cyan-800 ">
           Sign up
         </h2>

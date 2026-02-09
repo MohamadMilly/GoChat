@@ -10,7 +10,7 @@ export function InputField({
   isOptional = false,
 }) {
   return (
-    <div className="flex flex-col px-4 py-2 my-4 gap-2">
+    <div className="flex flex-col px-4 py-1.5 my-4 gap-2">
       <label className={`text-sm ${labelClassName}`} htmlFor={id}>
         {label}{" "}
         {isOptional && (

@@ -61,10 +61,10 @@ export function LogInPage() {
   };
 
   return (
-    <main className="flex">
+    <main className="md:flex">
       <ToastContainer position="top-right" draggable={true} autoClose={3000} />
       <section
-        className="flex-2 flex flex-col items-center h-screen relative"
+        className="max-w-250 w-full px-4 hidden md:flex flex-col items-center h-screen relative"
         style={{ backgroundImage: `url(${chatBackground})` }}
       >
         <div className="inset-0 z-1 absolute bg-gray-800/60 backdrop-blur-xs"></div>
@@ -79,7 +79,7 @@ export function LogInPage() {
           <p className="text-xs text-gray-300 mt-6">
             Don't have an accont?{" "}
             <Link
-              className="text-xs text-cyan-200 border-2 border-cyan-200"
+              className="text-xs text-cyan-200 border-2 border-cyan-200 rounded"
               route={"/auth/signup"}
             >
               Sign up
@@ -87,7 +87,7 @@ export function LogInPage() {
           </p>
         </article>
       </section>
-      <section className="basis-xl flex flex-col items-center">
+      <section className="basis-xl px-4 flex flex-1 flex-col items-center">
         <h2 className="font-rubik text-4xl font-bold text-center my-12 tracking-tight text-cyan-800 ">
           Log in
         </h2>

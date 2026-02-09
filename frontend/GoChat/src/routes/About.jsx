@@ -7,7 +7,7 @@ export function About() {
         About the creator
       </h2>
       <article>
-        <p className="text-lg text-gray-800">
+        <p className="text-lg text-gray-700">
           Welcome to my web app! I’m Mohammed Milly, a Syrian web developer and
           mathematician with a passion for logic and problem‑solving. I love
           exploring ideas that challenge the mind and spark creative thinking.
@@ -18,13 +18,13 @@ export function About() {
         <aside className="flex justify-between w-full max-w-120 mx-auto shrink-0 mt-6 border-2 border-cyan-500 rounded-md p-3">
           <Link
             route={"https://github.com/MohamadMilly"}
-            className="text-cyan-600 text-lg"
+            className="text-cyan-600 text-sm md:text-base rounded"
           >
             github account
           </Link>
           <Link
             route={"https://t.me/Mohamadmilly"}
-            className="text-cyan-600 text-lg"
+            className="text-cyan-600 text-sm md:text-base rounded"
           >
             telegram account
           </Link>
