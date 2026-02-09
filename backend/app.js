@@ -22,21 +22,30 @@ const io = new Server(server, {
 const connectedUsers = {};
 io.on("connection", async (socket) => {
   socket.on("user connected", (userId) => {
-    socket.userId = userId;
     connectedUsers[userId] = socket.id;
 
     io.emit("user connected", Object.keys(connectedUsers));
   });
-  socket.on("disconnect", () => {
-    delete connectedUsers[socket.userId];
+  socket.on("disconnect", async () => {
+    const userId = socket.handshake.auth.userId;
 
-    io.emit("user disconnected", socket.userId);
+    delete connectedUsers[userId];
+
+    await prisma.profile.update({
+      where: {
+        userId: userId,
+      },
+      data: {
+        lastSeen: new Date(),
+      },
+    });
+    io.emit("user disconnected", userId);
     console.log("user diconnected.");
   });
   console.log("user connected.");
   socket.on("join chat", async (conversationId) => {
     const convId = String(conversationId);
-    console.log("user joined chat", convId);
+
     socket.join(convId);
     try {
       const userId = socket.handshake.auth.userId;
@@ -44,7 +53,7 @@ io.on("connection", async (socket) => {
         where: { userId: userId },
       });
 
-      if (!socket.recovered) {
+      if (!socket.recovered && convId) {
         const missedMessages = await prisma.message.findMany({
           where: {
             conversationId: parseInt(convId),
@@ -72,7 +81,6 @@ io.on("connection", async (socket) => {
           socket
             .timeout(5000)
             .emit("chat message", filtered, convId, message.id);
-          console.log("Message recovered on join");
         });
         socket.recovered = true;
       }

@@ -14,6 +14,7 @@ function filterProfile(userOrParticipant, preferences) {
   return {
     ...userOrParticipant,
     profile: {
+      ...profile,
       avatar: prefs.isAvatarHidden ? "" : profile.avatar || "",
       phoneNumber: prefs.isPhoneNumberHidden ? "" : profile.phoneNumber || "",
       email: prefs.isEmailHidden ? "" : profile.email || "",

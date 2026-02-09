@@ -10,6 +10,7 @@ const filterProfile = require("../utils/filterProfile");
 
 const getSpecificConversationGet = async (req, res) => {
   const { conversationId } = req.params;
+
   try {
     const participantsIds = await prisma.conversationParticipant.findMany({
       where: {
@@ -237,8 +238,41 @@ const queryGroupsGet = async (req, res) => {
   }
 };
 
+const joinConversationPost = async (req, res) => {
+  const currentUser = req.currentUser;
+  const conversationId = req.params.conversationId;
+  try {
+    const conversationParticipant = await prisma.conversationParticipant.create(
+      {
+        data: {
+          user: {
+            connect: {
+              id: currentUser.id,
+            },
+          },
+          conversation: {
+            connect: {
+              id: parseInt(conversationId),
+            },
+          },
+        },
+      },
+    );
+    if (conversationParticipant) {
+      return res.json({
+        message: "You have successfully joined the conversation",
+      });
+    }
+  } catch (err) {
+    return res.status(500).json({
+      message: "Unexpected error happened while joining this conversation.",
+    });
+  }
+};
+
 module.exports = {
   createNewConversationPost,
   getSpecificConversationGet,
   queryGroupsGet,
+  joinConversationPost,
 };

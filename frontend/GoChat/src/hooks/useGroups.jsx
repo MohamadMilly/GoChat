@@ -18,7 +18,7 @@ export function useGroups(query) {
     enabled: !!query,
   });
 
-  const groups = data ? data.conversations : null;
+  const groups = data ? data.conversations : [];
 
   return { groups, error, isFetching };
 }

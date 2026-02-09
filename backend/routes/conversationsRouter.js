@@ -47,4 +47,9 @@ conversationsRouter.post(
   messagesCountroller.sendMessagePost,
 );
 
+conversationsRouter.post(
+  "/:conversationId",
+  conversationsController.joinConversationPost,
+);
+
 module.exports = conversationsRouter;

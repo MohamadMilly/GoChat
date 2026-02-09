@@ -9,7 +9,7 @@ import chatBackground from "../assets/chat_background.png";
 
 import { useMessages } from "../hooks/useMessages";
 
-export const ChatPageContext = createContext(null);
+export const ChatPageContext = createContext({ conversationId: null });
 
 export function ChatPage() {
   const { id } = useParams();
@@ -21,9 +21,10 @@ export function ChatPage() {
   } = useMessages(id);
 
   useEffect(() => {
+    console.log(id);
     socket.emit("join chat", String(id));
   }, [id]);
-
+  /* 
   const queryClient = useQueryClient();
   useEffect(() => {
     function onReceiveMessage(message, conversationId, serverOffset) {
@@ -44,7 +45,7 @@ export function ChatPage() {
     return () => {
       socket.off("chat message", onReceiveMessage);
     };
-  }, [id, queryClient]);
+  }, [id, queryClient]); */
 
   if (messagesError) {
     return <p>Error: {messagesError.message}</p>;
@@ -55,28 +56,33 @@ export function ChatPage() {
 
   return (
     <ChatPageContext value={{ conversationId: id }}>
-      <ChatHeader />
-      <div
-        className="flex flex-col w-full flex-1 relative"
-        style={{
-          backgroundImage: `url(${chatBackground})`,
-          backgroundAttachment: "fixed",
-          backgroundRepeat: "repeat",
-          backgroundPosition: "center",
-        }}
-      >
-        <div className="inset-0 absolute bg-gray-600/20"></div>
-        <section className="flex flex-col z-10 flex-1 p-3" aria-label="polite">
-          {messages.length === 0 ? (
-            <p className="text-center text-lg h-full flex justify-center items-center text-gray-800">
-              No messages yet.
-            </p>
-          ) : (
-            <MessagesList messages={messages} type={type} />
-          )}
-        </section>
-        <SendMessageForm />
-      </div>
+      <section className="flex flex-col md:col-start-2 md:col-end-3 md:row-start-1 md:row-end-2 overflow-y-auto scrollbar-custom absolute inset-0 md:static ">
+        <ChatHeader />
+        <div
+          className="flex flex-col w-full flex-1 relative"
+          style={{
+            backgroundImage: `url(${chatBackground})`,
+            backgroundAttachment: "fixed",
+            backgroundRepeat: "repeat",
+            backgroundPosition: "center",
+          }}
+        >
+          <div className="inset-0 absolute bg-gray-600/20"></div>
+          <section
+            className="flex flex-col z-10 flex-1 p-2"
+            aria-label="polite"
+          >
+            {messages.length === 0 ? (
+              <p className="text-center text-lg h-full flex justify-center items-center text-gray-800">
+                No messages yet.
+              </p>
+            ) : (
+              <MessagesList messages={messages} type={type} />
+            )}
+          </section>
+          <SendMessageForm />
+        </div>
+      </section>
     </ChatPageContext>
   );
 }

@@ -1,6 +1,7 @@
 // pages
 
 import App from "./App";
+import { GroupPreview } from "./components/chat/GroupPreview";
 import { About } from "./routes/About";
 import { ChatDetails } from "./routes/ChatDetails";
 
@@ -37,7 +38,14 @@ export const routes = [
   {
     path: "/chats/groups",
     element: <FindGroupPage />,
+    children: [
+      {
+        path: "/chats/groups/:id/preview",
+        element: <GroupPreview />,
+      },
+    ],
   },
+
   {
     path: "/chats",
     element: <ChatsListPage />,

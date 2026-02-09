@@ -41,7 +41,11 @@ export function MyProfile() {
         dynamicTransitionName={dynamicTransitionName}
         user={user}
       />
-      <ProfileIdentity fullname={fullname} isConnected={isConnected} />
+      <ProfileIdentity
+        fullname={fullname}
+        isConnected={isConnected}
+        lastSeen={user.profile.lastSeen}
+      />
       <section className="px-4 mt-4 py-2 bg-white shadow-sm rounded-md">
         <ProfileSection
           value={user.username}

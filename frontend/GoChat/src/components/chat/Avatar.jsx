@@ -16,7 +16,7 @@ export function Avatar({
   const dynamicTransitionName = dynamicTransitionId
     ? `${chatTitle.replaceAll(" ", "-")}-${dynamicTransitionId}`
     : null;
-  console.log(dynamicTransitionName);
+
   return (
     <div className={`relative ${className}`}>
       <div

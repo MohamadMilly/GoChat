@@ -41,6 +41,7 @@ datasource db {
   preferences Preferences? @relation("preferences to user")
   verificationCodes VerificationCode[]
   accountColor String?
+  
   @@map("users")
   }
 
@@ -64,6 +65,7 @@ birthday DateTime?
 email String? @unique
 avatar String?
 avatarBackground String?
+lastSeen DateTime?
 }
 
     /* 
@@ -167,7 +169,7 @@ model VerificationCode {
   type VerificationType
   expiresAt DateTime
   used Boolean @default(false)
-  
+   
   @@unique([code,userId])
 }
 

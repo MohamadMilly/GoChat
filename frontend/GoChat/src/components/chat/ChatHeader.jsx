@@ -1,6 +1,6 @@
 import { memo, useContext, useState } from "react";
 import { useSocket } from "../../contexts/SocketContext";
-import { NavLink } from "react-router";
+import { useNavigate } from "react-router";
 import { Avatar } from "./Avatar";
 import { useAuth } from "../../contexts/AuthContext";
 import { getTypingUsers } from "../../utils/getTypingUsers";
@@ -9,8 +9,11 @@ import { getChatInfo } from "../../utils/getChatInfo";
 import { getConnectedUsers } from "../../utils/getConnectedUsers";
 import { useConversation } from "../../hooks/useConversation";
 import { TransitionLink } from "../ui/TransitionLink";
+import Button from "../ui/Button";
+import { ArrowBigLeft } from "lucide-react";
 
-export const ChatHeader = memo(() => {
+export const ChatHeader = memo(({ id }) => {
+  const navigate = useNavigate();
   const { connectedUsers, typingUsers } = useSocket();
   const { user } = useAuth();
   const { conversationId } = useContext(ChatPageContext);
@@ -19,7 +22,7 @@ export const ChatHeader = memo(() => {
     membersCount,
     isFetching: isFetchingConversation,
     error: conversationError,
-  } = useConversation(conversationId);
+  } = useConversation(conversationId || id);
 
   const [transitionId, setTransitionId] = useState(null);
 
@@ -49,15 +52,22 @@ export const ChatHeader = memo(() => {
   const thisChatTypingUsers = getTypingUsers(
     conversation.participants,
     typingUsers,
-    conversationId,
+    conversationId || id,
   );
 
   return (
-    <header className="sticky top-0 z-20 border-b-2 border-gray-100 px-4 py-2 shadow-lg bg-white">
+    <header className="sticky top-0 z-20 border-b-2 border-gray-100 px-4 py-2 shadow-lg bg-white flex items-center gap-2">
+      <Button
+        onClick={() => navigate("/chats", { viewTransition: true })}
+        className={"text-gray-600 md:hidden"}
+      >
+        <p className="sr-only">Go Back</p>
+        <ArrowBigLeft size={18} />
+      </Button>
       <TransitionLink
         route={
           isGroup
-            ? `/chats/${conversationId}/details`
+            ? `/chats/${conversationId || id}/details`
             : `/users/${chatPartner.id}`
         }
         setDynamicTransitionId={setTransitionId}
@@ -91,7 +101,12 @@ export const ChatHeader = memo(() => {
             ) : isOneToOneChatPartnerConnected ? (
               <span className="text-cyan-600">Online</span>
             ) : (
-              "Offline"
+              <span>
+                last seen at{" "}
+                {new Date(
+                  chatPartner.profile.lastSeen,
+                ).toLocaleTimeString()}{" "}
+              </span>
             )}
           </span>
         </div>

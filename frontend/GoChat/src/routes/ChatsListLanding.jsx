@@ -3,7 +3,7 @@ import { Link } from "../components/ui/Link";
 
 export function ChatsListLanding() {
   return (
-    <div className="h-full flex flex-col justify-center gap-2 items-center relative">
+    <div className="h-full md:flex flex-col justify-center gap-2 items-center relative hidden z-10">
       <div className="text-cyan-600">
         <MessagesSquare strokeWidth={1} size={120} />
       </div>

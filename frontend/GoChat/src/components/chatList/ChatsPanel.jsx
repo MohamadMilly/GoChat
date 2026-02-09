@@ -14,8 +14,9 @@ export function ChatsPanel() {
   const query = searchParams.get("name");
   const queryClient = useQueryClient();
   useEffect(() => {
-    if (isFetching || !conversations) return;
+    if (isFetching || conversations.length <= 0) return;
     conversations.forEach((c) => {
+      console.log(c.id);
       socket.emit("join chat", String(c.id));
     });
   }, [conversations, isFetching]);
@@ -47,7 +48,7 @@ export function ChatsPanel() {
 
   const filteredConversations = filterConversations(conversations, query);
   return (
-    <aside className="col-start-1 col-end-2 border-r-2 border-gray-200 bg-white flex flex-col max-h-full">
+    <aside className="md:col-start-1 md:col-end-2 border-r-2 border-gray-200 bg-white flex flex-col max-h-full">
       <SearchBar name="name" query={query} label={"Search Chat"} />
       <p className="px-3 text-sm text-gray-500">
         {filteredConversations?.length || 0} chats

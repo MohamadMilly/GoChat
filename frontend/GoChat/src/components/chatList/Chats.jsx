@@ -1,4 +1,3 @@
-import { useNavigate } from "react-router";
 import { ChatEntry } from "./ChatEntry";
 import { useSocket } from "../../contexts/SocketContext";
 import { getTypingUsers } from "../../utils/getTypingUsers";
@@ -7,7 +6,6 @@ import { getChatInfo } from "../../utils/getChatInfo";
 import { getConnectedUsers } from "../../utils/getConnectedUsers";
 
 export function Chats({ chatsEntries }) {
-  const navigate = useNavigate();
   const { user } = useAuth();
   const { connectedUsers, typingUsers } = useSocket();
   return (
@@ -35,9 +33,6 @@ export function Chats({ chatsEntries }) {
               chatTitle={chatTitle}
               isGroup={isGroup}
               chatAvatar={chatAvatar}
-              onOpenChat={() => {
-                navigate(`/chats/${chatEntry.id}`, { viewTransition: true });
-              }}
               conversationId={chatEntry.id}
               isConnected={isGroup ? null : isoneToOneChatPartnerConnected}
               typingUsers={thisChatTypingUsers}
