@@ -1,3 +1,4 @@
+import { useAuth } from "../../contexts/AuthContext";
 import { api } from "../../utils/api";
 import { useMutation } from "@tanstack/react-query";
 

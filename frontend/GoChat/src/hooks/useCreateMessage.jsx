@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../utils/api";
-
+import { useAuth } from "../contexts/AuthContext";
 const sendMessage = async ({
   content,
   type,
@@ -19,16 +19,45 @@ const sendMessage = async ({
 
 export function useCreateMessage() {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
   return useMutation({
     mutationFn: sendMessage,
-    onSuccess: (data, args, context) => {
+    onMutate: async (args) => {
       const conversationId = args.conversationId;
-      queryClient.setQueryData(["conversation", conversationId], (old) => {
-        return { ...old, messages: [...old.messages, data.message] };
-      });
+      await queryClient.cancelQueries([
+        "messages",
+        "conversation",
+        conversationId,
+      ]);
+      const oldMessages = queryClient.getQueryData([
+        ["messages", "conversation", conversationId],
+      ]);
+      queryClient.setQueryData(
+        ["conversation", "messages", conversationId],
+        (old) => {
+          return {
+            ...old,
+            messages: [
+              ...old.messages,
+              { createdAt: new Date(), sender: user, ...args },
+            ],
+          };
+        },
+      );
+      return { oldMessages };
     },
-    onSettled: (data, error, args) => {
-      queryClient.invalidateQueries(["conversation", args.conversationId]);
+    onError: (error, args, context) => {
+      queryClient.setQueryData(
+        ["messages", "conversation", args.conversationId],
+        context.oldMessages,
+      );
+    },
+    onSettled: (data, error, args, context) => {
+      queryClient.invalidateQueries([
+        "conversation",
+        "messages",
+        args.conversationId,
+      ]);
     },
   });
 }

@@ -31,7 +31,7 @@ export function MessagesList({ messages, type }) {
     return () => {
       socket.off("chat message", onReceiveMessage);
     };
-  }, [queryClient]);
+  }, [queryClient, user.id]);
   return (
     <ul className="p-1 flex-1">
       {messages.map((message) => {

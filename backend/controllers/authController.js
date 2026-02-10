@@ -163,9 +163,10 @@ const verifyPost = async (req, res) => {
 
     return res.json({ token, user: payload.user });
   } catch (err) {
-    return res
-      .status(500)
-      .json({ message: "Unexpected error happened while verifying" });
+    return res.status(500).json({
+      message: "Unexpected error happened while verifying",
+      error: err,
+    });
   }
 };
 

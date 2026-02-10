@@ -7,7 +7,7 @@ const URL =
   import.meta.env.NODE_ENV === "production"
     ? undefined
     : import.meta.env.VITE_API_URL;
-console.log(URL);
+
 export const socket = io(URL, {
   autoConnect: false,
   auth: {

@@ -28,7 +28,7 @@ io.on("connection", async (socket) => {
   });
   socket.on("disconnect", async () => {
     const userId = socket.handshake.auth.userId;
-
+    if (!userId) return;
     delete connectedUsers[userId];
     console.log(socket.handshake);
     await prisma.profile.update({
@@ -139,7 +139,8 @@ io.on("connection", async (socket) => {
         if (err.code === "P2002") {
         }
       }
-      io.to(convId)
+      socket.broadcast
+        .to(convId)
         .timeout(5000)
         .emit(
           "chat message",

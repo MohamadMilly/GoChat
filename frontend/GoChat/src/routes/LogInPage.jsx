@@ -8,12 +8,14 @@ import { toast, ToastContainer } from "react-toastify";
 import chatBackground from "../assets/chat_background.png";
 import { Link } from "../components/ui/Link";
 import Button from "../components/ui/Button";
+import { useAuth } from "../contexts/AuthContext";
 
 export function LogInPage() {
   const [loginData, setLoginData] = useState({
     username: "",
     password: "",
   });
+  const { user } = useAuth();
   const [code, setCode] = useState("");
   const {
     mutate: login,
@@ -29,6 +31,7 @@ export function LogInPage() {
     isSuccess: isSuccessVerification,
   } = useVerifyCode();
   const [isLoginSucceed, setIsLogInSucceed] = useState(false);
+
   let [maxStep, minStep] = [2, 1];
   const [step, setstep] = useState(1);
   const goNext = () => {
@@ -50,13 +53,12 @@ export function LogInPage() {
   const onFieldChange = (fieldname, e) => {
     setLoginData((prev) => ({ ...prev, [fieldname]: e.target.value }));
   };
-  if (isSuccessVerification) {
+  if (isSuccessVerification && user) {
     return <Navigate to={"/"} />;
   }
 
   const handleVerifyCode = (e) => {
     e.preventDefault();
-
     verify({ code, username: loginData.username });
   };
 
