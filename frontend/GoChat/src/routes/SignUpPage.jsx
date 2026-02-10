@@ -71,7 +71,7 @@ export function SignUpPage() {
         </article>
       </section>
       <section className="basis-xl px-4 flex flex-1 flex-col items-center">
-        <h2 className="font-rubik text-4xl font-bold text-center my-12 tracking-tight text-cyan-800 ">
+        <h2 className="font-rubik text-4xl font-bold text-center my-10 tracking-tight text-cyan-800 ">
           Sign up
         </h2>
         <form

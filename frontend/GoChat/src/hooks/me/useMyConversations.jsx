@@ -9,7 +9,7 @@ export function useMyConversations() {
   const { data, isFetching, error, refetch } = useQuery({
     queryKey: ["conversations"],
     queryFn: fetchConversations,
-    staleTime: 1000 * 60,
+    staleTime: 1000 * 60 * 2,
   });
   const conversations = data ? data.conversations : [];
   return { conversations: conversations, isFetching, error, refetch };

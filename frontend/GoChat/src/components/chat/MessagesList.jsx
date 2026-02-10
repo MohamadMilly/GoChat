@@ -14,7 +14,10 @@ export function MessagesList({ messages, type }) {
       queryClient.setQueryData(
         ["conversation", "messages", conversationId],
         (old) => {
-          if (!old?.messages || !old?.type) return old;
+          // if there is no previous cached data return the old data , or if it the user's message don't added because it is now optimistic
+          if (!old?.messages || !old?.type || message.senderId === user.id)
+            return old;
+
           return {
             ...old,
             messages: [...old.messages, message],

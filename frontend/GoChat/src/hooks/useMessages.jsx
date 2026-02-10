@@ -11,6 +11,7 @@ export function useMessages(conversationId) {
     queryKey: ["conversation", "messages", conversationId],
     queryFn: () => fetchMessages(conversationId),
     enabled: !!conversationId,
+    staleTime: 1000 * 60 * 5,
   });
   const messages = data ? data.messages : null;
   const type = data ? data.type : null;

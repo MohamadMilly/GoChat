@@ -12,7 +12,7 @@ export function ChatsPanel() {
   const { isFetching, conversations, error } = useMyConversations();
   const [searchParams] = useSearchParams();
   const query = searchParams.get("name");
-  const queryClient = useQueryClient();
+
   useEffect(() => {
     if (isFetching || conversations.length <= 0) return;
     conversations.forEach((c) => {
@@ -20,31 +20,9 @@ export function ChatsPanel() {
       socket.emit("join chat", String(c.id));
     });
   }, [conversations, isFetching]);
-  useEffect(() => {
-    function onReceiveMessage(message, conversationId) {
-      queryClient.setQueryData(["conversations"], (old) => {
-        if (!old?.conversations) return old;
-        return {
-          ...old,
-          conversations: old.conversations.map((conversation) => {
-            if (conversation.id == conversationId) {
-              return {
-                ...conversation,
-                messages: [message],
-              };
-            }
-            return conversation;
-          }),
-        };
-      });
-    }
-    socket.on("chat message", onReceiveMessage);
-    return () => {
-      socket.off("chat message", onReceiveMessage);
-    };
-  }, [queryClient]);
+
   if (isFetching) return <p className="p-4">Loading...</p>;
-  if (error) return <p className="p-4">Error: {error}</p>;
+  if (error) return <p className="p-4">Error: {error.message}</p>;
 
   const filteredConversations = filterConversations(conversations, query);
   return (

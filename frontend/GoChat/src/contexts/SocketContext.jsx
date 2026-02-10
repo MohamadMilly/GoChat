@@ -1,6 +1,7 @@
 import { createContext, useState, useEffect, useContext } from "react";
 import { socket } from "../socket";
 import { useAuth } from "./AuthContext";
+import { useQueryClient } from "@tanstack/react-query";
 
 const SocketContext = createContext(null);
 
@@ -9,6 +10,7 @@ export function SocketProvider({ children }) {
   const [connectedUsers, setConnectedUsers] = useState([]);
   const [typingUsers, setTypingUsers] = useState([]);
   const { token, user } = useAuth();
+  const queryClient = useQueryClient();
   useEffect(() => {
     if (!token || !user) return;
     socket.connect();
@@ -47,6 +49,25 @@ export function SocketProvider({ children }) {
       );
     }
 
+    function onReceiveMessage(message, conversationId) {
+      queryClient.setQueryData(["conversations"], (old) => {
+        if (!old?.conversations) return old;
+        return {
+          ...old,
+          conversations: old.conversations.map((conversation) => {
+            if (conversation.id == conversationId) {
+              return {
+                ...conversation,
+                messages: [message],
+              };
+            }
+            return conversation;
+          }),
+        };
+      });
+    }
+    socket.on("chat message", onReceiveMessage);
+
     socket.on("connect", onConnect);
     socket.on("disconnect", onDisconnect);
     socket.on("user connected", onUserConnect);
@@ -60,6 +81,7 @@ export function SocketProvider({ children }) {
       socket.off("user disconnected", onUserDisconnect);
       socket.off("typing", onUserTyping);
       socket.off("stopped typing", onUserStoppedTyping);
+      socket.off("chat message", onReceiveMessage);
     };
   }, []);
   return (

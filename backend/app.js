@@ -12,7 +12,7 @@ const app = express();
 const server = createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "https://go-chat-dun.vercel.app",
+    origin: process.env.clientURL,
   },
   connectionStateRecovery: {
     maxDisconnectionDuration: 1000 * 60 * 2,
@@ -30,7 +30,7 @@ io.on("connection", async (socket) => {
     const userId = socket.handshake.auth.userId;
 
     delete connectedUsers[userId];
-
+    console.log(socket.handshake);
     await prisma.profile.update({
       where: {
         userId: userId,
@@ -169,7 +169,7 @@ io.on("connection", async (socket) => {
 
 app.use(
   cors({
-    origin: "https://go-chat-dun.vercel.app",
+    origin: process.env.clientURL,
   }),
 );
 

@@ -5,6 +5,8 @@ import { useRef } from "react";
 import { MediaDrawer } from "./MediaDrawer";
 import { Paperclip, Image, Send } from "lucide-react";
 import { ChatPageContext } from "../../routes/ChatPage";
+import { useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "../../contexts/AuthContext";
 let counter = 0;
 
 export function SendMessageForm() {
@@ -12,6 +14,8 @@ export function SendMessageForm() {
   const [isDrawerVisible, setIsDrawerVisible] = useState(false);
   const [mediaFileData, setMediaFileData] = useState(null);
   const { conversationId } = useContext(ChatPageContext);
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
   const onMessageChange = (e) => {
     setMessage(e.target.value);
   };
@@ -51,6 +55,51 @@ export function SendMessageForm() {
     if (container) {
       container.scrollTo({ top: container.scrollHeight, behavior: "smooth" });
     }
+    queryClient.setQueryData(
+      ["conversation", "messages", conversationId],
+      (old) => {
+        if (!old?.messages || !old?.type) return old;
+        return {
+          ...old,
+          messages: [
+            ...old.messages,
+            {
+              createdAt: new Date(),
+              sender: user,
+              content: message,
+              fileURL: "",
+              mimeType: mediaFileData?.mimeType || "text/plain",
+              type: mediaFileData ? "FILE" : "TEXT",
+            },
+          ],
+        };
+      },
+    );
+
+    queryClient.setQueryData(["conversations"], (old) => {
+      if (!old?.conversations) return old;
+      return {
+        ...old,
+        conversations: old.conversations.map((conversation) => {
+          if (conversation.id == conversationId) {
+            return {
+              ...conversation,
+              messages: [
+                {
+                  createdAt: new Date(),
+                  sender: user,
+                  content: message,
+                  fileURL: "",
+                  mimeType: mediaFileData?.mimeType || "text/plain",
+                  type: mediaFileData ? "FILE" : "TEXT",
+                },
+              ],
+            };
+          }
+          return conversation;
+        }),
+      };
+    });
   };
   return (
     <form className="sticky bottom-0 z-20" method="POST" onSubmit={onSend}>

@@ -72,7 +72,7 @@ export function ChatPage() {
             className="flex flex-col z-10 flex-1 p-2"
             aria-label="polite"
           >
-            {messages.length === 0 ? (
+            {messages && messages.length === 0 ? (
               <p className="text-center text-lg h-full flex justify-center items-center text-gray-800">
                 No messages yet.
               </p>
