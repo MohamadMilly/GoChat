@@ -15,7 +15,6 @@ export function useVerifyCode() {
   return useMutation({
     mutationFn: verifyCode,
     onSuccess: (data) => {
-      console.log(data);
       login(data.token, data.user);
     },
     onError: (error) => {

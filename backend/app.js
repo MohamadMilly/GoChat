@@ -167,10 +167,11 @@ io.on("connection", async (socket) => {
     socket.broadcast.to(String(conversationId)).emit("stopped typing", userId);
   });
 });
-
+console.log(process.env.clientURL);
 app.use(
   cors({
     origin: process.env.clientURL,
+    methods: ["POST", "PUT", "OPTIONS", "PATCH", "GET", "DELETE"],
   }),
 );
 
