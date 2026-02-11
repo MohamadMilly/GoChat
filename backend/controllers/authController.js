@@ -127,9 +127,11 @@ const loginPost = async (req, res) => {
       email: preferredVerification === "EMAIL" ? user.profile?.email : "",
     });
   } catch (err) {
-    return res
-      .status(500)
-      .json({ message: "Unexpected error happened while logging in" });
+    console.log(err.message);
+    return res.status(500).json({
+      message: "Unexpected error happened while logging in",
+      error: err,
+    });
   }
 };
 
