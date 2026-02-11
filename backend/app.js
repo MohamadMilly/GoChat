@@ -175,7 +175,7 @@ app.use(
     methods: ["POST", "PUT", "OPTIONS", "PATCH", "GET", "DELETE"],
   }),
 );
-app.options("*", cors());
+app.options("/*", cors());
 
 // routers
 const authRouter = require("./routes/authRouter");
