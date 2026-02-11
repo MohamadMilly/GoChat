@@ -171,11 +171,12 @@ console.log(process.env.clientURL);
 
 app.use(
   cors({
-    origin: process.env.clientURL,
-    methods: ["POST", "PUT", "OPTIONS", "PATCH", "GET", "DELETE"],
+    origin: process.env.CLIENT_URL,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
   }),
 );
-app.options("/*", cors());
 
 // routers
 const authRouter = require("./routes/authRouter");
