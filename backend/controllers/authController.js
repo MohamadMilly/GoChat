@@ -112,22 +112,20 @@ const loginPost = async (req, res) => {
       user.id,
       preferredVerification,
     );
-
-    if (preferredVerification === "EMAIL") {
-      await sendEmailVerification(user.profile.email, codeData.code);
-    } else if (preferredVerification === "PHONE") {
-      await sendSmsVerification(user.profile.phoneNumber, codeData.code);
-    }
-
-    return res.json({
+    res.json({
       message: "Verification code sent.",
       preferredVerification: preferredVerification,
       phoneNumber:
         preferredVerification === "PHONE" ? user.profile?.phoneNumber : "",
       email: preferredVerification === "EMAIL" ? user.profile?.email : "",
     });
+
+    if (preferredVerification === "EMAIL") {
+      await sendEmailVerification(user.profile.email, codeData.code);
+    } else if (preferredVerification === "PHONE") {
+      await sendSmsVerification(user.profile.phoneNumber, codeData.code);
+    }
   } catch (err) {
-    console.log(err.message);
     return res.status(500).json({
       message: "Unexpected error happened while logging in",
       error: err,

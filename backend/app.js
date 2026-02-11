@@ -168,12 +168,14 @@ io.on("connection", async (socket) => {
   });
 });
 console.log(process.env.clientURL);
+
 app.use(
   cors({
     origin: process.env.clientURL,
     methods: ["POST", "PUT", "OPTIONS", "PATCH", "GET", "DELETE"],
   }),
 );
+app.options("*", cors());
 
 // routers
 const authRouter = require("./routes/authRouter");
