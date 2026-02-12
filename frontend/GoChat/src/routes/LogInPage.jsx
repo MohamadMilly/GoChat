@@ -15,7 +15,7 @@ export function LogInPage() {
     username: "",
     password: "",
   });
-  const { user } = useAuth();
+
   const [code, setCode] = useState("");
   const {
     mutate: login,
@@ -53,7 +53,7 @@ export function LogInPage() {
   const onFieldChange = (fieldname, e) => {
     setLoginData((prev) => ({ ...prev, [fieldname]: e.target.value }));
   };
-  if (isSuccessVerification && user) {
+  if (isSuccessVerification) {
     return <Navigate to={"/"} />;
   }
 

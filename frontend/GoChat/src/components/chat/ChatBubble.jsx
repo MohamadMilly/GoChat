@@ -98,10 +98,6 @@ function MediaFilePreview({ fileURL, mimeType }) {
 }
 
 export function ChatBubble({ message, isGroupMessage, isMyMessage }) {
-  const [isDateShown, setIsDateShown] = useState(false);
-  const toggleIsDateShown = () => {
-    setIsDateShown((prev) => !prev);
-  };
   const [transitionId, setTransitionId] = useState(null);
 
   const fullname = message.sender.firstname + " " + message.sender.lastname;
@@ -127,7 +123,6 @@ export function ChatBubble({ message, isGroupMessage, isMyMessage }) {
       )}
       <div
         className={`w-fit max-w-5/6 px-2 py-1 font-rubik rounded-t-xl ${isMyMessage ? "bg-cyan-700 ml-auto rounded-br-none rounded-bl-xl text-gray-100" : "bg-gray-100 text-gray-600 rounded-bl-none rounded-br-xl"}`}
-        onClick={toggleIsDateShown}
       >
         <div className="flex flex-col">
           {isGroupMessage && !isMyMessage && (
@@ -157,12 +152,12 @@ export function ChatBubble({ message, isGroupMessage, isMyMessage }) {
             edited
           </span>
         )}
+        <span
+          className={`text-xs block ${isMyMessage ? "text-white text-left" : "text-gray-500 text-right"}`}
+        >
+          {new Date(message.createdAt).toLocaleTimeString()}
+        </span>
       </div>
-      {isDateShown && (
-        <div>
-          <span className="text-xs">{message.createdAt}</span>
-        </div>
-      )}
     </li>
   );
 }

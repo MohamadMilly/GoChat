@@ -1,14 +1,14 @@
 import { useAuth } from "../../contexts/AuthContext";
 import { ChatBubble } from "./ChatBubble";
 import { socket } from "../../socket";
-import { useEffect, useContext } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { ChatPageContext } from "../../routes/ChatPage";
 
 export function MessagesList({ messages, type }) {
   const { user } = useAuth();
-
   const queryClient = useQueryClient();
+
   useEffect(() => {
     function onReceiveMessage(message, conversationId, serverOffset) {
       queryClient.setQueryData(
@@ -32,18 +32,39 @@ export function MessagesList({ messages, type }) {
       socket.off("chat message", onReceiveMessage);
     };
   }, [queryClient, user.id]);
+
   return (
     <ul className="p-1 flex-1">
-      {messages.map((message) => {
+      {messages.map((message, index) => {
+        const previousMessageDate = messages[index - 1]
+          ? messages[index - 1].createdAt
+          : null;
+        console.log(messages[index - 1]);
+        console.log(previousMessageDate);
+        const isNewDayMessage = previousMessageDate
+          ? new Date(message.createdAt).getDate() !=
+            new Date(previousMessageDate).getDate()
+          : true;
+
         const sender = message.sender;
         const isMyMessage = user.id === sender.id;
+
         return (
-          <ChatBubble
-            message={message}
-            isGroupMessage={type === "GROUP"}
-            isMyMessage={isMyMessage}
-            key={message.id}
-          />
+          <Fragment key={message.id}>
+            {isNewDayMessage && (
+              <span
+                dir="rtl"
+                className="text-xs text-gray-500 bg-gray-50/40 mx-auto my-2 block w-fit p-0.5 rounded"
+              >
+                {new Date(message.createdAt).toLocaleDateString()}
+              </span>
+            )}
+            <ChatBubble
+              message={message}
+              isGroupMessage={type === "GROUP"}
+              isMyMessage={isMyMessage}
+            />
+          </Fragment>
         );
       })}
     </ul>

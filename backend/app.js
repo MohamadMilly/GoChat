@@ -30,7 +30,7 @@ io.on("connection", async (socket) => {
     const userId = socket.handshake.auth.userId;
     if (!userId) return;
     delete connectedUsers[userId];
-    console.log(socket.handshake);
+
     await prisma.profile.update({
       where: {
         userId: userId,
