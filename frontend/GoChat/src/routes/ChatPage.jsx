@@ -86,8 +86,6 @@ export function ChatPage() {
           </section>
           <SendMessageForm />
         </div>
-        <Button onClick={() => socket.disconnect()}>Disconnect</Button>
-        <Button onClick={() => socket.connect()}>Connect</Button>
       </section>
     </ChatPageContext>
   );
