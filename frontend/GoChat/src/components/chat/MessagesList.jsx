@@ -10,7 +10,6 @@ export function MessagesList({ messages, type }) {
 
   useEffect(() => {
     function onReceiveMessage(message, conversationId, serverOffset) {
-      console.log("Message recieved");
       queryClient.setQueryData(
         ["conversation", "messages", conversationId],
         (old) => {
@@ -24,7 +23,10 @@ export function MessagesList({ messages, type }) {
           };
         },
       );
-      socket.auth.serverOffset = serverOffset;
+      socket.auth.serverOffset = {
+        ...socket.auth.serverOffset,
+        [conversationId]: serverOffset,
+      };
     }
 
     socket.on("chat message", onReceiveMessage);

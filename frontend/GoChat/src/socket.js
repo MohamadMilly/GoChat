@@ -12,6 +12,6 @@ export const socket = io(URL, {
   autoConnect: false,
   auth: {
     userId: user ? user.id : undefined,
-    serverOffset: 0,
+    serverOffset: {},
   },
 });

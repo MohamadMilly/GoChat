@@ -23,7 +23,7 @@ const connectedUsers = {};
 io.on("connection", async (socket) => {
   socket.on("user connected", (userId) => {
     connectedUsers[userId] = socket.id;
-
+    socket.isFirstConnection = true;
     io.emit("user connected", Object.keys(connectedUsers));
   });
   socket.on("disconnect", async () => {
@@ -45,7 +45,7 @@ io.on("connection", async (socket) => {
   console.log("user connected.");
   socket.on("join chat", async (conversationId) => {
     const convId = String(conversationId);
-    console.log("joined chat");
+
     socket.join(convId);
     try {
       const userId = socket.handshake.auth.userId;
@@ -53,12 +53,13 @@ io.on("connection", async (socket) => {
         where: { userId: userId },
       });
 
-      if (!socket.recovered && convId) {
+      if (!socket.recovered && convId && !socket.isFirstConnection) {
+        console.log(socket.handshake.auth.serverOffset);
         const missedMessages = await prisma.message.findMany({
           where: {
             conversationId: parseInt(convId),
             id: {
-              gt: socket.handshake.auth.serverOffset || 0,
+              gt: Number(socket.handshake.auth.serverOffset[convId]) || 0,
             },
           },
           include: {
@@ -78,7 +79,7 @@ io.on("connection", async (socket) => {
             ...message,
             sender: filterProfile(message.sender, [userPreferences]),
           };
-          console.log(convId);
+
           socket.emit("chat message", filtered, convId, message.id);
         });
         socket.recovered = true;
