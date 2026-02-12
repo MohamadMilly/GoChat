@@ -15,14 +15,7 @@ export function ChatsPanel() {
   const query = searchParams.get("name");
 
   useEffect(() => {
-    if (
-      !isFetching &&
-      conversations &&
-      !conversations.length <= 0 &&
-      !isConnected
-    )
-      return;
-    console.log("rejoin");
+    if (!isFetching || conversations.length === 0 || !isConnected) return;
     conversations.forEach((c) => {
       socket.auth.serverOffset[c.id.toString()] =
         c.messages[c.messages.length - 1]?.id || 0;

@@ -9,6 +9,7 @@ export function MessagesList({ messages, type }) {
   const queryClient = useQueryClient();
 
   useEffect(() => {
+    console.log("this runs");
     function onReceiveMessage(message, conversationId, serverOffset) {
       queryClient.setQueryData(
         ["conversation", "messages", conversationId],
