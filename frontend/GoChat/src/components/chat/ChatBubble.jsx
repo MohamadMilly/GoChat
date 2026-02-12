@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Avatar } from "./Avatar";
-import { NavLink } from "react-router";
 import { TransitionLink } from "../ui/TransitionLink";
 import { Braces, FileText, FileArchive, CodeXml, File } from "lucide-react";
 
@@ -153,7 +152,7 @@ export function ChatBubble({ message, isGroupMessage, isMyMessage }) {
           </span>
         )}
         <span
-          className={`text-xs block ${isMyMessage ? "text-white text-left" : "text-gray-500 text-right"}`}
+          className={`text-xs block ${isMyMessage ? "text-white text-left" : "text-gray-400 text-right"}`}
         >
           {new Date(message.createdAt).toLocaleTimeString()}
         </span>

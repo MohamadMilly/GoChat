@@ -6,25 +6,29 @@ import { useQueryClient } from "@tanstack/react-query";
 import { createContext, useEffect } from "react";
 import { socket } from "../socket";
 import chatBackground from "../assets/chat_background.png";
-
+import Button from "../components/ui/Button";
 import { useMessages } from "../hooks/useMessages";
+import { useAuth } from "../contexts/AuthContext";
+import { useSocket } from "../contexts/SocketContext";
 
 export const ChatPageContext = createContext({ conversationId: null });
 
 export function ChatPage() {
   const { id } = useParams();
+  const { isConnected } = useSocket();
   const {
     messages,
     type,
     error: messagesError,
     isFetching: isFetchingMessages,
   } = useMessages(id);
-
   useEffect(() => {
-    console.log(id);
+    if (!isConnected) return;
     socket.emit("join chat", String(id));
-  }, [id]);
+  }, [id, isConnected]);
+
   /* 
+  
   const queryClient = useQueryClient();
   useEffect(() => {
     function onReceiveMessage(message, conversationId, serverOffset) {
@@ -82,6 +86,8 @@ export function ChatPage() {
           </section>
           <SendMessageForm />
         </div>
+        <Button onClick={() => socket.disconnect()}>Disconnect</Button>
+        <Button onClick={() => socket.connect()}>Connect</Button>
       </section>
     </ChatPageContext>
   );

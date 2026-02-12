@@ -11,6 +11,7 @@ export function SocketProvider({ children }) {
   const [typingUsers, setTypingUsers] = useState([]);
   const { token, user } = useAuth();
   const queryClient = useQueryClient();
+
   useEffect(() => {
     if (!token || !user) return;
     socket.connect();
@@ -83,7 +84,7 @@ export function SocketProvider({ children }) {
       socket.off("stopped typing", onUserStoppedTyping);
       socket.off("chat message", onReceiveMessage);
     };
-  }, []);
+  }, [queryClient]);
   return (
     <SocketContext.Provider
       value={{ isConnected, connectedUsers, typingUsers }}

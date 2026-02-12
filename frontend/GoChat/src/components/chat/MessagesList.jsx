@@ -1,9 +1,8 @@
 import { useAuth } from "../../contexts/AuthContext";
 import { ChatBubble } from "./ChatBubble";
 import { socket } from "../../socket";
-import { Fragment, useEffect, useState } from "react";
+import { Fragment, useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { ChatPageContext } from "../../routes/ChatPage";
 
 export function MessagesList({ messages, type }) {
   const { user } = useAuth();
@@ -11,6 +10,7 @@ export function MessagesList({ messages, type }) {
 
   useEffect(() => {
     function onReceiveMessage(message, conversationId, serverOffset) {
+      console.log("Message recieved");
       queryClient.setQueryData(
         ["conversation", "messages", conversationId],
         (old) => {
@@ -39,8 +39,7 @@ export function MessagesList({ messages, type }) {
         const previousMessageDate = messages[index - 1]
           ? messages[index - 1].createdAt
           : null;
-        console.log(messages[index - 1]);
-        console.log(previousMessageDate);
+
         const isNewDayMessage = previousMessageDate
           ? new Date(message.createdAt).getDate() !=
             new Date(previousMessageDate).getDate()

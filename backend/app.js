@@ -45,7 +45,7 @@ io.on("connection", async (socket) => {
   console.log("user connected.");
   socket.on("join chat", async (conversationId) => {
     const convId = String(conversationId);
-
+    console.log("joined chat");
     socket.join(convId);
     try {
       const userId = socket.handshake.auth.userId;
@@ -78,9 +78,8 @@ io.on("connection", async (socket) => {
             ...message,
             sender: filterProfile(message.sender, [userPreferences]),
           };
-          socket
-            .timeout(5000)
-            .emit("chat message", filtered, convId, message.id);
+          console.log(convId);
+          socket.emit("chat message", filtered, convId, message.id);
         });
         socket.recovered = true;
       }
