@@ -151,7 +151,7 @@ export function ChatBubble({ message, isGroupMessage, isMyMessage }) {
   return (
     <li
       ref={messagesContainerRef}
-      className="my-1 flex items-end gap-1 text-sm md:text-base"
+      className="my-1 flex items-end gap-1 text-sm md:text-base animate-pop"
     >
       {isGroupMessage && !isMyMessage && (
         <TransitionLink
