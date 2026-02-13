@@ -31,7 +31,7 @@ async function createVerificationCode(userId, verificationType) {
 
 async function sendEmailVerification(email, code) {
   const transporter = nodemailer.createTransport({
-    host: "smtp.gmail.com",
+    host: "smtp.mailersend.net",
     port: 587,
     secure: false,
     auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
@@ -39,7 +39,7 @@ async function sendEmailVerification(email, code) {
   });
 
   await transporter.sendMail({
-    from: process.env.EMAIL_USER,
+    from: "no-reply@test-69oxl5eorj2l785k.mlsender.net",
     to: email,
     subject: "Your Verification Code",
     text: `Your code is ${code}. It expires in 5 minutes.`,
