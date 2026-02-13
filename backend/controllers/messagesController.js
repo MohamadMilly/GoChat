@@ -81,11 +81,23 @@ const getConversationMessagesGet = async (req, res) => {
             profile: true,
           },
         },
+        readers: {
+          include: {
+            reader: {
+              include: {
+                profile: true,
+              },
+            },
+          },
+        },
       },
     });
     const filteredMessages = messages.map((message) => {
       return {
         ...message,
+        readers: message.readers.map((readerOnMessage) =>
+          filterProfile(readerOnMessage.reader, participantsPreferences),
+        ),
         sender: filterProfile(message.sender, participantsPreferences),
       };
     });

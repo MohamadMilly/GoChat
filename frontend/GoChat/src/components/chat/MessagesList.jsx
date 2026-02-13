@@ -9,15 +9,33 @@ export function MessagesList({ messages, type }) {
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    console.log("this runs");
-    function onReceiveMessage(message, conversationId, serverOffset) {
+    function onReceiveMessage(
+      message,
+      conversationId,
+      serverOffset,
+      optimisticMessageCreatedAt,
+    ) {
       queryClient.setQueryData(
         ["conversation", "messages", conversationId],
         (old) => {
           // if there is no previous cached data return the old data , or if it the user's message don't added because it is now optimistic
-          if (!old?.messages || !old?.type || message.senderId === user.id)
+          if (!old?.messages || !old?.type) {
             return old;
+          }
 
+          if (message.sender.id === user.id) {
+            return {
+              ...old,
+              messages: old.messages.map((m) => {
+                const d1 = new Date(m.createdAt);
+                const d2 = new Date(optimisticMessageCreatedAt);
+
+                if (d1.getTime() === d2.getTime()) {
+                  return message;
+                } else return m;
+              }),
+            };
+          }
           return {
             ...old,
             messages: [...old.messages, message],
@@ -52,7 +70,7 @@ export function MessagesList({ messages, type }) {
         const isMyMessage = user.id === sender.id;
 
         return (
-          <Fragment key={message.id}>
+          <Fragment key={message.id || message.createdAt}>
             {isNewDayMessage && (
               <span
                 dir="rtl"

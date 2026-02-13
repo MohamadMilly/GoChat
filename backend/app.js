@@ -142,14 +142,15 @@ io.on("connection", async (socket) => {
         if (err.code === "P2002") {
         }
       }
-      socket.broadcast
-        .to(convId)
+
+      io.to(convId)
         .timeout(5000)
         .emit(
           "chat message",
           createdMessage,
           convId,
           createdMessage.id,
+          message.createdAt,
           (response, err) => {
             if (err) {
               console.error("socket error:", err);
@@ -169,8 +170,32 @@ io.on("connection", async (socket) => {
     const userId = socket.handshake.auth.userId;
     socket.broadcast.to(String(conversationId)).emit("stopped typing", userId);
   });
+
+  socket.on("read message", async (messageId, readerId) => {
+    await prisma.messageOnReader.upsert({
+      where: {
+        messageId_readerId: {
+          messageId: parseInt(messageId),
+          readerId: parseInt(readerId),
+        },
+      },
+      create: {
+        message: {
+          connect: {
+            id: parseInt(messageId),
+          },
+        },
+        reader: {
+          connect: {
+            id: parseInt(readerId),
+          },
+        },
+      },
+      update: {},
+    });
+    socket.broadcast.emit("read message", messageId, readerId);
+  });
 });
-console.log(process.env.clientURL);
 
 app.use(
   cors({
@@ -185,6 +210,8 @@ const authRouter = require("./routes/authRouter");
 const usersRouter = require("./routes/usersRouter");
 const conversationsRouter = require("./routes/conversationsRouter");
 const filterProfile = require("./utils/filterProfile");
+const { connect } = require("node:http2");
+const { read } = require("node:fs");
 
 app.use(express.json());
 app.use(

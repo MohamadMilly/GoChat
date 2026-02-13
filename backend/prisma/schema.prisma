@@ -42,7 +42,7 @@ datasource db {
   preferences Preferences? @relation("preferences to user")
   verificationCodes VerificationCode[]
   accountColor String?
-  
+  readMessages MessageOnReader[]
   @@map("users")
   }
 
@@ -146,6 +146,16 @@ Each message should have :
 - message type (image , file , voice message)
 */
 
+model MessageOnReader {
+seenAt DateTime @default(now())
+message Message @relation(fields: [messageId],references: [id])
+messageId Int
+reader User @relation(fields: [readerId],references: [id])
+readerId Int
+
+@@id([messageId,readerId])
+}
+
 model Message {
   id Int @id @default(autoincrement())
   sender User @relation(fields: [senderId],references: [id])
@@ -160,6 +170,7 @@ model Message {
   fileURL String?
   mimeType String?
   clientOffset String?
+  readers MessageOnReader[]
 }
 
 model VerificationCode {

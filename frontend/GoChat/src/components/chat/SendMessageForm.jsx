@@ -39,9 +39,11 @@ export function SendMessageForm() {
   const onSend = (e) => {
     e.preventDefault();
     const client_offset = `${socket.id}-${counter++}`;
+    const now = new Date();
     socket.emit(
       "chat message",
       {
+        createdAt: now,
         content: message,
         fileURL: "",
         mimeType: mediaFileData?.mimeType || "text/plain",
@@ -64,12 +66,13 @@ export function SendMessageForm() {
           messages: [
             ...old.messages,
             {
-              createdAt: new Date(),
+              createdAt: now,
               sender: user,
               content: message,
               fileURL: "",
               mimeType: mediaFileData?.mimeType || "text/plain",
               type: mediaFileData ? "FILE" : "TEXT",
+              status: "pending",
             },
           ],
         };

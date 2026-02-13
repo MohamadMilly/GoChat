@@ -1,7 +1,10 @@
-import { useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { Avatar } from "./Avatar";
 import { TransitionLink } from "../ui/TransitionLink";
 import { Braces, FileText, FileArchive, CodeXml, File } from "lucide-react";
+import { useAuth } from "../../contexts/AuthContext";
+import { socket } from "../../socket";
+import { CheckCheck, Clock } from "lucide-react";
 
 function VideoFile({ link }) {
   return (
@@ -97,15 +100,59 @@ function MediaFilePreview({ fileURL, mimeType }) {
 }
 
 export function ChatBubble({ message, isGroupMessage, isMyMessage }) {
+  const { user } = useAuth();
+  const readersIds = message.readers
+    ? message.readers.map((reader) => reader.readerId)
+    : [];
+  const [readers, setReaders] = useState(readersIds);
   const [transitionId, setTransitionId] = useState(null);
-
+  const messagesContainerRef = useRef(null);
   const fullname = message.sender.firstname + " " + message.sender.lastname;
 
   const isThereAvatar = !!message.sender.profile?.avatar;
   const avatar = isThereAvatar && message.sender.profile?.avatar;
   const color = message.sender?.accountColor || "";
+
+  useEffect(() => {
+    function onReadMessage(messageId, userId) {
+      if (messageId !== message.id) return;
+      setReaders((prev) => [...prev, userId]);
+    }
+    socket.on("read message", onReadMessage);
+
+    return () => {
+      socket.off("read message", onReadMessage);
+    };
+  }, [message.id]);
+
+  useEffect(() => {
+    if (!messagesContainerRef.current) return;
+
+    const observer = new IntersectionObserver((entries) => {
+      const observedMessage = entries[0];
+      const isReadByMe = readers.some((id) => id === user.id);
+
+      if (
+        observedMessage.isIntersecting &&
+        !isReadByMe &&
+        message.status !== "pending"
+      ) {
+        socket.emit("read message", message.id, user.id);
+      }
+    });
+    const observedMessage = messagesContainerRef.current;
+    observer.observe(observedMessage);
+    return () => {
+      if (!observedMessage) return;
+      observer.unobserve(observedMessage);
+    };
+  }, [message.id, message.readers, user.id, message.status, readers]);
+
   return (
-    <li className="my-1 flex items-end gap-1 text-sm md:text-base">
+    <li
+      ref={messagesContainerRef}
+      className="my-1 flex items-end gap-1 text-sm md:text-base"
+    >
       {isGroupMessage && !isMyMessage && (
         <TransitionLink
           route={`/users/${message.sender.id}`}
@@ -151,11 +198,26 @@ export function ChatBubble({ message, isGroupMessage, isMyMessage }) {
             edited
           </span>
         )}
-        <span
-          className={`text-xs block ${isMyMessage ? "text-white text-left" : "text-gray-400 text-right"}`}
-        >
-          {new Date(message.createdAt).toLocaleTimeString()}
-        </span>
+        <div className="flex items-center gap-2">
+          {isMyMessage &&
+            readers.length > 0 &&
+            !readers.includes(user.id) &&
+            message.status !== "pending" && (
+              <span>
+                <CheckCheck size={12} />
+              </span>
+            )}
+          {message.status === "pending" && (
+            <span>
+              <Clock size={12} />
+            </span>
+          )}
+          <span
+            className={`text-xs block ${isMyMessage ? "text-white text-left" : "text-gray-400 text-right"}`}
+          >
+            {new Date(message.createdAt).toLocaleTimeString()}
+          </span>
+        </div>
       </div>
     </li>
   );
