@@ -24,7 +24,9 @@ export function ChatPage() {
     error: messagesError,
     isFetching: isFetchingMessages,
   } = useMessages(id);
+
   useEffect(() => {
+    console.log("runs");
     if (!isConnected) return;
     socket.emit("join chat", String(id));
   }, [id, isConnected]);

@@ -5,6 +5,7 @@ import { Braces, FileText, FileArchive, CodeXml, File } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
 import { socket } from "../../socket";
 import { CheckCheck, Clock } from "lucide-react";
+import { ChatBubbleStatus } from "./chatBubbleStatus";
 
 function VideoFile({ link }) {
   return (
@@ -99,12 +100,20 @@ function MediaFilePreview({ fileURL, mimeType }) {
   );
 }
 
-export function ChatBubble({ message, isGroupMessage, isMyMessage }) {
+export function ChatBubble({
+  message,
+  isGroupMessage,
+  isMyMessage,
+  hideAvatar = false,
+  hideName = false,
+}) {
   const { user } = useAuth();
   const readersIds = message.readers
-    ? message.readers.map((reader) => reader.readerId)
+    ? message.readers.map((reader) => reader.id)
     : [];
+
   const [readers, setReaders] = useState(readersIds);
+
   const [transitionId, setTransitionId] = useState(null);
   const messagesContainerRef = useRef(null);
   const fullname = message.sender.firstname + " " + message.sender.lastname;
@@ -151,9 +160,9 @@ export function ChatBubble({ message, isGroupMessage, isMyMessage }) {
   return (
     <li
       ref={messagesContainerRef}
-      className="my-1 flex items-end gap-1 text-sm md:text-base animate-pop"
+      className={`my-1 flex items-end gap-1 text-sm md:text-base animate-pop ${hideAvatar && isGroupMessage ? "pl-12" : ""}`}
     >
-      {isGroupMessage && !isMyMessage && (
+      {isGroupMessage && !isMyMessage && !hideAvatar && (
         <TransitionLink
           route={`/users/${message.sender.id}`}
           setDynamicTransitionId={setTransitionId}
@@ -171,7 +180,7 @@ export function ChatBubble({ message, isGroupMessage, isMyMessage }) {
         className={`w-fit max-w-5/6 px-2 py-1 font-rubik rounded-t-xl ${isMyMessage ? "bg-cyan-700 ml-auto rounded-br-none rounded-bl-xl text-gray-100" : "bg-gray-100 text-gray-600 rounded-bl-none rounded-br-xl"}`}
       >
         <div className="flex flex-col">
-          {isGroupMessage && !isMyMessage && (
+          {isGroupMessage && !isMyMessage && !hideName && (
             <p
               className={`${color ? "text-[var(--color)]" : "text-gray-800"} font-medium `}
               style={{ "--color": color }}
@@ -199,19 +208,11 @@ export function ChatBubble({ message, isGroupMessage, isMyMessage }) {
           </span>
         )}
         <div className="flex items-center gap-2">
-          {isMyMessage &&
-            readers.length > 0 &&
-            !readers.includes(user.id) &&
-            message.status !== "pending" && (
-              <span>
-                <CheckCheck size={12} />
-              </span>
-            )}
-          {message.status === "pending" && (
-            <span>
-              <Clock size={12} />
-            </span>
-          )}
+          <ChatBubbleStatus
+            readers={readers}
+            senderId={message.senderId}
+            message={message.status}
+          />
           <span
             className={`text-xs block ${isMyMessage ? "text-white text-left" : "text-gray-400 text-right"}`}
           >

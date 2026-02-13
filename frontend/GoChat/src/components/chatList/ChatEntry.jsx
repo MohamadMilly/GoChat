@@ -5,6 +5,7 @@ import { NavLink } from "react-router";
 import { useEffect, useState } from "react";
 import { socket } from "../../socket";
 import { useAuth } from "../../contexts/AuthContext";
+import { ChatBubbleStatus } from "../chat/chatBubbleStatus";
 export function ChatEntry({
   chatAvatar,
   isGroup,
@@ -16,26 +17,17 @@ export function ChatEntry({
   conversationId,
   color,
 }) {
-  const { user } = useAuth();
   const base_class =
     "w-full flex items-center gap-x-3 p-3 hover:bg-gray-50 transition-colors duration-150";
-  const initialReadStatus = lastMessage.readers
-    ? lastMessage.readers.length > 0
-      ? true
-      : false
-    : null;
-  const [isRead, setIsRead] = useState(initialReadStatus);
-  const [notifications, setNotifications] = useState(0);
-  useEffect(() => {
-    setIsRead(lastMessage.readers?.length > 0 ? true : false);
-  }, [lastMessage]);
+  const initialReadersIds = lastMessage.readers
+    ? lastMessage.readers.map((reader) => reader.readerId)
+    : [];
+  const [readers, setReaders] = useState(initialReadersIds);
+
   useEffect(() => {
     function onReadMessage(messageId, readerId) {
-      if (messageId === lastMessage.id && lastMessage.senderId !== readerId) {
-        setIsRead(true);
-        if (readerId !== user.id) {
-          setNotifications((prev) => prev + 1);
-        }
+      if (messageId === lastMessage.id) {
+        setReaders((prev) => [...prev, readerId]);
       }
     }
 
@@ -89,15 +81,11 @@ export function ChatEntry({
               ) : (
                 <span className="truncate">{lastMessage?.content || ""}</span>
               )}
-              <span className="shrink-0">
-                {lastMessage.status === "pending" ? (
-                  <Clock size={12} />
-                ) : isRead ? (
-                  <CheckCheck size={12} />
-                ) : (
-                  <Check size={12} />
-                )}
-              </span>
+              <ChatBubbleStatus
+                readers={readers}
+                senderId={lastMessage.senderId}
+                status={lastMessage.status}
+              />
             </p>
           </div>
         </NavLink>

@@ -84,7 +84,11 @@ const getConversationMessagesGet = async (req, res) => {
         readers: {
           include: {
             reader: {
-              include: {
+              select: {
+                id: true,
+                firstname: true,
+                lastname: true,
+                username: true,
                 profile: true,
               },
             },

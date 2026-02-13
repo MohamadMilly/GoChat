@@ -50,7 +50,12 @@ export function SocketProvider({ children }) {
       );
     }
 
-    function onReceiveMessage(message, conversationId) {
+    function onReceiveMessage(
+      message,
+      conversationId,
+      serverOffset,
+      optimisticMessageCreatedAt,
+    ) {
       queryClient.setQueryData(["conversations"], (old) => {
         if (!old?.conversations) return old;
         return {
@@ -66,9 +71,40 @@ export function SocketProvider({ children }) {
           }),
         };
       });
-    }
-    socket.on("chat message", onReceiveMessage);
+      queryClient.setQueryData(
+        ["conversation", "messages", conversationId],
+        (old) => {
+          // if there is no previous cached data return the old data , or if it the user's message don't added because it is now optimistic
+          if (!old?.messages || !old?.type) {
+            return old;
+          }
 
+          if (message.sender.id === user.id) {
+            return {
+              ...old,
+              messages: old.messages.map((m) => {
+                const d1 = new Date(m.createdAt);
+                const d2 = new Date(optimisticMessageCreatedAt);
+
+                if (d1.getTime() === d2.getTime()) {
+                  return message;
+                } else return m;
+              }),
+            };
+          }
+          return {
+            ...old,
+            messages: [...old.messages, message],
+          };
+        },
+      );
+      socket.auth.serverOffset = {
+        ...socket.auth.serverOffset,
+        [conversationId]: serverOffset,
+      };
+    }
+
+    socket.on("chat message", onReceiveMessage);
     socket.on("connect", onConnect);
     socket.on("disconnect", onDisconnect);
     socket.on("user connected", onUserConnect);
@@ -84,7 +120,7 @@ export function SocketProvider({ children }) {
       socket.off("stopped typing", onUserStoppedTyping);
       socket.off("chat message", onReceiveMessage);
     };
-  }, [queryClient]);
+  }, [queryClient, user.id]);
   return (
     <SocketContext.Provider
       value={{ isConnected, connectedUsers, typingUsers }}
