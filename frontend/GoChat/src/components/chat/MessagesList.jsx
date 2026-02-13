@@ -1,10 +1,10 @@
 import { useAuth } from "../../contexts/AuthContext";
 import { ChatBubble } from "./ChatBubble";
 import { socket } from "../../socket";
-import { Fragment, useEffect } from "react";
+import { Fragment, useEffect, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 
-export function MessagesList({ messages, type }) {
+export function MessagesList({ messages, type, ref }) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
@@ -55,7 +55,10 @@ export function MessagesList({ messages, type }) {
   }, [queryClient, user.id]);
 
   return (
-    <ul className="p-1 flex-1">
+    <ul
+      ref={ref}
+      className="p-1 h-full overflow-y-auto z-10 relative scrollbar-custom"
+    >
       {messages.map((message, index) => {
         const previousMessageDate = messages[index - 1]
           ? messages[index - 1].createdAt

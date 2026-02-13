@@ -53,10 +53,7 @@ export function SendMessageForm() {
       client_offset,
     );
     setMessage("");
-    const container = document.getElementById("messages-scrollable");
-    if (container) {
-      container.scrollTo({ top: container.scrollHeight, behavior: "smooth" });
-    }
+
     queryClient.setQueryData(
       ["conversation", "messages", conversationId],
       (old) => {

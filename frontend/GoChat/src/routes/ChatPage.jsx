@@ -2,13 +2,14 @@ import { useParams } from "react-router";
 import { SendMessageForm } from "../components/chat/SendMessageForm";
 import { ChatHeader } from "../components/chat/ChatHeader";
 import { MessagesList } from "../components/chat/MessagesList";
-import { useQueryClient } from "@tanstack/react-query";
+
 import { createContext, useEffect } from "react";
 import { socket } from "../socket";
 import chatBackground from "../assets/chat_background.png";
-import Button from "../components/ui/Button";
+
 import { useMessages } from "../hooks/useMessages";
-import { useAuth } from "../contexts/AuthContext";
+import { useRef } from "react";
+
 import { useSocket } from "../contexts/SocketContext";
 
 export const ChatPageContext = createContext({ conversationId: null });
@@ -16,6 +17,7 @@ export const ChatPageContext = createContext({ conversationId: null });
 export function ChatPage() {
   const { id } = useParams();
   const { isConnected } = useSocket();
+  const messagesListRef = useRef(null);
   const {
     messages,
     type,
@@ -27,29 +29,11 @@ export function ChatPage() {
     socket.emit("join chat", String(id));
   }, [id, isConnected]);
 
-  /* 
-  
-  const queryClient = useQueryClient();
   useEffect(() => {
-    function onReceiveMessage(message, conversationId, serverOffset) {
-      queryClient.setQueryData(
-        ["conversation", "messages", conversationId],
-        (old) => {
-          if (!old?.messages || !old?.type) return old;
-          return {
-            ...old,
-            messages: [...old.messages, message],
-          };
-        },
-      );
-      socket.auth.serverOffset = serverOffset;
+    if (messagesListRef.current) {
+      messagesListRef.current.scrollTop = messagesListRef.current.scrollHeight;
     }
-
-    socket.on("chat message", onReceiveMessage);
-    return () => {
-      socket.off("chat message", onReceiveMessage);
-    };
-  }, [id, queryClient]); */
+  }, [messages]);
 
   if (messagesError) {
     return <p>Error: {messagesError.message}</p>;
@@ -60,10 +44,10 @@ export function ChatPage() {
 
   return (
     <ChatPageContext value={{ conversationId: id }}>
-      <section className="flex flex-col md:col-start-2 md:col-end-3 md:row-start-1 md:row-end-2 overflow-y-auto scrollbar-custom absolute inset-0 h-full w-full md:static ">
+      <section className="flex flex-col md:col-start-2 md:col-end-3 md:row-start-1 md:row-end-2 absolute inset-0 h-full w-full md:static scrollbar-custom overflow-hidden ">
         <ChatHeader />
-        <div
-          className="flex flex-col w-full flex-1 relative"
+        <section
+          className="w-full relative basis-full flex-1 overflow-hidden"
           style={{
             backgroundImage: `url(${chatBackground})`,
             backgroundAttachment: "fixed",
@@ -72,20 +56,23 @@ export function ChatPage() {
           }}
         >
           <div className="inset-0 absolute bg-gray-600/20"></div>
-          <section
-            className="flex flex-col z-10 flex-1 p-2"
-            aria-label="polite"
-          >
-            {messages && messages.length === 0 ? (
-              <p className="text-center text-lg h-full flex justify-center items-center text-gray-800">
-                No messages yet.
-              </p>
-            ) : (
-              <MessagesList messages={messages} type={type} />
-            )}
-          </section>
-          <SendMessageForm />
-        </div>
+
+          {messages && messages.length === 0 ? (
+            <p
+              className="text-center text-lg h-full flex justify-center items-center text-gray-800 z-10
+            "
+            >
+              No messages yet.
+            </p>
+          ) : (
+            <MessagesList
+              ref={messagesListRef}
+              messages={messages}
+              type={type}
+            />
+          )}
+        </section>
+        <SendMessageForm />
       </section>
     </ChatPageContext>
   );
