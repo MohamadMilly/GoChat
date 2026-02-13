@@ -120,7 +120,7 @@ export function SocketProvider({ children }) {
       socket.off("stopped typing", onUserStoppedTyping);
       socket.off("chat message", onReceiveMessage);
     };
-  }, [queryClient, user.id]);
+  }, [queryClient, user]);
   return (
     <SocketContext.Provider
       value={{ isConnected, connectedUsers, typingUsers }}
