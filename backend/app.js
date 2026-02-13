@@ -53,8 +53,11 @@ io.on("connection", async (socket) => {
         where: { userId: userId },
       });
 
-      if (!socket.recovered && convId && !socket.isFirstConnection) {
-        console.log(socket.handshake.auth.serverOffset);
+      if (
+        !socket.recovered &&
+        convId &&
+        !socket.handshake.auth.isInitialDataLoading
+      ) {
         const missedMessages = await prisma.message.findMany({
           where: {
             conversationId: parseInt(convId),

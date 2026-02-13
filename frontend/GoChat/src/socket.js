@@ -13,5 +13,6 @@ export const socket = io(URL, {
   auth: {
     userId: user ? user.id : undefined,
     serverOffset: {},
+    isInitialDataLoading: true,
   },
 });

@@ -60,7 +60,7 @@ export function ChatPage() {
 
   return (
     <ChatPageContext value={{ conversationId: id }}>
-      <section className="flex flex-col md:col-start-2 md:col-end-3 md:row-start-1 md:row-end-2 overflow-y-auto scrollbar-custom absolute inset-0 md:static ">
+      <section className="flex flex-col md:col-start-2 md:col-end-3 md:row-start-1 md:row-end-2 overflow-y-auto scrollbar-custom absolute inset-0 h-full w-full md:static ">
         <ChatHeader />
         <div
           className="flex flex-col w-full flex-1 relative"

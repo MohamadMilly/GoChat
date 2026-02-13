@@ -19,6 +19,7 @@ export function ChatsPanel() {
     conversations.forEach((c) => {
       socket.auth.serverOffset[c.id.toString()] =
         c.messages[c.messages.length - 1]?.id || 0;
+      socket.auth.isInitialDataLoading = false;
       socket.emit("join chat", String(c.id));
     });
   }, [conversations, isFetching, isConnected]);
