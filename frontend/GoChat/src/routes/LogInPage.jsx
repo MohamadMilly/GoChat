@@ -159,7 +159,7 @@ export function LogInPage() {
                 </Button>
                 <Button
                   type="submit"
-                  className={"text-xs bg-cyan-600 text-white"}
+                  className={"text-xs bg-cyan-600! text-white"}
                 >
                   Verify code
                 </Button>
