@@ -86,12 +86,13 @@ export function SendMessageForm() {
               ...conversation,
               messages: [
                 {
-                  createdAt: new Date(),
+                  createdAt: now,
                   sender: user,
                   content: message,
                   fileURL: "",
                   mimeType: mediaFileData?.mimeType || "text/plain",
                   type: mediaFileData ? "FILE" : "TEXT",
+                  status: "pending",
                 },
               ],
             };

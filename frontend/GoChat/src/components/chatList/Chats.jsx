@@ -9,7 +9,7 @@ export function Chats({ chatsEntries }) {
   const { user } = useAuth();
   const { connectedUsers, typingUsers } = useSocket();
   return (
-    <section className="px-2 pt-2 max-h-full">
+    <section className="pt-2 max-h-full">
       <ul className="divide-y divide-gray-100 overflow-y-auto scrollbar-custom h-[calc(100vh-200px)]">
         {chatsEntries.map((chatEntry) => {
           const { chatAvatar, lastMessage, chatTitle, isGroup, color } =

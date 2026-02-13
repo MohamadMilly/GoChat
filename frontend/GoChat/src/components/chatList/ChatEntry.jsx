@@ -1,6 +1,10 @@
+import { Check, CheckCheck, Clock } from "lucide-react";
 import { printGroupTypingUsers } from "../../utils/printGroupTypingUsers";
 import { Avatar } from "../chat/Avatar";
 import { NavLink } from "react-router";
+import { useEffect, useState } from "react";
+import { socket } from "../../socket";
+import { useAuth } from "../../contexts/AuthContext";
 export function ChatEntry({
   chatAvatar,
   isGroup,
@@ -12,8 +16,33 @@ export function ChatEntry({
   conversationId,
   color,
 }) {
+  const { user } = useAuth();
   const base_class =
     "w-full flex items-center gap-x-3 p-3 hover:bg-gray-50 transition-colors duration-150";
+  const initialReadStatus = lastMessage.readers
+    ? lastMessage.readers.length > 0
+      ? true
+      : false
+    : null;
+  const [isRead, setIsRead] = useState(initialReadStatus);
+  const [notifications, setNotifications] = useState(0);
+  useEffect(() => {
+    setIsRead(lastMessage.readers?.length > 0 ? true : false);
+  }, [lastMessage]);
+  useEffect(() => {
+    function onReadMessage(messageId, readerId) {
+      if (messageId === lastMessage.id && lastMessage.senderId !== readerId) {
+        setIsRead(true);
+        if (readerId !== user.id) {
+          setNotifications((prev) => prev + 1);
+        }
+      }
+    }
+
+    socket.on("read message", onReadMessage);
+
+    return () => socket.off("read message", onReadMessage);
+  });
   return (
     <li>
       <button className="w-full" onClick={onOpenChat}>
@@ -48,16 +77,27 @@ export function ChatEntry({
                   : ""}
               </span>
             </div>
-            <p className="text-gray-600 text-sm truncate text-left mt-1">
+            <p className="text-gray-600 text-sm  text-left mt-1 flex items-center justify-between">
               {typingUsers.length > 0 ? (
                 isGroup ? (
-                  <p>{printGroupTypingUsers(typingUsers)}</p>
+                  <span className="truncate">
+                    {printGroupTypingUsers(typingUsers)}
+                  </span>
                 ) : (
-                  <p>typing...</p>
+                  <span>typing...</span>
                 )
               ) : (
-                lastMessage?.content || ""
+                <span className="truncate">{lastMessage?.content || ""}</span>
               )}
+              <span className="shrink-0">
+                {lastMessage.status === "pending" ? (
+                  <Clock size={12} />
+                ) : isRead ? (
+                  <CheckCheck size={12} />
+                ) : (
+                  <Check size={12} />
+                )}
+              </span>
             </p>
           </div>
         </NavLink>

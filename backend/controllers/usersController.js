@@ -133,6 +133,9 @@ const myConversationsGet = async (req, res) => {
         messages: {
           orderBy: { createdAt: "desc" },
           take: 1,
+          include: {
+            readers: true,
+          },
         },
       },
       orderBy: {
