@@ -135,6 +135,14 @@ const myConversationsGet = async (req, res) => {
           take: 1,
           include: {
             readers: true,
+            sender: {
+              select: {
+                id: true,
+                firstname: true,
+                lastname: true,
+                username: true,
+              },
+            },
           },
         },
       },

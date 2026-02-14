@@ -2,6 +2,7 @@ import { io } from "socket.io-client";
 
 const user = JSON.parse(localStorage.getItem("user"));
 
+console.log(user);
 // "undefined" means the URL will be computed from the `window.location` object
 const URL =
   import.meta.env.NODE_ENV === "production"

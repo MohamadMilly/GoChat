@@ -1,16 +1,15 @@
-import { Check, CheckCheck, Clock } from "lucide-react";
 import { printGroupTypingUsers } from "../../utils/printGroupTypingUsers";
 import { Avatar } from "../chat/Avatar";
 import { NavLink } from "react-router";
 import { useEffect, useState } from "react";
 import { socket } from "../../socket";
-import { useAuth } from "../../contexts/AuthContext";
 import { ChatBubbleStatus } from "../chat/chatBubbleStatus";
+
 export function ChatEntry({
   chatAvatar,
   isGroup,
   chatTitle,
-  lastMessage = "",
+  lastMessage = null,
   onOpenChat,
   isConnected,
   typingUsers,
@@ -26,7 +25,8 @@ export function ChatEntry({
 
   useEffect(() => {
     function onReadMessage(messageId, readerId) {
-      if (messageId === lastMessage.id) {
+      console.log(chatTitle, messageId, lastMessage.id);
+      if (messageId === lastMessage?.id) {
         setReaders((prev) => [...prev, readerId]);
       }
     }
@@ -35,6 +35,11 @@ export function ChatEntry({
 
     return () => socket.off("read message", onReadMessage);
   });
+  // reset the state when a new message arrives
+  useEffect(() => {
+    if (!lastMessage) return;
+    setReaders(lastMessage?.readers ? lastMessage.readers : []);
+  }, [lastMessage]);
   return (
     <li>
       <button className="w-full" onClick={onOpenChat}>
@@ -79,11 +84,13 @@ export function ChatEntry({
                   <span>typing...</span>
                 )
               ) : (
-                <span className="truncate">{lastMessage?.content || ""}</span>
+                <span className="truncate">
+                  {lastMessage ? lastMessage.content : ""}
+                </span>
               )}
               <ChatBubbleStatus
                 readers={readers}
-                senderId={lastMessage.senderId}
+                senderId={lastMessage?.sender?.id || lastMessage.senderId}
                 status={lastMessage.status}
               />
             </p>

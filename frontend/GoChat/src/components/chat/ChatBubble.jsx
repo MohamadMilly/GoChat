@@ -210,9 +210,10 @@ export function ChatBubble({
         <div className="flex items-center gap-2">
           <ChatBubbleStatus
             readers={readers}
-            senderId={message.senderId}
-            message={message.status}
+            senderId={message.sender.id || message.senderId}
+            status={message.status}
           />
+
           <span
             className={`text-xs block ${isMyMessage ? "text-white text-left" : "text-gray-400 text-right"}`}
           >

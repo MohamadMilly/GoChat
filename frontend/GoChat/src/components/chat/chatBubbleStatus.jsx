@@ -4,7 +4,8 @@ import { useAuth } from "../../contexts/AuthContext";
 export function ChatBubbleStatus({ readers, senderId, status }) {
   const { user } = useAuth();
   const isMyMessage = user.id === senderId;
-  const readersWithOutMe = readers.filter((id) => id !== user.id);
+  const readersWithOutMe = readers.filter((id) => id != user.id);
+
   if (!isMyMessage) return null;
 
   if (status === "pending")
