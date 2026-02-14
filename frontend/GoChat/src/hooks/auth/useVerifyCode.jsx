@@ -17,7 +17,7 @@ export function useVerifyCode() {
     onSuccess: (data) => {
       console.log(data);
       login(data.token, data.user);
-      api.defaults.headers.common["Authorization"] = `Bearer ${data.token}`;
+      api.defaults.headers.common["authorization"] = `Bearer ${data.token}`;
     },
     onError: (error) => {
       console.error("Veification failed: ", error);
