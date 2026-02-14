@@ -38,7 +38,11 @@ export function ChatEntry({
   // reset the state when a new message arrives
   useEffect(() => {
     if (!lastMessage) return;
-    setReaders(lastMessage?.readers ? lastMessage.readers : []);
+    setReaders(
+      lastMessage?.readers
+        ? lastMessage.readers.map((reader) => reader.readerId)
+        : [],
+    );
   }, [lastMessage]);
   return (
     <li>
