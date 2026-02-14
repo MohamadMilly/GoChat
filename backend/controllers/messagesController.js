@@ -117,4 +117,53 @@ const getConversationMessagesGet = async (req, res) => {
   }
 };
 
-module.exports = { sendMessagePost, getConversationMessagesGet };
+const getMessageReaders = async (req, res) => {
+  const { messageId } = req.params;
+  try {
+    const message = await prisma.message.findUnique({
+      where: {
+        id: parseInt(messageId),
+      },
+    });
+    if (!message) {
+      return res.status(404).json({
+        message: "Message is not found.",
+      });
+    }
+    const readers = await prisma.messageOnReader.findMany({
+      where: {
+        messageId: parseInt(messageId),
+      },
+      include: {
+        reader: {
+          include: {
+            profile: true,
+          },
+        },
+      },
+    });
+    const readersPreferences = await prisma.preferences.findMany({
+      where: {
+        userId: {
+          in: readers.map((reader) => reader.readerId),
+        },
+      },
+    });
+    const filteredReaders = readers.map((messageOnReader) => ({
+      ...messageOnReader,
+      reader: filterProfile(messageOnReader.reader, readersPreferences),
+    }));
+
+    return res.json({
+      readers: filteredReaders,
+    });
+  } catch (err) {
+    return res.json({});
+  }
+};
+
+module.exports = {
+  sendMessagePost,
+  getConversationMessagesGet,
+  getMessageReaders,
+};

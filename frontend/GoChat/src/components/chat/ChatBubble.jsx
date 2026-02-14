@@ -1,11 +1,11 @@
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, createContext } from "react";
 import { Avatar } from "./Avatar";
 import { TransitionLink } from "../ui/TransitionLink";
 import { Braces, FileText, FileArchive, CodeXml, File } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
 import { socket } from "../../socket";
-import { CheckCheck, Clock } from "lucide-react";
 import { ChatBubbleStatus } from "./chatBubbleStatus";
+import { ReadersMenu } from "./ReadersMenu";
 
 function VideoFile({ link }) {
   return (
@@ -100,6 +100,12 @@ function MediaFilePreview({ fileURL, mimeType }) {
   );
 }
 
+export const ChatBubbleContext = createContext({
+  messageId: null,
+  isInPreview: false,
+  clickYCoords: null,
+});
+
 export function ChatBubble({
   message,
   isGroupMessage,
@@ -113,14 +119,24 @@ export function ChatBubble({
     : [];
 
   const [readers, setReaders] = useState(readersIds);
-
+  const [isReadersVisible, setIsReadersVisible] = useState(false);
+  const [clickYCoords, setClickYCoords] = useState(null);
   const [transitionId, setTransitionId] = useState(null);
+
   const messagesContainerRef = useRef(null);
+  const messageContentContainerRef = useRef(null);
   const fullname = message.sender.firstname + " " + message.sender.lastname;
 
   const isThereAvatar = !!message.sender.profile?.avatar;
   const avatar = isThereAvatar && message.sender.profile?.avatar;
   const color = message.sender?.accountColor || "";
+
+  const handleShowReaders = (e) => {
+    setIsReadersVisible(true);
+    const rect = e.currentTarget.getBoundingClientRect();
+    const y = e.clientY - rect.top;
+    setClickYCoords(y);
+  };
 
   useEffect(() => {
     function onReadMessage(messageId, userId) {
@@ -157,70 +173,96 @@ export function ChatBubble({
     };
   }, [message.id, message.readers, user.id, message.status, readers]);
 
-  return (
-    <li
-      ref={messagesContainerRef}
-      className={`my-1 flex items-end gap-1 text-sm md:text-base animate-pop ${hideAvatar && isGroupMessage ? "pl-12" : ""}`}
-    >
-      {isGroupMessage && !isMyMessage && !hideAvatar && (
-        <TransitionLink
-          route={`/users/${message.sender.id}`}
-          setDynamicTransitionId={setTransitionId}
-        >
-          <Avatar
-            avatar={avatar}
-            chatTitle={fullname}
-            color={color}
-            dynamicTransitionId={transitionId}
-            size="42px"
-          />
-        </TransitionLink>
-      )}
-      <div
-        className={`w-fit max-w-5/6 px-2 py-1 font-rubik rounded-t-xl ${isMyMessage ? "bg-cyan-700 ml-auto rounded-br-none rounded-bl-xl text-gray-100" : "bg-gray-100 text-gray-600 rounded-bl-none rounded-br-xl"}`}
-      >
-        <div className="flex flex-col">
-          {isGroupMessage && !isMyMessage && !hideName && (
-            <p
-              className={`${color ? "text-[var(--color)]" : "text-gray-800"} font-medium `}
-              style={{ "--color": color }}
-            >
-              {fullname}
-            </p>
-          )}
-          {message.type !== "TEXT" && (
-            <MediaFilePreview
-              fileURL={message.fileURL}
-              mimeType={message.mimeType}
-            />
-          )}
-          {message.content && (
-            <p className="wrap-break-word whitespace-pre-wrap" dir="auto">
-              {message.content}
-            </p>
-          )}
-        </div>
-        {message.edit && (
-          <span
-            className={`text-xs block ${isMyMessage ? "text-white text-right" : "text-gray-500"}`}
-          >
-            edited
-          </span>
-        )}
-        <div className="flex items-center gap-2">
-          <ChatBubbleStatus
-            readers={readers}
-            senderId={message.sender.id || message.senderId}
-            status={message.status}
-          />
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (
+        messageContentContainerRef.current &&
+        !messageContentContainerRef.current.contains(event.target)
+      ) {
+        setIsReadersVisible(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isReadersVisible]);
 
-          <span
-            className={`text-xs block ${isMyMessage ? "text-white text-left" : "text-gray-400 text-right"}`}
+  return (
+    <ChatBubbleContext
+      value={{
+        messageId: message.id,
+        isReadersVisible: isReadersVisible,
+        clickYCoords: clickYCoords,
+      }}
+    >
+      <li
+        ref={messagesContainerRef}
+        className={`my-1 flex items-end gap-1 text-sm md:text-base animate-pop ${hideAvatar && isGroupMessage ? "pl-12" : ""} ${isReadersVisible ? "bg-cyan-300/40" : ""}`}
+      >
+        {isGroupMessage && !isMyMessage && !hideAvatar && (
+          <TransitionLink
+            route={`/users/${message.sender.id}`}
+            setDynamicTransitionId={setTransitionId}
           >
-            {new Date(message.createdAt).toLocaleTimeString()}
-          </span>
+            <Avatar
+              avatar={avatar}
+              chatTitle={fullname}
+              color={color}
+              dynamicTransitionId={transitionId}
+              size="42px"
+            />
+          </TransitionLink>
+        )}
+        <div
+          onClick={handleShowReaders}
+          ref={messageContentContainerRef}
+          className={`relative w-fit max-w-5/6 md:max-w-3/4 px-2 py-1 font-rubik rounded-t-xl ${isMyMessage ? "bg-cyan-700 ml-auto rounded-br-none rounded-bl-xl text-gray-100" : "bg-gray-100 text-gray-600 rounded-bl-none rounded-br-xl"}`}
+        >
+          <div className="flex flex-col">
+            {isGroupMessage && !isMyMessage && !hideName && (
+              <p
+                className={`${color ? "text-[var(--color)]" : "text-gray-800"} font-medium `}
+                style={{ "--color": color }}
+              >
+                {fullname}
+              </p>
+            )}
+            {message.type !== "TEXT" && (
+              <MediaFilePreview
+                fileURL={message.fileURL}
+                mimeType={message.mimeType}
+              />
+            )}
+            {message.content && (
+              <p className="wrap-break-word whitespace-pre-wrap" dir="auto">
+                {message.content}
+              </p>
+            )}
+          </div>
+          {message.edit && (
+            <span
+              className={`text-xs block ${isMyMessage ? "text-white text-right" : "text-gray-500"}`}
+            >
+              edited
+            </span>
+          )}
+          <div className="flex items-center gap-2">
+            <ChatBubbleStatus
+              readers={readers}
+              senderId={message.sender.id || message.senderId}
+              status={message.status}
+            />
+
+            <span
+              className={`text-xs block ${isMyMessage ? "text-white text-left" : "text-gray-400 text-right"}`}
+            >
+              {new Date(message.createdAt).toLocaleTimeString()}
+            </span>
+          </div>
+          {user.id === message.senderId && <ReadersMenu />}
         </div>
-      </div>
-    </li>
+      </li>
+    </ChatBubbleContext>
   );
 }

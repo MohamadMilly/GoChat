@@ -12,7 +12,10 @@ import { useRef } from "react";
 
 import { useSocket } from "../contexts/SocketContext";
 
-export const ChatPageContext = createContext({ conversationId: null });
+export const ChatPageContext = createContext({
+  conversationId: null,
+  isInPreview: true,
+});
 
 export function ChatPage() {
   const { id } = useParams();
@@ -45,7 +48,7 @@ export function ChatPage() {
   }
 
   return (
-    <ChatPageContext value={{ conversationId: id }}>
+    <ChatPageContext value={{ conversationId: id, isInPreview: false }}>
       <section className="flex flex-col md:col-start-2 md:col-end-3 md:row-start-1 md:row-end-2 absolute inset-0 h-full w-full md:static scrollbar-custom overflow-hidden ">
         <ChatHeader />
         <section

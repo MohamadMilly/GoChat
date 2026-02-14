@@ -24,6 +24,11 @@ conversationsRouter.get(
   messagesCountroller.getConversationMessagesGet,
 );
 
+conversationsRouter.get(
+  "/:conversationId/messages/:messageId/readers",
+  messagesCountroller.getMessageReaders,
+);
+
 conversationsRouter.use(verifyToken, (req, res, next) => {
   const token = req.token;
   try {

@@ -35,15 +35,7 @@ export function ChatEntry({
 
     return () => socket.off("read message", onReadMessage);
   });
-  // reset the state when a new message arrives
-  useEffect(() => {
-    if (!lastMessage) return;
-    setReaders(
-      lastMessage?.readers
-        ? lastMessage.readers.map((reader) => reader.readerId)
-        : [],
-    );
-  }, [lastMessage]);
+
   return (
     <li>
       <button className="w-full" onClick={onOpenChat}>
@@ -96,6 +88,7 @@ export function ChatEntry({
                 readers={readers}
                 senderId={lastMessage?.sender?.id || lastMessage.senderId}
                 status={lastMessage.status}
+                className={"shrink-0"}
               />
             </p>
           </div>

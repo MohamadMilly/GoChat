@@ -10,6 +10,7 @@ export function Avatar({
   className = "",
   viewTransitionName = null,
   dynamicTransitionId,
+  titleSize = "18px",
 }) {
   const src = chatAvatar || avatar || null;
 
@@ -39,7 +40,8 @@ export function Avatar({
           />
         ) : (
           <span
-            className={`text-lg ${color ? "text-gray-100" : "text-gray-600"}`}
+            className={`text-[var(--text-size)] ${color ? "text-gray-100" : "text-gray-600"}`}
+            style={{ "--text-size": titleSize }}
           >
             {abbreviateText(chatTitle)}
           </span>

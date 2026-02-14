@@ -28,7 +28,7 @@ export function Chats({ chatsEntries }) {
           );
           return (
             <ChatEntry
-              key={chatEntry.id}
+              key={`${chatEntry.id}-${lastMessage.id || lastMessage.createdAt}`}
               lastMessage={lastMessage}
               chatTitle={chatTitle}
               isGroup={isGroup}

@@ -10,6 +10,9 @@ import { useMessages } from "../../hooks/useMessages";
 import { MessagesList } from "./MessagesList";
 import { ArrowBigLeft } from "lucide-react";
 import { useJoinGroup } from "../../hooks/me/useJoinGroup";
+import { useContext } from "react";
+import { ChatPageContext } from "../../routes/ChatPage";
+
 function GroupPreviewFooter() {
   const { id } = useParams();
   const navigate = useNavigate();
