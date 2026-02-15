@@ -7,7 +7,7 @@ import { socket } from "../../socket";
 import { useSearchParams } from "react-router";
 import { filterConversations } from "../../utils/filterConversations";
 import { useSocket } from "../../contexts/SocketContext";
-import { ChatEntriesLoading } from "../skeletonLoadingComponents/chatEntriesLoading";
+import { ChatEntriesLoading } from "../skeletonLoadingComponents/ChatEntriesLoading";
 
 export function ChatsPanel() {
   const { isConnected } = useSocket();
