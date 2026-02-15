@@ -21,11 +21,12 @@ export function ReadersMenu() {
           (readerOnMessage) => readerOnMessage.readerId !== user.id,
         )
       : [];
+
   return (
     <div
-      className={`w-60 z-50 text-gray-700 ${isReadersVisible ? "animate-pop" : "animate-fade"} bg-white p-2 rounded-lg absolute md:-left-2 left-3/4 top-[var(--bottom)] -translate-x-full`}
+      className={`w-60 text-gray-700 ${isReadersVisible ? "animate-pop" : "animate-fade"} bg-white p-2 rounded-lg absolute md:-left-2 left-3/4 top-[var(--top)] -translate-x-full`}
       style={{
-        "--bottom": Math.floor(clickYCoords - 80) + "px",
+        "--top": Math.floor(clickYCoords - 80) + "px",
       }}
     >
       {isInPreview ? (

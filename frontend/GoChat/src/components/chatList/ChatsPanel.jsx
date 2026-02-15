@@ -7,6 +7,7 @@ import { socket } from "../../socket";
 import { useSearchParams } from "react-router";
 import { filterConversations } from "../../utils/filterConversations";
 import { useSocket } from "../../contexts/SocketContext";
+import { ChatEntriesLoading } from "../skeletonLoadingComponents/chatEntriesLoading";
 
 export function ChatsPanel() {
   const { isConnected } = useSocket();
@@ -24,17 +25,25 @@ export function ChatsPanel() {
     });
   }, [conversations, isFetching, isConnected]);
 
-  if (isFetching) return <p className="p-4">Loading...</p>;
-  if (error) return <p className="p-4">Error: {error.message}</p>;
-
   const filteredConversations = filterConversations(conversations, query);
   return (
     <aside className="md:col-start-1 md:col-end-2 border-r-2 border-gray-200 bg-white flex flex-col max-h-full">
       <SearchBar name="name" query={query} label={"Search Chat"} />
       <p className="px-3 text-sm text-gray-500">
-        {filteredConversations?.length || 0} chats
+        {isFetching ? (
+          <span className="inline-block w-5 p-1.5 bg-gray-200 animate-pulse rounded"></span>
+        ) : (
+          filteredConversations?.length || 0
+        )}{" "}
+        <span>chats</span>
       </p>
-      <Chats chatsEntries={filteredConversations} />
+      {isFetching ? (
+        <ChatEntriesLoading />
+      ) : error ? (
+        <p>Error: {error.message}</p>
+      ) : (
+        <Chats chatsEntries={filteredConversations} />
+      )}
     </aside>
   );
 }

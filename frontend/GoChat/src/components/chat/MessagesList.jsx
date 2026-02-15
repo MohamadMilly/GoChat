@@ -11,7 +11,7 @@ export function MessagesList({ messages, type, ref }) {
   return (
     <ul
       ref={ref}
-      className="p-1 h-full overflow-y-auto z-10 relative scrollbar-custom"
+      className="p-1 h-full overflow-visible overflow-y-auto z-10 relative scrollbar-custom"
     >
       {messages.map((message, index) => {
         const previousMessageDate = messages[index - 1]
