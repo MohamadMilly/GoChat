@@ -11,6 +11,7 @@ import { useConversation } from "../../hooks/useConversation";
 import { TransitionLink } from "../ui/TransitionLink";
 import Button from "../ui/Button";
 import { ArrowBigLeft } from "lucide-react";
+import { ChatHeaderLoading } from "../skeletonLoadingComponents/ChatHeaderLoading";
 
 export const ChatHeader = memo(({ id }) => {
   const navigate = useNavigate();
@@ -26,7 +27,7 @@ export const ChatHeader = memo(({ id }) => {
 
   const [transitionId, setTransitionId] = useState(null);
 
-  if (isFetchingConversation) return <p>Loading...</p>;
+  if (isFetchingConversation) return <ChatHeaderLoading isGroup={false} />;
   if (conversationError) return <p>Error: {conversationError.message}</p>;
 
   const { chatTitle, chatAvatar, color, chatPartner, isGroup } = getChatInfo(

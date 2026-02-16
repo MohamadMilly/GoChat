@@ -8,7 +8,7 @@ import { useAuth } from "../../contexts/AuthContext";
 
 export function ReadersMenu() {
   const { conversationId, isInPreview } = useContext(ChatPageContext);
-  const { messageId, isReadersVisible, clickYCoords } =
+  const { messageId, isReadersVisible, clickYCoords, isFadeRunning } =
     useContext(ChatBubbleContext);
   const { user } = useAuth();
   const { readers, isFetching, error } = useMessageReader(
@@ -21,10 +21,10 @@ export function ReadersMenu() {
           (readerOnMessage) => readerOnMessage.readerId !== user.id,
         )
       : [];
-
+  if (!isReadersVisible) return;
   return (
     <div
-      className={`w-60 text-gray-700 ${isReadersVisible ? "animate-pop" : "animate-fade"} bg-white p-2 rounded-lg absolute md:-left-2 left-3/4 top-[var(--top)] -translate-x-full`}
+      className={`w-60 text-gray-700 ${isReadersVisible && "animate-pop"} ${isFadeRunning && "animate-fade"} bg-white p-2 rounded-lg absolute md:-left-2 left-3/4 top-[var(--top)] -translate-x-full`}
       style={{
         "--top": Math.floor(clickYCoords - 80) + "px",
       }}

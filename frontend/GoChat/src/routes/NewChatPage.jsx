@@ -31,7 +31,7 @@ export function NewChatPage() {
     });
   };
   if (isSuccess && !!data) {
-    return <Navigate to={`/chats/${data.conversation.id}`} />;
+    return <Navigate to={`/chats/direct/${data.conversation.id}`} />;
   }
   return (
     <main className="max-w-200 mx-auto bg-white font-rubik relative">

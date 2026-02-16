@@ -56,7 +56,11 @@ export const routes = [
         element: <ChatsListLanding />,
       },
       {
-        path: "/chats/:id",
+        path: "/chats/direct/:id",
+        element: <ChatPageWrapper />,
+      },
+      {
+        path: "/chats/group/:id",
         element: <ChatPageWrapper />,
       },
     ],
@@ -69,10 +73,7 @@ export const routes = [
     path: "/chats/group/new",
     element: <NewGroupPage />,
   },
-  {
-    path: "/chats/:id",
-    element: <ChatPageWrapper />,
-  },
+
   {
     path: "/users/:userId",
     element: <UserProfile />,

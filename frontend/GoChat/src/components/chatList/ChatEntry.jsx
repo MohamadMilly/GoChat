@@ -41,7 +41,7 @@ export function ChatEntry({
       <button className="w-full" onClick={onOpenChat}>
         <NavLink
           viewTransition
-          to={`/chats/${conversationId}`}
+          to={`/chats/${isGroup ? "group" : "direct"}/${conversationId}`}
           className={({ isActive, isPending }) => {
             if (isActive) {
               return `${base_class} bg-cyan-600/40`;

@@ -122,7 +122,7 @@ export function ChatBubble({
   const [isReadersVisible, setIsReadersVisible] = useState(false);
   const [clickYCoords, setClickYCoords] = useState(null);
   const [transitionId, setTransitionId] = useState(null);
-
+  const [isFadeRunning, setIsFadeRunning] = useState(false);
   const messagesContainerRef = useRef(null);
   const messageContentContainerRef = useRef(null);
   const fullname = message.sender.firstname + " " + message.sender.lastname;
@@ -174,17 +174,23 @@ export function ChatBubble({
   }, [message.id, message.readers, user.id, message.status, readers]);
 
   useEffect(() => {
+    let timer;
     function handleClickOutside(event) {
       if (
         messageContentContainerRef.current &&
         !messageContentContainerRef.current.contains(event.target)
       ) {
-        setIsReadersVisible(false);
+        setIsFadeRunning(true);
+        timer = setTimeout(() => {
+          setIsFadeRunning(false);
+          setIsReadersVisible(false);
+        }, 300);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
+      clearTimeout(timer);
     };
   }, [isReadersVisible]);
 
@@ -193,12 +199,13 @@ export function ChatBubble({
       value={{
         messageId: message.id,
         isReadersVisible: isReadersVisible,
+        isFadeRunning: isFadeRunning,
         clickYCoords: clickYCoords,
       }}
     >
       <li
         ref={messagesContainerRef}
-        className={`my-1 flex items-end gap-1 text-sm md:text-base animate-pop ${hideAvatar && isGroupMessage ? "pl-12" : ""} ${isReadersVisible ? "bg-cyan-300/40" : ""}`}
+        className={`my-1 flex items-end gap-1 text-sm md:text-base animate-pop transition-all duration-300 ${hideAvatar && isGroupMessage ? "pl-12" : ""} ${isReadersVisible && "bg-cyan-300/40"}`}
       >
         {isGroupMessage && !isMyMessage && !hideAvatar && (
           <TransitionLink

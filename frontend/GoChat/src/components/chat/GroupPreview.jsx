@@ -38,7 +38,7 @@ function GroupPreviewFooter() {
     join(id);
   };
   if (isSuccess) {
-    navigate(`/chats/${id}`);
+    navigate(`/chats/group/${id}`);
   }
   return (
     <div className="px-4 py-2 flex flex-col items-center gap-2 bg-white">
@@ -48,7 +48,7 @@ function GroupPreviewFooter() {
             <p className="text-sm text-gray-400">
               You are already in this group
             </p>
-            <Link route={`/chats/${id}`} className="text-xs rounded-md">
+            <Link route={`/chats/group/${id}`} className="text-xs rounded-md">
               Go to the chat
             </Link>{" "}
           </>
@@ -75,12 +75,7 @@ function GroupPreviewFooter() {
 export function GroupPreview() {
   const { id } = useParams();
   const naviagte = useNavigate();
-  const {
-    messages,
-    type,
-    error: messagesError,
-    isFetching: isFetchingMessages,
-  } = useMessages(id);
+
   return (
     <>
       <div className="inset-0 bg-gray-600/20 backdrop-blur-xs absolute"></div>
@@ -106,15 +101,7 @@ export function GroupPreview() {
             className="flex flex-col z-10 flex-1 overflow-y-auto scrollbar-custom"
             aria-label="polite"
           >
-            {isFetchingMessages ? (
-              <p>Loading...</p>
-            ) : messages.length === 0 ? (
-              <p className="text-center text-lg h-full flex justify-center items-center text-gray-800">
-                No messages yet.
-              </p>
-            ) : (
-              <MessagesList messages={messages} type={type} />
-            )}
+            <MessagesList convId={id} />
           </article>
         </div>
 

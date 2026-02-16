@@ -1,55 +1,81 @@
 import { useAuth } from "../../contexts/AuthContext";
 import { ChatBubble } from "./ChatBubble";
-import { socket } from "../../socket";
-import { Fragment, useEffect, useRef } from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import { Fragment, useContext, useEffect, useRef } from "react";
+import { ChatPageContext } from "../../routes/ChatPage";
+import { useMessages } from "../../hooks/useMessages";
+import { MessagesListLoading } from "../skeletonLoadingComponents/MessagesListLoading";
 
-export function MessagesList({ messages, type, ref }) {
+export function MessagesList({ convId = null }) {
   const { user } = useAuth();
-  const queryClient = useQueryClient();
+  const messagesListRef = useRef(null);
 
+  const { conversationId } = useContext(ChatPageContext);
+  const {
+    messages,
+    type,
+    error: messagesError,
+    isFetching: isFetchingMessages,
+  } = useMessages(conversationId || convId);
+
+  useEffect(() => {
+    if (messagesListRef.current) {
+      messagesListRef.current.scrollTop = messagesListRef.current.scrollHeight;
+    }
+  }, [messages]);
+
+  if (isFetchingMessages) return <MessagesListLoading />;
+  if (messagesError) return <p>Error: {messagesError.message}</p>;
   return (
     <ul
-      ref={ref}
+      ref={messagesListRef}
       className="p-1 h-full overflow-visible overflow-y-auto z-10 relative scrollbar-custom"
     >
-      {messages.map((message, index) => {
-        const previousMessageDate = messages[index - 1]
-          ? messages[index - 1].createdAt
-          : null;
+      {messages && messages.length === 0 ? (
+        <p
+          className="text-center text-lg h-full flex justify-center items-center text-gray-800 z-10
+            "
+        >
+          No messages yet.
+        </p>
+      ) : (
+        messages.map((message, index) => {
+          const previousMessageDate = messages[index - 1]
+            ? messages[index - 1].createdAt
+            : null;
 
-        const isNewDayMessage = previousMessageDate
-          ? new Date(message.createdAt).getDate() !=
-            new Date(previousMessageDate).getDate()
-          : true;
+          const isNewDayMessage = previousMessageDate
+            ? new Date(message.createdAt).getDate() !=
+              new Date(previousMessageDate).getDate()
+            : true;
 
-        const sender = message.sender;
-        const isMyMessage = user.id === sender.id;
+          const sender = message.sender;
+          const isMyMessage = user.id === sender.id;
 
-        const isThereNextMessageFromTheSameUser =
-          messages[index + 1]?.senderId === message.senderId;
-        const isTherePreviousMessageFromTheSameuser =
-          messages[index - 1]?.senderId === message.senderId;
-        return (
-          <Fragment key={message.id || message.createdAt}>
-            {isNewDayMessage && (
-              <span
-                dir="rtl"
-                className="text-xs text-gray-500 bg-gray-50/40 mx-auto my-2 block w-fit p-0.5 rounded"
-              >
-                {new Date(message.createdAt).toLocaleDateString()}
-              </span>
-            )}
-            <ChatBubble
-              message={message}
-              isGroupMessage={type === "GROUP"}
-              isMyMessage={isMyMessage}
-              hideAvatar={isThereNextMessageFromTheSameUser}
-              hideName={isTherePreviousMessageFromTheSameuser}
-            />
-          </Fragment>
-        );
-      })}
+          const isThereNextMessageFromTheSameUser =
+            messages[index + 1]?.senderId === message.senderId;
+          const isTherePreviousMessageFromTheSameuser =
+            messages[index - 1]?.senderId === message.senderId;
+          return (
+            <Fragment key={message.id || message.createdAt}>
+              {isNewDayMessage && (
+                <span
+                  dir="rtl"
+                  className="text-xs text-gray-500 bg-gray-50/40 mx-auto my-2 block w-fit p-0.5 rounded"
+                >
+                  {new Date(message.createdAt).toLocaleDateString()}
+                </span>
+              )}
+              <ChatBubble
+                message={message}
+                isGroupMessage={type === "GROUP"}
+                isMyMessage={isMyMessage}
+                hideAvatar={isThereNextMessageFromTheSameUser}
+                hideName={isTherePreviousMessageFromTheSameuser}
+              />
+            </Fragment>
+          );
+        })
+      )}
     </ul>
   );
 }

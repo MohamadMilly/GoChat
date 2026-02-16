@@ -79,7 +79,7 @@ export function NewGroupPage() {
     });
   };
   if (isSuccess && !!data) {
-    return <Navigate to={`/chats/${data.conversation.id}`} />;
+    return <Navigate to={`/chats/group/${data.conversation.id}`} />;
   }
   return (
     <main className="max-w-200 mx-auto bg-white font-rubik relative">
