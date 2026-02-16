@@ -12,6 +12,7 @@ import {
 import Line from "./Line";
 import { useState } from "react";
 import { TransitionLink } from "./TransitionLink";
+import { IdentityLoading } from "../skeletonLoadingComponents/IdentityLoading";
 export function SideDrawer() {
   const { user, isFetching, error } = useMe();
 
@@ -60,7 +61,7 @@ export function SideDrawer() {
             <div className="relative flex h-full flex-col overflow-y-auto bg-white py-6 shadow-xl">
               <div className="px-4 sm:px-6">
                 {isFetching ? (
-                  <p>Loading...</p>
+                  <IdentityLoading isCurrentUserIdentity={true} />
                 ) : user ? (
                   <div className="flex items-center gap-x-2">
                     <Avatar
