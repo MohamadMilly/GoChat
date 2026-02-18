@@ -16,11 +16,12 @@ export function ChatsPanel() {
   const query = searchParams.get("name");
 
   useEffect(() => {
-    if (!isFetching || conversations.length === 0 || !isConnected) return;
+    if (isFetching || conversations.length === 0 || !isConnected) return;
     conversations.forEach((c) => {
       socket.auth.serverOffset[c.id.toString()] =
         c.messages[c.messages.length - 1]?.id || 0;
       socket.auth.isInitialDataLoading = false;
+      console.log("joined chat:", c.id);
       socket.emit("join chat", String(c.id));
     });
   }, [conversations, isFetching, isConnected]);
