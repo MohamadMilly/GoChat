@@ -185,17 +185,48 @@ function AvatarBackgroundFileField({
   isFetchingProfile,
 }) {
   const avatarBackgroundFieldRef = useRef(null);
-  const handleAvatarbackgroundSelect = (e) => {
+  const [isUploading, setIsUploading] = useState(false);
+  const [previewURL, setPreviewURL] = useState(null);
+  const handleAvatarbackgroundSelect = async (e) => {
     const avatarBackgroundFile = e.target.files[0];
+    if (!avatarBackgroundFile) return;
+    // get the temporary URL by createObjectURL method of URL class so it feels optimistic
+    const fileTempURL = URL.createObjectURL(avatarBackgroundFile);
+    setPreviewURL(fileTempURL);
+    try {
+      setIsUploading(true);
+      const { data, error } = await supabase.storage
+        .from("images")
+        .upload(
+          `${Date.now()}-${avatarBackgroundFile.name}`,
+          avatarBackgroundFile,
+          {
+            contentType: avatarBackgroundFile.type,
+          },
+        );
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      const { data: publicURlData } = supabase.storage
+        .from("images")
+        .getPublicUrl(data.path);
+      setAvatarBackgroundURL(publicURlData.publicUrl);
+      setIsUploading(false);
+    } catch (err) {
+      toast.error(err.message);
+      console.error(err.message);
+    }
   };
   const handleDeleteAvatarbackground = () => {
     setAvatarBackgroundURL("");
+    setPreviewURL("");
   };
   return (
     <div
-      className={`flex-1 basis-sm relative overflow-hidden h-48 ${isFetchingProfile && "animate-pulse"}`}
+      className={`flex-1 basis-sm relative overflow-hidden h-48 ${(isFetchingProfile || isUploading) && "animate-pulse"}`}
       style={{
-        backgroundImage: `url(${avatarBackgroundURL})`,
+        backgroundImage: `url(${previewURL || avatarBackgroundURL})`,
         backgroundPosition: "center",
         backgroundSize: "cover",
       }}
@@ -216,22 +247,28 @@ function AvatarBackgroundFileField({
           ref={avatarBackgroundFieldRef}
           onChange={handleAvatarbackgroundSelect}
         />
-        <div className="flex items-center gap-2">
-          <Button
-            disabled={isFetchingProfile}
-            className={"text-xs bg-gray-50 disabled:opacity-50"}
-            onClick={() => avatarBackgroundFieldRef.current.click()}
-          >
-            Replace
-          </Button>
-          <Button
-            disabled={isFetchingProfile}
-            className={"bg-red-200 text-red-500/80 text-xs disabled:opacity-50"}
-            onClick={handleDeleteAvatarbackground}
-          >
-            Delete
-          </Button>
-        </div>
+        {isUploading ? (
+          <p className="text-sm text-gray-50">Uploading...</p>
+        ) : (
+          <div className="flex items-center gap-2">
+            <Button
+              disabled={isFetchingProfile}
+              className={"text-xs bg-gray-50 disabled:opacity-50"}
+              onClick={() => avatarBackgroundFieldRef.current.click()}
+            >
+              Replace
+            </Button>
+            <Button
+              disabled={isFetchingProfile}
+              className={
+                "bg-red-200 text-red-500/80 text-xs disabled:opacity-50"
+              }
+              onClick={handleDeleteAvatarbackground}
+            >
+              Delete
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );
