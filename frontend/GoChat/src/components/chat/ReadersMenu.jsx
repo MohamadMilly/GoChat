@@ -34,7 +34,7 @@ export function ReadersMenu() {
       }}
     >
       {isInPreview ? (
-        <p className="text-xs">Join the group to see the readers</p>
+        <p className="text-xs">Join or go to the chat to see the readers</p>
       ) : isFetching ? (
         <p>Loading...</p>
       ) : error ? (

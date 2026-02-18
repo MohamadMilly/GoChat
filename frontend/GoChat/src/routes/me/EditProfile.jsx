@@ -6,6 +6,8 @@ import { ArrowBigLeft, Check } from "lucide-react";
 import { useRef, useState, useEffect } from "react";
 import { Avatar } from "../../components/chat/Avatar";
 import { useAuth } from "../../contexts/AuthContext";
+import { supabase } from "../../utils/supabase";
+import { toast } from "react-toastify";
 
 function ProfileInputField({
   value,
@@ -87,12 +89,38 @@ function AvatarFileField({
   isFetchingProfile,
 }) {
   const avatarFieldRef = useRef(null);
-
-  const handleAvatarSelect = (e) => {
+  const [previewURL, setPreviewURL] = useState("");
+  const [isUploading, setIsUploading] = useState(false);
+  const handleAvatarSelect = async (e) => {
     const avatarFile = e.target.files[0];
+    if (!avatarFile) return;
+    // get the temporary URL by createObjectURL method of URL class so it feels optimistic
+    const fileTempURL = URL.createObjectURL(avatarFile);
+    setPreviewURL(fileTempURL);
+    try {
+      setIsUploading(true);
+      const { data, error } = await supabase.storage
+        .from("images")
+        .upload(`${Date.now()}-${avatarFile.name}`, avatarFile, {
+          contentType: avatarFile.type,
+        });
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      const { data: publicURlData } = supabase.storage
+        .from("images")
+        .getPublicUrl(data.path);
+      setAvatarURL(publicURlData.publicUrl);
+      setIsUploading(false);
+    } catch (err) {
+      toast.error(err.message);
+      console.error(err.message);
+    }
   };
   const handleDeleteAvatar = () => {
     setAvatarURL("");
+    setPreviewURL("");
   };
   return (
     <div className="bg-gray-50/30 px-4 py-2 my-4 flex-0 shrink-0 h-full">
@@ -106,19 +134,30 @@ function AvatarFileField({
         id="avatar"
         name="avatarFile"
         onChange={handleAvatarSelect}
+        accept="image/*"
       />
       {isFetchingProfile ? (
         <div className="shrink-0 my-3 flex justify-center">
           <div className="w-[80px] h-[80px] bg-gray-200 animate-pulse rounded-full"></div>
         </div>
       ) : (
-        <Avatar
-          size="80px"
-          chatAvatar={avatarURL}
-          chatTitle={fullname}
-          color={color}
-          className="my-3 flex justify-center"
-        />
+        <div className="relative">
+          {isUploading && (
+            <span
+              className="absolute
+             left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 text-xs text-white"
+            >
+              Uploading...
+            </span>
+          )}
+          <Avatar
+            size="80px"
+            chatAvatar={previewURL || avatarURL}
+            chatTitle={fullname}
+            color={color}
+            className={`my-3 flex justify-center ${isUploading && "brightness-50"}`}
+          />
+        </div>
       )}
       <div className="flex items-center justify-center gap-2">
         <Button
