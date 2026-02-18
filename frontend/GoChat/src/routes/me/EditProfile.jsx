@@ -5,6 +5,8 @@ import Button from "../../components/ui/Button";
 import { ArrowBigLeft, Check } from "lucide-react";
 import { useRef, useState, useEffect } from "react";
 import { Avatar } from "../../components/chat/Avatar";
+import { useAuth } from "../../contexts/AuthContext";
+
 function ProfileInputField({
   value,
   onChange,
@@ -12,25 +14,30 @@ function ProfileInputField({
   label,
   type = "text",
   name,
+  isFetchingProfile,
 }) {
   return (
     <div className="flex flex-col gap-1 px-4 py-2 my-4 rounded">
       <label htmlFor={id} className="text-sm text-cyan-600/80">
         {label}
       </label>
-      <input
-        onChange={onChange}
-        className="outline-2 outline-gray-200/50 rounded text-sm px-2 py-1 mt-2 focus:outline-cyan-600/50 focus:outline-offset-2 transition-all text-gray-700"
-        id={id}
-        type={type}
-        value={value}
-        name={name}
-      />
+      {isFetchingProfile ? (
+        <div className="h-8 rounded bg-gray-200 animate-pulse"></div>
+      ) : (
+        <input
+          onChange={onChange}
+          className="outline-2 outline-gray-200/50 rounded text-sm px-2 py-1 mt-2 focus:outline-cyan-600/50 focus:outline-offset-2 transition-all text-gray-700"
+          id={id}
+          type={type}
+          value={value}
+          name={name}
+        />
+      )}
     </div>
   );
 }
 
-function BioTextAreaField({ value, onChange }) {
+function BioTextAreaField({ value, onChange, isFetchingProfile }) {
   const textAreaRef = useRef(null);
   const bioLength = value ? value.length : 0;
   const handleInput = () => {
@@ -45,23 +52,40 @@ function BioTextAreaField({ value, onChange }) {
       <label htmlFor={"bio"} className="text-sm text-cyan-600/80">
         Your Bio
       </label>
-      <textarea
-        className="outline-2 outline-gray-200/50 focus:outline-cyan-600/50 focus:outline-offset-2 transition-all rounded mt-2 p-2 text-sm text-gray-700 resize-none"
-        name="bio"
-        id="bio"
-        ref={textAreaRef}
-        value={value}
-        onInput={handleInput}
-        onChange={onChange}
-      ></textarea>
-      <span className="text-xs text-gray-400 text-end">
-        {bioLength} {bioLength > 1 ? "characters" : "character"}
-      </span>
+      {isFetchingProfile ? (
+        <div className="h-18 rounded bg-gray-200 animate-pulse"></div>
+      ) : (
+        <textarea
+          className="outline-2 outline-gray-200/50 focus:outline-cyan-600/50 focus:outline-offset-2 transition-all rounded mt-2 p-2 text-sm text-gray-700 resize-none"
+          name="bio"
+          id="bio"
+          ref={textAreaRef}
+          value={value}
+          onInput={handleInput}
+          onChange={onChange}
+        ></textarea>
+      )}
+      {isFetchingProfile ? (
+        <div className="flex items-center gap-1 justify-end">
+          <span className="inline-block py-1.5 w-5 bg-gray-200 animate-pulse rounded"></span>
+          <span className="text-xs text-gray-400 text-end">characters</span>
+        </div>
+      ) : (
+        <span className="text-xs text-gray-400 text-end">
+          {bioLength} {bioLength > 1 ? "characters" : "character"}
+        </span>
+      )}
     </div>
   );
 }
 
-function AvatarFileField({ avatarURL, setAvatarURL, fullname, color }) {
+function AvatarFileField({
+  avatarURL,
+  setAvatarURL,
+  fullname,
+  color,
+  isFetchingProfile,
+}) {
   const avatarFieldRef = useRef(null);
 
   const handleAvatarSelect = (e) => {
@@ -83,23 +107,31 @@ function AvatarFileField({ avatarURL, setAvatarURL, fullname, color }) {
         name="avatarFile"
         onChange={handleAvatarSelect}
       />
-      <Avatar
-        size="80px"
-        chatAvatar={avatarURL}
-        chatTitle={fullname}
-        color={color}
-        className="my-3 flex justify-center"
-      />
+      {isFetchingProfile ? (
+        <div className="shrink-0 my-3 flex justify-center">
+          <div className="w-[80px] h-[80px] bg-gray-200 animate-pulse rounded-full"></div>
+        </div>
+      ) : (
+        <Avatar
+          size="80px"
+          chatAvatar={avatarURL}
+          chatTitle={fullname}
+          color={color}
+          className="my-3 flex justify-center"
+        />
+      )}
       <div className="flex items-center justify-center gap-2">
         <Button
-          className={"text-xs bg-white"}
+          disabled={isFetchingProfile}
+          className={"text-xs bg-white disabled:opacity-50"}
           onClick={() => avatarFieldRef.current.click()}
         >
           Replace
         </Button>
         <Button
-          className={"bg-red-200 text-red-500/80 text-xs"}
+          className={"bg-red-200 text-red-500/80 text-xs disabled:opacity-50"}
           onClick={handleDeleteAvatar}
+          disabled={isFetchingProfile}
         >
           Delete
         </Button>
@@ -111,6 +143,7 @@ function AvatarFileField({ avatarURL, setAvatarURL, fullname, color }) {
 function AvatarBackgroundFileField({
   avatarBackgroundURL,
   setAvatarBackgroundURL,
+  isFetchingProfile,
 }) {
   const avatarBackgroundFieldRef = useRef(null);
   const handleAvatarbackgroundSelect = (e) => {
@@ -121,7 +154,7 @@ function AvatarBackgroundFileField({
   };
   return (
     <div
-      className="flex-1 basis-sm relative overflow-hidden h-48"
+      className={`flex-1 basis-sm relative overflow-hidden h-48 ${isFetchingProfile && "animate-pulse"}`}
       style={{
         backgroundImage: `url(${avatarBackgroundURL})`,
         backgroundPosition: "center",
@@ -146,13 +179,15 @@ function AvatarBackgroundFileField({
         />
         <div className="flex items-center gap-2">
           <Button
-            className={"text-xs bg-gray-50"}
+            disabled={isFetchingProfile}
+            className={"text-xs bg-gray-50 disabled:opacity-50"}
             onClick={() => avatarBackgroundFieldRef.current.click()}
           >
             Replace
           </Button>
           <Button
-            className={"bg-red-200 text-red-500/80 text-xs"}
+            disabled={isFetchingProfile}
+            className={"bg-red-200 text-red-500/80 text-xs disabled:opacity-50"}
             onClick={handleDeleteAvatarbackground}
           >
             Delete
@@ -171,7 +206,7 @@ export function EditProfilePage() {
   } = useEditProfile();
 
   const { user, isFetching: isFetchingProfile, error: profileError } = useMe();
-
+  const { user: currentUserIdentity } = useAuth();
   const [newProfileData, setNewProfileData] = useState({
     avatar: "",
     avatarBackground: "",
@@ -183,15 +218,18 @@ export function EditProfilePage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!isFetchingProfile && user) {
-      setNewProfileData((prev) => {
-        if (user?.profile) {
-          return { ...user?.profile };
-        } else {
-          return prev;
-        }
-      });
+    function setInitialUser() {
+      if (user && !isFetchingProfile) {
+        setNewProfileData((prev) => {
+          if (user?.profile) {
+            return { ...user?.profile };
+          } else {
+            return prev;
+          }
+        });
+      }
     }
+    setInitialUser();
   }, [isFetchingProfile, user]);
 
   const onFieldChange = (value, key) => {
@@ -201,7 +239,7 @@ export function EditProfilePage() {
     put(newProfileData);
     navigate("/users/me/profile");
   };
-  if (isFetchingProfile) return <p>Loading...</p>;
+
   if (profileError) return <p>Error: {profileError.message}</p>;
 
   return (
@@ -211,7 +249,11 @@ export function EditProfilePage() {
           <p className="sr-only">Go Back</p>
           <ArrowBigLeft size={20} />
         </Button>
-        <Button onClick={handleConfirmEdit} className={"text-gray-600"}>
+        <Button
+          disabled={isFetchingProfile}
+          onClick={handleConfirmEdit}
+          className={"text-gray-600"}
+        >
           <p className="sr-only">Confirm edits</p>
           <Check size={20} />
         </Button>
@@ -225,18 +267,23 @@ export function EditProfilePage() {
         <AvatarFileField
           setAvatarURL={(value) => onFieldChange(value, "avatar")}
           avatarURL={newProfileData.avatar}
-          fullname={user.firstname + " " + user.lastname}
+          fullname={
+            currentUserIdentity.firstname + " " + currentUserIdentity.lastname
+          }
           color={user?.accountColor || ""}
+          isFetchingProfile={isFetchingProfile}
         />
         <AvatarBackgroundFileField
           setAvatarBackgroundURL={(value) =>
             onFieldChange(value, "avatarBackground")
           }
           avatarBackgroundURL={newProfileData.avatarBackground}
+          isFetchingProfile={isFetchingProfile}
         />
         <BioTextAreaField
           value={newProfileData.bio}
           onChange={(e) => onFieldChange(e.target.value, "bio")}
+          isFetchingProfile={isFetchingProfile}
         />
         <ProfileInputField
           value={newProfileData.phoneNumber}
@@ -245,6 +292,7 @@ export function EditProfilePage() {
           label={"Your phone number"}
           type="phone"
           name={"phoneNumber"}
+          isFetchingProfile={isFetchingProfile}
         />
         <ProfileInputField
           value={newProfileData.email}
@@ -253,6 +301,7 @@ export function EditProfilePage() {
           label={"Your Email"}
           type="email"
           name={"bio"}
+          isFetchingProfile={isFetchingProfile}
         />
         <ProfileInputField
           value={newProfileData.birthday}
@@ -261,6 +310,7 @@ export function EditProfilePage() {
           label={"Your Birthday"}
           type="date"
           name={"birthday"}
+          isFetchingProfile={isFetchingProfile}
         />
       </form>
     </main>

@@ -193,7 +193,7 @@ io.on("connection", async (socket) => {
       },
       update: {},
     });
-    socket.broadcast.emit("read message", messageId, readerId);
+    io.emit("read message", messageId, readerId);
   });
 });
 

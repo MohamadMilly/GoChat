@@ -25,7 +25,7 @@ export function ChatEntry({
 
   useEffect(() => {
     function onReadMessage(messageId, readerId) {
-      console.log(chatTitle, messageId, lastMessage.id);
+      console.log("a message read");
       if (messageId === lastMessage?.id) {
         setReaders((prev) => [...prev, readerId]);
       }
@@ -84,12 +84,15 @@ export function ChatEntry({
                   {lastMessage ? lastMessage.content : ""}
                 </span>
               )}
-              <ChatBubbleStatus
-                readers={readers}
-                senderId={lastMessage?.sender?.id || lastMessage.senderId}
-                status={lastMessage.status}
-                className={"shrink-0"}
-              />
+              {lastMessage && (
+                <ChatBubbleStatus
+                  readers={readers}
+                  senderId={lastMessage?.sender?.id || lastMessage.senderId}
+                  status={lastMessage.status}
+                  className={"shrink-0"}
+                  supportNotifications={true}
+                />
+              )}
             </p>
           </div>
         </NavLink>

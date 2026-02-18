@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect, createContext } from "react";
+import { useRef, useState, useEffect, createContext, memo } from "react";
 import { Avatar } from "./Avatar";
 import { TransitionLink } from "../ui/TransitionLink";
 import { Braces, FileText, FileArchive, CodeXml, File } from "lucide-react";
@@ -104,172 +104,176 @@ export const ChatBubbleContext = createContext({
   messageId: null,
   isInPreview: false,
   clickYCoords: null,
+  isFadeRunning: false,
 });
 
-export function ChatBubble({
-  message,
-  isGroupMessage,
-  isMyMessage,
-  hideAvatar = false,
-  hideName = false,
-}) {
-  const { user } = useAuth();
-  const readersIds = message.readers
-    ? message.readers.map((reader) => reader.id)
-    : [];
+export const ChatBubble = memo(
+  ({
+    message,
+    isGroupMessage,
+    isMyMessage,
+    hideAvatar = false,
+    hideName = false,
+  }) => {
+    const { user } = useAuth();
+    const readersIds = message.readers
+      ? message.readers.map((reader) => reader.id)
+      : [];
 
-  const [readers, setReaders] = useState(readersIds);
-  const [isReadersVisible, setIsReadersVisible] = useState(false);
-  const [clickYCoords, setClickYCoords] = useState(null);
-  const [transitionId, setTransitionId] = useState(null);
-  const [isFadeRunning, setIsFadeRunning] = useState(false);
-  const messagesContainerRef = useRef(null);
-  const messageContentContainerRef = useRef(null);
-  const fullname = message.sender.firstname + " " + message.sender.lastname;
+    const [readers, setReaders] = useState(readersIds);
+    const [isReadersVisible, setIsReadersVisible] = useState(false);
+    const [clickYCoords, setClickYCoords] = useState(null);
+    const [transitionId, setTransitionId] = useState(null);
+    const [isFadeRunning, setIsFadeRunning] = useState(false);
+    const messagesContainerRef = useRef(null);
+    const messageContentContainerRef = useRef(null);
+    const fullname = message.sender.firstname + " " + message.sender.lastname;
 
-  const isThereAvatar = !!message.sender.profile?.avatar;
-  const avatar = isThereAvatar && message.sender.profile?.avatar;
-  const color = message.sender?.accountColor || "";
+    const isThereAvatar = !!message.sender.profile?.avatar;
+    const avatar = isThereAvatar && message.sender.profile?.avatar;
+    const color = message.sender?.accountColor || "";
 
-  const handleShowReaders = (e) => {
-    setIsReadersVisible(true);
-    const rect = e.currentTarget.getBoundingClientRect();
-    const y = e.clientY - rect.top;
-    setClickYCoords(y);
-  };
-
-  useEffect(() => {
-    function onReadMessage(messageId, userId) {
-      if (messageId !== message.id) return;
-      setReaders((prev) => [...prev, userId]);
-    }
-    socket.on("read message", onReadMessage);
-
-    return () => {
-      socket.off("read message", onReadMessage);
+    const handleShowReaders = (e) => {
+      setIsReadersVisible(true);
+      const rect = e.currentTarget.getBoundingClientRect();
+      const y = e.clientY - rect.top;
+      setClickYCoords(y);
     };
-  }, [message.id]);
 
-  useEffect(() => {
-    if (!messagesContainerRef.current) return;
+    useEffect(() => {
+      function onReadMessage(messageId, userId) {
+        if (messageId !== message.id) return;
 
-    const observer = new IntersectionObserver((entries) => {
-      const observedMessage = entries[0];
-      const isReadByMe = readers.some((id) => id === user.id);
-
-      if (
-        observedMessage.isIntersecting &&
-        !isReadByMe &&
-        message.status !== "pending"
-      ) {
-        socket.emit("read message", message.id, user.id);
+        setReaders((prev) => [...prev, userId]);
       }
-    });
-    const observedMessage = messagesContainerRef.current;
-    observer.observe(observedMessage);
-    return () => {
-      if (!observedMessage) return;
-      observer.unobserve(observedMessage);
-    };
-  }, [message.id, message.readers, user.id, message.status, readers]);
+      socket.on("read message", onReadMessage);
 
-  useEffect(() => {
-    let timer;
-    function handleClickOutside(event) {
-      if (
-        messageContentContainerRef.current &&
-        !messageContentContainerRef.current.contains(event.target)
-      ) {
-        setIsFadeRunning(true);
-        timer = setTimeout(() => {
-          setIsFadeRunning(false);
-          setIsReadersVisible(false);
-        }, 300);
+      return () => {
+        socket.off("read message", onReadMessage);
+      };
+    }, [message.id]);
+
+    useEffect(() => {
+      if (!messagesContainerRef.current) return;
+      const observer = new IntersectionObserver((entries) => {
+        const observedMessage = entries[0];
+        const isReadByMe = readers.some((id) => id === user.id);
+
+        if (
+          observedMessage.isIntersecting &&
+          !isReadByMe &&
+          message.status !== "pending"
+        ) {
+          socket.emit("read message", message.id, user.id);
+        }
+      });
+      const observedMessage = messagesContainerRef.current;
+      observer.observe(observedMessage);
+      return () => {
+        if (!observedMessage) return;
+        observer.unobserve(observedMessage);
+      };
+    }, [message.id, user.id, message.status, readers]);
+
+    useEffect(() => {
+      let timer;
+      function handleClickOutside(event) {
+        if (
+          isReadersVisible &&
+          messageContentContainerRef.current &&
+          !messageContentContainerRef.current.contains(event.target)
+        ) {
+          setIsFadeRunning(true);
+          timer = setTimeout(() => {
+            setIsFadeRunning(false);
+            setIsReadersVisible(false);
+          }, 300);
+        }
       }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-      clearTimeout(timer);
-    };
-  }, [isReadersVisible]);
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => {
+        document.removeEventListener("mousedown", handleClickOutside);
+        clearTimeout(timer);
+      };
+    }, [isReadersVisible]);
 
-  return (
-    <ChatBubbleContext
-      value={{
-        messageId: message.id,
-        isReadersVisible: isReadersVisible,
-        isFadeRunning: isFadeRunning,
-        clickYCoords: clickYCoords,
-      }}
-    >
-      <li
-        ref={messagesContainerRef}
-        className={`my-1 flex items-end gap-1 text-sm md:text-base animate-pop transition-all duration-300 ${hideAvatar && isGroupMessage ? "pl-12" : ""} ${isReadersVisible && "bg-cyan-300/40"}`}
+    return (
+      <ChatBubbleContext
+        value={{
+          messageId: message.id,
+          isReadersVisible: isReadersVisible,
+          isFadeRunning: isFadeRunning,
+          clickYCoords: clickYCoords,
+        }}
       >
-        {isGroupMessage && !isMyMessage && !hideAvatar && (
-          <TransitionLink
-            route={`/users/${message.sender.id}`}
-            setDynamicTransitionId={setTransitionId}
-          >
-            <Avatar
-              avatar={avatar}
-              chatTitle={fullname}
-              color={color}
-              dynamicTransitionId={transitionId}
-              size="42px"
-            />
-          </TransitionLink>
-        )}
-        <div
-          onClick={handleShowReaders}
-          ref={messageContentContainerRef}
-          className={`relative w-fit max-w-5/6 md:max-w-3/4 px-2 py-1 font-rubik rounded-t-xl ${isMyMessage ? "bg-cyan-700 ml-auto rounded-br-none rounded-bl-xl text-gray-100" : "bg-gray-100 text-gray-600 rounded-bl-none rounded-br-xl"}`}
+        <li
+          ref={messagesContainerRef}
+          className={`my-1 flex items-end gap-1 text-sm md:text-base animate-pop transition-all duration-300 ${hideAvatar && isGroupMessage ? "pl-12" : ""} ${isReadersVisible && "bg-cyan-300/40"}`}
         >
-          <div className="flex flex-col">
-            {isGroupMessage && !isMyMessage && !hideName && (
-              <p
-                className={`${color ? "text-[var(--color)]" : "text-gray-800"} font-medium `}
-                style={{ "--color": color }}
-              >
-                {fullname}
-              </p>
-            )}
-            {message.type !== "TEXT" && (
-              <MediaFilePreview
-                fileURL={message.fileURL}
-                mimeType={message.mimeType}
+          {isGroupMessage && !isMyMessage && !hideAvatar && (
+            <TransitionLink
+              route={`/users/${message.sender.id}`}
+              setDynamicTransitionId={setTransitionId}
+            >
+              <Avatar
+                avatar={avatar}
+                chatTitle={fullname}
+                color={color}
+                dynamicTransitionId={transitionId}
+                size="42px"
               />
-            )}
-            {message.content && (
-              <p className="wrap-break-word whitespace-pre-wrap" dir="auto">
-                {message.content}
-              </p>
-            )}
-          </div>
-          {message.edit && (
-            <span
-              className={`text-xs block ${isMyMessage ? "text-white text-right" : "text-gray-500"}`}
-            >
-              edited
-            </span>
+            </TransitionLink>
           )}
-          <div className="flex items-center gap-2">
-            <ChatBubbleStatus
-              readers={readers}
-              senderId={message.sender.id || message.senderId}
-              status={message.status}
-            />
+          <div
+            onClick={handleShowReaders}
+            ref={messageContentContainerRef}
+            className={`relative w-fit max-w-5/6 md:max-w-3/4 px-2 py-1 font-rubik rounded-t-xl ${isMyMessage ? "bg-cyan-700 ml-auto rounded-br-none rounded-bl-xl text-gray-100" : "bg-gray-100 text-gray-600 rounded-bl-none rounded-br-xl"}`}
+          >
+            <div className="flex flex-col">
+              {isGroupMessage && !isMyMessage && !hideName && (
+                <p
+                  className={`${color ? "text-[var(--color)]" : "text-gray-800"} font-medium `}
+                  style={{ "--color": color }}
+                >
+                  {fullname}
+                </p>
+              )}
+              {message.type !== "TEXT" && (
+                <MediaFilePreview
+                  fileURL={message.fileURL}
+                  mimeType={message.mimeType}
+                />
+              )}
+              {message.content && (
+                <p className="wrap-break-word whitespace-pre-wrap" dir="auto">
+                  {message.content}
+                </p>
+              )}
+            </div>
+            {message.edit && (
+              <span
+                className={`text-xs block ${isMyMessage ? "text-white text-right" : "text-gray-500"}`}
+              >
+                edited
+              </span>
+            )}
+            <div className="flex items-center gap-2">
+              <ChatBubbleStatus
+                readers={readers}
+                senderId={message.sender.id || message.senderId}
+                status={message.status}
+              />
 
-            <span
-              className={`text-xs block ${isMyMessage ? "text-white text-left" : "text-gray-400 text-right"}`}
-            >
-              {new Date(message.createdAt).toLocaleTimeString()}
-            </span>
+              <span
+                className={`text-xs block ${isMyMessage ? "text-white text-left" : "text-gray-400 text-right"}`}
+              >
+                {new Date(message.createdAt).toLocaleTimeString()}
+              </span>
+            </div>
+            {user.id === message.senderId && <ReadersMenu />}
           </div>
-          {user.id === message.senderId && <ReadersMenu />}
-        </div>
-      </li>
-    </ChatBubbleContext>
-  );
-}
+        </li>
+      </ChatBubbleContext>
+    );
+  },
+);

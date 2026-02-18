@@ -1,7 +1,7 @@
 import { SlideUpMenu } from "../ui/SlideupMenu";
 import { useMessageReader } from "../../hooks/useMessageReaders";
 import { Avatar } from "../chat/Avatar";
-import { useContext } from "react";
+import { useContext, useMemo } from "react";
 import { ChatPageContext } from "../../routes/ChatPage";
 import { ChatBubbleContext } from "./ChatBubble";
 import { useAuth } from "../../contexts/AuthContext";
@@ -15,12 +15,16 @@ export function ReadersMenu() {
     messageId,
     conversationId,
   );
-  const readersWithOutMe =
-    readers && !isFetching
+  const readersWithOutMe = useMemo(() => {
+    return readers && !isFetching
       ? readers.filter(
           (readerOnMessage) => readerOnMessage.readerId !== user.id,
         )
       : [];
+  }, [isFetching, readers, user.id]);
+  readers && !isFetching
+    ? readers.filter((readerOnMessage) => readerOnMessage.readerId !== user.id)
+    : [];
   if (!isReadersVisible) return;
   return (
     <div
