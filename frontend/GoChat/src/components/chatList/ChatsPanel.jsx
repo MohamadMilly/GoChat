@@ -21,7 +21,7 @@ export function ChatsPanel() {
       socket.auth.serverOffset[c.id.toString()] =
         c.messages[c.messages.length - 1]?.id || 0;
       socket.auth.isInitialDataLoading = false;
-      console.log("joined chat:", c.id);
+
       socket.emit("join chat", String(c.id));
     });
   }, [conversations, isFetching, isConnected]);

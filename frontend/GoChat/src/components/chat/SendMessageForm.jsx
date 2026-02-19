@@ -7,12 +7,61 @@ import { Paperclip, Image, Send } from "lucide-react";
 import { ChatPageContext } from "../../routes/ChatPage";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "../../contexts/AuthContext";
+import { supabase } from "../../utils/supabase";
+
 let counter = 0;
 
 export function SendMessageForm() {
   const [message, setMessage] = useState("");
   const [isDrawerVisible, setIsDrawerVisible] = useState(false);
-  const [mediaFileData, setMediaFileData] = useState(null);
+  const messagesQueueRef = useRef([]);
+  const [hasAttached, setHasAttached] = useState(false);
+
+  const [mediaFileData, setMediaFileData] = useState({
+    file: null,
+    mimeType: null,
+  });
+  useEffect(() => {
+    let ignore = false;
+    if (messagesQueueRef.current.length > 0) {
+      messagesQueueRef.current.forEach(async (pendingMessage) => {
+        const { data, error } = await supabase.storage
+          .from("files")
+          .upload(
+            `${Date.now()}-${pendingMessage.file.name}`,
+            pendingMessage.file,
+            { contentType: pendingMessage.mimeType },
+          );
+        if (error) {
+          console.error(error.message);
+          throw new Error(error.message);
+        }
+        const { data: publicUrlData } = supabase.storage
+          .from("files")
+          .getPublicUrl(data.path);
+        const client_offset = `${socket.id}-${++counter}`;
+        if (ignore) return;
+        socket.emit(
+          "chat message",
+          {
+            createdAt: pendingMessage.createdAt,
+            content: pendingMessage.content,
+            fileURL: publicUrlData.publicUrl || "",
+            mimeType: pendingMessage?.mimeType || "text/plain",
+            type: pendingMessage.mimeType.includes("image") ? "IMAGE" : "FILE",
+          },
+          String(conversationId),
+          client_offset,
+        );
+        messagesQueueRef.current.shift();
+      });
+    }
+    return () => {
+      ignore = true;
+    };
+  });
+  const [previewFileURL, setPreviewFileURL] = useState(null);
+
   const { conversationId } = useContext(ChatPageContext);
   const queryClient = useQueryClient();
   const { user } = useAuth();
@@ -36,42 +85,32 @@ export function SendMessageForm() {
     }, 500);
     return () => clearTimeout(timer);
   }, [message, conversationId]);
+
   const onSend = (e) => {
     e.preventDefault();
-    const client_offset = `${socket.id}-${counter++}`;
+    const client_offset = `${socket.id}-${++counter}`;
     const now = new Date();
-    socket.emit(
-      "chat message",
-      {
-        createdAt: now,
-        content: message,
-        fileURL: "",
-        mimeType: mediaFileData?.mimeType || "text/plain",
-        type: mediaFileData ? "FILE" : "TEXT",
-      },
-      String(conversationId),
-      client_offset,
-    );
-    setMessage("");
-
+    const optimisticMessage = {
+      createdAt: now,
+      sender: user,
+      content: message,
+      file: mediaFileData.file,
+      fileURL: previewFileURL,
+      mimeType: mediaFileData?.mimeType || "text/plain",
+      type: mediaFileData.mimeType
+        ? mediaFileData.mimeType.includes("image")
+          ? "IMAGE"
+          : "FILE"
+        : "TEXT",
+      status: "pending",
+    };
     queryClient.setQueryData(
       ["conversation", "messages", conversationId],
       (old) => {
         if (!old?.messages || !old?.type) return old;
         return {
           ...old,
-          messages: [
-            ...old.messages,
-            {
-              createdAt: now,
-              sender: user,
-              content: message,
-              fileURL: "",
-              mimeType: mediaFileData?.mimeType || "text/plain",
-              type: mediaFileData ? "FILE" : "TEXT",
-              status: "pending",
-            },
-          ],
+          messages: [...old.messages, optimisticMessage],
         };
       },
     );
@@ -84,23 +123,35 @@ export function SendMessageForm() {
           if (conversation.id == conversationId) {
             return {
               ...conversation,
-              messages: [
-                {
-                  createdAt: now,
-                  sender: user,
-                  content: message,
-                  fileURL: "",
-                  mimeType: mediaFileData?.mimeType || "text/plain",
-                  type: mediaFileData ? "FILE" : "TEXT",
-                  status: "pending",
-                },
-              ],
+              messages: [optimisticMessage],
             };
           }
           return conversation;
         }),
       };
     });
+    if (hasAttached) {
+      messagesQueueRef.current = [
+        ...messagesQueueRef.current,
+        optimisticMessage,
+      ];
+    } else {
+      socket.emit(
+        "chat message",
+        {
+          createdAt: optimisticMessage.createdAt,
+          content: message,
+          fileURL: "",
+          mimeType: "text/plain",
+          type: "TEXT",
+        },
+        String(conversationId),
+        client_offset,
+      );
+    }
+    setMessage("");
+    setPreviewFileURL(null);
+    setHasAttached(false);
   };
   return (
     <form className="sticky bottom-0 z-20" method="POST" onSubmit={onSend}>
@@ -147,6 +198,8 @@ export function SendMessageForm() {
         setMediaFileData={setMediaFileData}
         mediaFileData={mediaFileData}
         setIsVisible={setIsDrawerVisible}
+        setPreviewFileURl={setPreviewFileURL}
+        setHasAttached={setHasAttached}
       />
     </form>
   );

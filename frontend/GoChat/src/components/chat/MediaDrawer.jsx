@@ -3,16 +3,18 @@ import { X, Image, File, Video } from "lucide-react";
 import { SlideUpMenu } from "../ui/SlideupMenu";
 
 export function MediaDrawer({
-  mediaFileData,
   setMediaFileData,
   isVisible,
   setIsVisible,
+  setPreviewFileURl,
+  setHasAttached,
 }) {
-  const handleMediaSet = (type, e) => {
+  const handleMediaSet = async (type, e) => {
     const mediaFile = e.target.files[0];
-    const extension = mediaFile.name.split(".").pop();
-    const mimeType = `${type}/${extension}`;
-    setMediaFileData({ file: mediaFile, mimeType: mimeType });
+    setHasAttached(true);
+    const fileTempURL = URL.createObjectURL(mediaFile);
+    setPreviewFileURl(fileTempURL);
+    setMediaFileData({ file: mediaFile, mimeType: mediaFile.type });
   };
   const imageFieldRef = useRef(null);
   const fileFieldRef = useRef(null);

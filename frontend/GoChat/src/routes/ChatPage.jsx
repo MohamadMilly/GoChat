@@ -14,18 +14,19 @@ export const ChatPageContext = createContext({
 });
 
 export function ChatPage() {
+  const pendingMessagesRef = useRef([]);
   const { id } = useParams();
   const { isConnected } = useSocket();
-  const messagesListRef = useRef(null);
 
   useEffect(() => {
-    console.log("runs");
     if (!isConnected) return;
     socket.emit("join chat", String(id));
   }, [id, isConnected]);
 
   return (
-    <ChatPageContext value={{ conversationId: id, isInPreview: false }}>
+    <ChatPageContext
+      value={{ conversationId: id, isInPreview: false, pendingMessagesRef }}
+    >
       <section className="flex flex-col md:col-start-2 md:col-end-3 md:row-start-1 md:row-end-2 absolute inset-0 h-full w-full md:static scrollbar-custom overflow-hidden ">
         <ChatHeader />
         <section

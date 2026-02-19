@@ -25,7 +25,6 @@ export function ChatEntry({
 
   useEffect(() => {
     function onReadMessage(messageId, readerId) {
-      console.log("a message read");
       if (messageId === lastMessage?.id) {
         setReaders((prev) => [...prev, readerId]);
       }

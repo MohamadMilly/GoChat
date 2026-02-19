@@ -82,7 +82,6 @@ io.on("connection", async (socket) => {
             ...message,
             sender: filterProfile(message.sender, [userPreferences]),
           };
-
           socket.emit("chat message", filtered, convId, message.id);
         });
         socket.recovered = true;

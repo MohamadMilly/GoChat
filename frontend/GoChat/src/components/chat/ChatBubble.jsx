@@ -9,11 +9,13 @@ import { ReadersMenu } from "./ReadersMenu";
 
 function VideoFile({ link }) {
   return (
-    <video className="w-100 h-auto m-1 rounded" controls>
-      <source src={link} type="video/mp4" />
-      <source src={link} type="video/ogg"></source>
-      Your browser does not support the video tag.
-    </video>
+    <div className="w-full max-w-[28rem] mx-0 my-1">
+      <video className="w-full h-auto max-h-[40vh] rounded" controls>
+        <source src={link} type="video/mp4" />
+        <source src={link} type="video/ogg"></source>
+        Your browser does not support the video tag.
+      </video>
+    </div>
   );
 }
 
@@ -22,16 +24,18 @@ function FileItem({ icon, link, colors = {}, label = "File" }) {
   const bgClass = colors.bg || "bg-gray-200";
 
   return (
-    <div className="w-100 h-30 bg-gray-50 border px-6 border-gray-300 rounded flex items-center justify-center gap-x-6 m-1">
+    <div className="h-30 max-w-full w-[25rem] md:w-[30rem] lg:w-[35rem] bg-gray-50 border px-4 py-2 md:px-5 md:py-3 border-gray-300 rounded flex items-center gap-3 md:gap-6 m-1 min-w-0">
       <div
-        className={`${textClass} ${bgClass} w-20 h-20 rounded-full shrink-0 flex justify-center items-center`}
+        className={`${textClass} ${bgClass} w-15 h-15 sm:w-20 sm:h-20 rounded-full shrink-0 flex items-center justify-center`}
       >
         {icon}
       </div>
 
-      <div className="flex-1 bg-gray-100/50 flex flex-col items-start border border-gray-100 h-full py-6 px-4">
-        <p className="text-sm text-gray-700">
-          <a href={link}>{label}</a>
+      <div className="flex-1 h-full min-w-0 bg-gray-100/50 flex flex-col items-start border border-gray-100 py-2 px-3 overflow-hidden rounded">
+        <p className="text-sm md:text-base text-gray-700 truncate w-full">
+          <a href={link} className="break-words inline-block w-full truncate">
+            {label}
+          </a>
         </p>
       </div>
     </div>
@@ -42,12 +46,12 @@ function MediaFilePreview({ fileURL, mimeType }) {
   if (!fileURL) return null;
   if (mimeType.includes("image")) {
     return (
-      <div className="p-2 rounded relative">
-        <span className="absolute top-3 left-3 text-xs text-gray-900">
+      <div className="p-0.5 rounded relative max-w-[28rem] overflow-hidden">
+        <span className="absolute top-3 left-3 text-xs text-gray-900 z-10">
           {mimeType.split("/")[1].toUpperCase()}
         </span>
         <img
-          className="w-100 h-auto rounded object-cover"
+          className="w-full h-auto rounded object-cover block"
           src={fileURL}
           alt="Sended Message image"
         />
@@ -165,6 +169,7 @@ export const ChatBubble = memo(
           message.status !== "pending"
         ) {
           socket.emit("read message", message.id, user.id);
+          console.log("message is being read");
         }
       });
       const observedMessage = messagesContainerRef.current;
@@ -227,9 +232,9 @@ export const ChatBubble = memo(
           <div
             onClick={handleShowReaders}
             ref={messageContentContainerRef}
-            className={`relative w-fit max-w-5/6 md:max-w-3/4 px-2 py-1 font-rubik rounded-t-xl ${isMyMessage ? "bg-cyan-700 ml-auto rounded-br-none rounded-bl-xl text-gray-100" : "bg-gray-100 text-gray-600 rounded-bl-none rounded-br-xl"}`}
+            className={`relative w-fit max-w-[85%] md:max-w-[75%] px-3 py-2 font-rubik rounded-t-xl ${isMyMessage ? "bg-cyan-700 ml-auto rounded-br-none rounded-bl-xl text-gray-100" : "bg-gray-100 text-gray-600 rounded-bl-none rounded-br-xl"}`}
           >
-            <div className="flex flex-col">
+            <div className="min-w-0 w-full">
               {isGroupMessage && !isMyMessage && !hideName && (
                 <p
                   className={`${color ? "text-[var(--color)]" : "text-gray-800"} font-medium `}
