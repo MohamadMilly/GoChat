@@ -11,6 +11,7 @@ function PrefrenceSectionSelect({
   initialOption,
   preferenceTitle,
   preferenceKey,
+  isFetching,
 }) {
   const [isMenuVisible, setIsMenuVisible] = useState(false);
   const [fadeIsRunning, setFadeIsRunning] = useState(false);
@@ -20,7 +21,7 @@ function PrefrenceSectionSelect({
     patch({ key: preferenceKey, value: value });
   };
   const toggleMenuVisibility = () => {
-    if (isMenuVisible) {
+    if (isMenuVisible && !isFetching) {
       setFadeIsRunning(true);
       setTimeout(() => {
         setFadeIsRunning(false);
@@ -35,18 +36,28 @@ function PrefrenceSectionSelect({
   }
   return (
     <section className="flex items-center justify-between px-2 py-1 my-2">
-      <h3 className="text-sm">{preferenceTitle}</h3>
+      {isFetching ? (
+        <span className="w-20 inline-block py-2.5 rounded bg-gray-200 animate-pulse"></span>
+      ) : (
+        <h3 className="text-sm">{preferenceTitle}</h3>
+      )}
       <div className="text-gray-700">
         <Button
           onClick={toggleMenuVisibility}
           className={"text-xs text-gray-600 flex items-center gap-x-2"}
         >
           {isMenuVisible ? <ArrowUp size={15} /> : <ArrowDown size={15} />}
-          <span>{initialOption}</span>
+          <span
+            className={
+              isFetching ? "inline-block w-10 py-1.5 rounded bg-gray-200" : ""
+            }
+          >
+            {isFetching ? "" : initialOption}
+          </span>
         </Button>
         {isMenuVisible && (
           <ul
-            className={`absolute bottom-0 translate-y-1/3 bg-white shadow-xs p-2 rounded w-20 ${fadeIsRunning ? "animate-fade" : "animate-pop"}`}
+            className={`absolute bottom-0 right-0 translate-y-1/3 bg-white shadow-xs p-2 rounded w-50 ${fadeIsRunning ? "animate-fade" : "animate-pop"}`}
           >
             {options.map((option) => {
               return (
@@ -68,7 +79,12 @@ function PrefrenceSectionSelect({
   );
 }
 
-function PreferenceSectionToggle({ preferenceTitle, preferenceKey, value }) {
+function PreferenceSectionToggle({
+  preferenceTitle,
+  preferenceKey,
+  value,
+  isFetching,
+}) {
   const { mutate: patch, error, isPending } = usePatchPreferences();
   const handlePatch = (e) => {
     patch({ key: preferenceKey, value: e.target.checked });
@@ -79,6 +95,12 @@ function PreferenceSectionToggle({ preferenceTitle, preferenceKey, value }) {
   return (
     <section className="flex items-center justify-between px-2 py-1 my-2">
       <h3 className="text-sm">{preferenceTitle}</h3>
+      {isFetching && (
+        <div className="flex items-center">
+          <div className="w-9 h-5 bg-gray-300 rounded-full animate-pulse"></div>
+          <span className="w-10 ml-3 block py-1.5 rounded bg-gray-200 animate-pulse"></span>
+        </div>
+      )}
       {typeof value === "boolean" ? (
         <label className="inline-flex items-center cursor-pointer">
           <input
@@ -86,7 +108,9 @@ function PreferenceSectionToggle({ preferenceTitle, preferenceKey, value }) {
             className="sr-only peer"
             checked={value}
             onChange={handlePatch}
+            disabled={isFetching}
           />
+
           <div
             className="relative w-9 h-5 bg-gray-300 rounded-full peer-focus:ring-4 peer-focus:ring-cyan-300 
               dark:bg-gray-700 dark:peer-focus:ring-cyan-800
@@ -95,6 +119,7 @@ function PreferenceSectionToggle({ preferenceTitle, preferenceKey, value }) {
               after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all
               peer-checked:bg-cyan-600 dark:peer-checked:bg-cyan-600"
           ></div>
+
           <span className="ms-3 text-xs text-gray-600">
             {value ? "Enabled" : "Disabled"}
           </span>
@@ -107,7 +132,7 @@ function PreferenceSectionToggle({ preferenceTitle, preferenceKey, value }) {
 export function MyPreferences() {
   const { preferences, error, isFetching } = useMyPrefrences();
   const navigate = useNavigate();
-  if (isFetching) return <p>Loading...</p>;
+
   if (error) return <p>Error: {error.message}</p>;
 
   return (
@@ -125,33 +150,39 @@ export function MyPreferences() {
         </h2>
         <PreferenceSectionToggle
           preferenceTitle={"Hide avatar"}
-          value={preferences.isAvatarHidden}
+          value={preferences && preferences.isAvatarHidden}
           preferenceKey={"isAvatarHidden"}
+          isFetching={isFetching}
         />
         <PreferenceSectionToggle
           preferenceTitle={"Hide avatar background"}
-          value={preferences.isAvatarBackgroundHidden}
+          value={preferences && preferences.isAvatarBackgroundHidden}
           preferenceKey={"isAvatarBackgroundHidden"}
+          isFetching={isFetching}
         />
         <PreferenceSectionToggle
           preferenceTitle={"Hide Bio"}
-          value={preferences.isBioHidden}
+          value={preferences && preferences.isBioHidden}
           preferenceKey={"isBioHidden"}
+          isFetching={isFetching}
         />
         <PreferenceSectionToggle
           preferenceTitle={"Hide phone number"}
-          value={preferences.isPhoneNumberHidden}
+          value={preferences && preferences.isPhoneNumberHidden}
           preferenceKey={"isPhoneNumberHidden"}
+          isFetching={isFetching}
         />
         <PreferenceSectionToggle
           preferenceTitle={"Hide email"}
-          value={preferences.isEmailHidden}
+          value={preferences && preferences.isEmailHidden}
           preferenceKey={"isEmailHidden"}
+          isFetching={isFetching}
         />
         <PreferenceSectionToggle
           preferenceTitle={"Hide Birthday"}
-          value={preferences.isBirthdayHidden}
+          value={preferences && preferences.isBirthdayHidden}
           preferenceKey={"isBirthdayHidden"}
+          isFetching={isFetching}
         />
       </section>
 
@@ -161,9 +192,10 @@ export function MyPreferences() {
             { value: "EMAIL", key: "email" },
             { value: "PHONE", key: "phone" },
           ]}
-          initialOption={preferences.preferredVerification}
+          initialOption={preferences && preferences.preferredVerification}
           preferenceKey={"preferredVerification"}
           preferenceTitle={"Verification method"}
+          isFetching={isFetching}
         />
       </section>
     </main>
