@@ -3,11 +3,12 @@ import { socket } from "../../socket";
 import { useEffect } from "react";
 import { useRef } from "react";
 import { MediaDrawer } from "./MediaDrawer";
-import { Paperclip, Image, Send } from "lucide-react";
+import { Paperclip, Smile, Send } from "lucide-react";
 import { ChatPageContext } from "../../routes/ChatPage";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "../../contexts/AuthContext";
 import { supabase } from "../../utils/supabase";
+import EmojiPicker from "emoji-picker-react";
 
 let counter = 0;
 
@@ -16,6 +17,7 @@ export function SendMessageForm() {
   const [isDrawerVisible, setIsDrawerVisible] = useState(false);
   const messagesQueueRef = useRef([]);
   const [hasAttached, setHasAttached] = useState(false);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
   const [mediaFileData, setMediaFileData] = useState({
     file: null,
@@ -153,8 +155,18 @@ export function SendMessageForm() {
     setPreviewFileURL(null);
     setHasAttached(false);
   };
+
+  const handlePickEmoji = (emojiObj) => {
+    setMessage((prev) => prev + emojiObj.emoji);
+  };
   return (
     <form className="sticky bottom-0 z-20" method="POST" onSubmit={onSend}>
+      <EmojiPicker
+        onEmojiClick={handlePickEmoji}
+        open={showEmojiPicker}
+        width={"100%"}
+      />
+
       <label htmlFor="chat" className="sr-only">
         Your message
       </label>
@@ -171,9 +183,10 @@ export function SendMessageForm() {
         <button
           type="button"
           className="p-2 text-gray-500 rounded-lg cursor-pointer hover:text-gray-900 hover:bg-gray-100"
+          onClick={() => setShowEmojiPicker(!showEmojiPicker)}
         >
-          <Image />
-          <span className="sr-only">Upload image</span>
+          <Smile />
+          <span className="sr-only">Emoji</span>
         </button>
 
         <textarea

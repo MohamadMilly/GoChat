@@ -1,12 +1,11 @@
-import { SlideUpMenu } from "../ui/SlideupMenu";
 import { useMessageReader } from "../../hooks/useMessageReaders";
 import { Avatar } from "../chat/Avatar";
-import { useContext, useMemo } from "react";
+import { memo, useContext, useMemo } from "react";
 import { ChatPageContext } from "../../routes/ChatPage";
 import { ChatBubbleContext } from "./ChatBubble";
 import { useAuth } from "../../contexts/AuthContext";
 
-export function ReadersMenu() {
+export const ReadersMenu = memo(() => {
   const { conversationId, isInPreview } = useContext(ChatPageContext);
   const { messageId, isReadersVisible, clickYCoords, isFadeRunning } =
     useContext(ChatBubbleContext);
@@ -75,4 +74,4 @@ export function ReadersMenu() {
       )}
     </div>
   );
-}
+});
