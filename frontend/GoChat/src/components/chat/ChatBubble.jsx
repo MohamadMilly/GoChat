@@ -1,4 +1,11 @@
-import { useRef, useState, useEffect, createContext, memo } from "react";
+import {
+  useRef,
+  useState,
+  useEffect,
+  createContext,
+  memo,
+  useContext,
+} from "react";
 import { Avatar } from "./Avatar";
 import { TransitionLink } from "../ui/TransitionLink";
 import { Braces, FileText, FileArchive, CodeXml, File } from "lucide-react";
@@ -6,6 +13,8 @@ import { useAuth } from "../../contexts/AuthContext";
 import { socket } from "../../socket";
 import { ChatBubbleStatus } from "./chatBubbleStatus";
 import { ReadersMenu } from "./ReadersMenu";
+import { ChatPageContext } from "../../routes/ChatPage";
+import Button from "../ui/Button";
 
 function VideoFile({ link }) {
   return (
@@ -42,21 +51,39 @@ function FileItem({ icon, link, colors = {}, label = "File" }) {
   );
 }
 
+function ImageFile({ mimeType, fileURL }) {
+  const { setIsInPreviewMode, setPreviewImageURL } =
+    useContext(ChatPageContext);
+  const handlePreview = (fileURL) => {
+    setIsInPreviewMode(true);
+    setPreviewImageURL(fileURL);
+  };
+  return (
+    <div className="p-0.5 rounded-xl max-w-md overflow-hidden relative group">
+      <span className="absolute top-3 left-3 text-xs text-gray-400 bg-gray-50/10 backdrop-blur-xs rounded z-10">
+        {mimeType.split("/")[1].toUpperCase()}
+      </span>
+      <div className="group-hover:opacity-100 opacity-0 z-10 absolute rounded-xl inset-0.5 bg-gray-900/30 backdrop-blur-xs transition-all duration-300">
+        <button
+          onClick={() => handlePreview(fileURL)}
+          className="w-full h-full text-2xl text-gray-50 cursor-pointer tracking-tight"
+        >
+          Click to preview
+        </button>
+      </div>
+      <img
+        className="h-auto rounded-xl object-cover block cursor-pointer w-full"
+        src={fileURL}
+        alt="Sended Message image"
+      />
+    </div>
+  );
+}
+
 function MediaFilePreview({ fileURL, mimeType }) {
   if (!fileURL) return null;
   if (mimeType.includes("image")) {
-    return (
-      <div className="p-0.5 rounded relative max-w-[28rem] overflow-hidden">
-        <span className="absolute top-3 left-3 text-xs text-gray-900 z-10">
-          {mimeType.split("/")[1].toUpperCase()}
-        </span>
-        <img
-          className="w-full h-auto rounded object-cover block"
-          src={fileURL}
-          alt="Sended Message image"
-        />
-      </div>
-    );
+    return <ImageFile fileURL={fileURL} mimeType={mimeType} />;
   }
   if (mimeType.includes("application")) {
     if (mimeType.includes("json")) {
@@ -230,52 +257,57 @@ export const ChatBubble = memo(
             </TransitionLink>
           )}
           <div
-            onClick={handleShowReaders}
-            ref={messageContentContainerRef}
-            className={`relative w-fit max-w-[85%] md:max-w-[75%] px-3 py-2 font-rubik rounded-t-xl ${isMyMessage ? "bg-cyan-700 ml-auto rounded-br-none rounded-bl-xl text-gray-100" : "bg-gray-100 text-gray-600 rounded-bl-none rounded-br-xl"}`}
+            className={`w-fit max-w-[85%] md:max-w-[75%] ${isMyMessage ? "ml-auto" : ""}`}
           >
-            <div className="min-w-0 w-full">
-              {isGroupMessage && !isMyMessage && !hideName && (
-                <p
-                  className={`${color ? "text-[var(--color)]" : "text-gray-800"} font-medium `}
-                  style={{ "--color": color }}
-                >
-                  {fullname}
-                </p>
-              )}
-              {message.type !== "TEXT" && (
-                <MediaFilePreview
-                  fileURL={message.fileURL}
-                  mimeType={message.mimeType}
-                />
-              )}
-              {message.content && (
-                <p className="wrap-break-word whitespace-pre-wrap" dir="auto">
-                  {message.content}
-                </p>
-              )}
-            </div>
-            {message.edit && (
-              <span
-                className={`text-xs block ${isMyMessage ? "text-white text-right" : "text-gray-500"}`}
-              >
-                edited
-              </span>
-            )}
-            <div className="flex items-center gap-2">
-              <ChatBubbleStatus
-                readers={readers}
-                senderId={message.sender.id || message.senderId}
-                status={message.status}
+            {message.type !== "TEXT" && (
+              <MediaFilePreview
+                fileURL={message.fileURL}
+                mimeType={message.mimeType}
               />
+            )}
+            <div
+              onClick={handleShowReaders}
+              ref={messageContentContainerRef}
+              className={`relative w-full px-2 py-1 font-rubik rounded-t-xl ${isMyMessage ? "bg-cyan-700 rounded-br-none rounded-bl-xl text-gray-100" : "bg-gray-100 text-gray-600 rounded-bl-none rounded-br-xl"}`}
+            >
+              <div className="min-w-0 w-full">
+                {isGroupMessage && !isMyMessage && !hideName && (
+                  <p
+                    className={`${color ? "text-[var(--color)]" : "text-gray-800"} font-medium `}
+                    style={{ "--color": color }}
+                  >
+                    {fullname}
+                  </p>
+                )}
 
-              <span
-                className={`text-xs block ${isMyMessage ? "text-white text-left" : "text-gray-400 text-right"}`}
-              >
-                {new Date(message.createdAt).toLocaleTimeString()}
-              </span>
+                {message.content && (
+                  <p className="wrap-break-word whitespace-pre-wrap" dir="auto">
+                    {message.content}
+                  </p>
+                )}
+              </div>
+              {message.edit && (
+                <span
+                  className={`text-xs block ${isMyMessage ? "text-white text-right" : "text-gray-500"}`}
+                >
+                  edited
+                </span>
+              )}
+              <div className="flex items-center gap-2">
+                <ChatBubbleStatus
+                  readers={readers}
+                  senderId={message.sender.id || message.senderId}
+                  status={message.status}
+                />
+
+                <span
+                  className={`text-xs block ${isMyMessage ? "text-white text-left" : "text-gray-400 text-right"}`}
+                >
+                  {new Date(message.createdAt).toLocaleTimeString()}
+                </span>
+              </div>
+              {user.id === message.senderId && <ReadersMenu />}
             </div>
-            {user.id === message.senderId && <ReadersMenu />}
           </div>
         </li>
       </ChatBubbleContext>

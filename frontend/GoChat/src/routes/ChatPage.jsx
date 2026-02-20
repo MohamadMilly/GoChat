@@ -2,11 +2,13 @@ import { useParams } from "react-router";
 import { SendMessageForm } from "../components/chat/SendMessageForm";
 import { ChatHeader } from "../components/chat/ChatHeader";
 import { MessagesList } from "../components/chat/MessagesList";
-import { createContext, useEffect } from "react";
+import { createContext, useEffect, useState } from "react";
 import { socket } from "../socket";
 import chatBackground from "../assets/chat_background.png";
 import { useRef } from "react";
 import { useSocket } from "../contexts/SocketContext";
+import Button from "../components/ui/Button";
+import { X } from "lucide-react";
 
 export const ChatPageContext = createContext({
   conversationId: null,
@@ -17,6 +19,8 @@ export function ChatPage() {
   const pendingMessagesRef = useRef([]);
   const { id } = useParams();
   const { isConnected } = useSocket();
+  const [isInPreviewMode, setIsInPreviewMode] = useState(false);
+  const [previewImageURL, setPreviewImageURL] = useState(null);
 
   useEffect(() => {
     if (!isConnected) return;
@@ -25,7 +29,13 @@ export function ChatPage() {
 
   return (
     <ChatPageContext
-      value={{ conversationId: id, isInPreview: false, pendingMessagesRef }}
+      value={{
+        conversationId: id,
+        isInPreview: false,
+        pendingMessagesRef,
+        setIsInPreviewMode,
+        setPreviewImageURL,
+      }}
     >
       <section className="flex flex-col md:col-start-2 md:col-end-3 md:row-start-1 md:row-end-2 absolute inset-0 h-full w-full md:static scrollbar-custom overflow-hidden ">
         <ChatHeader />
@@ -42,6 +52,21 @@ export function ChatPage() {
           <MessagesList />
         </section>
         <SendMessageForm />
+        {isInPreviewMode && (
+          <div className="fixed z-900 inset-0 flex items-center justify-center bg-black/80 backdrop-blur-md animate-pop">
+            <img
+              src={previewImageURL}
+              alt="Preview"
+              className="w-200 h-auto object-contain rounded-xl"
+            />
+            <Button
+              onClick={() => setIsInPreviewMode(false)}
+              className="absolute top-4 right-4 px-3 py-1 text-gray-700 rounded"
+            >
+              <X size={25} />
+            </Button>
+          </div>
+        )}
       </section>
     </ChatPageContext>
   );
