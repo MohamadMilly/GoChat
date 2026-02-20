@@ -95,13 +95,13 @@ function PreferenceSectionToggle({
   return (
     <section className="flex items-center justify-between px-2 py-1 my-2">
       <h3 className="text-sm">{preferenceTitle}</h3>
-      {isFetching && (
+      if(isFetching) {}
+      {isFetching ? (
         <div className="flex items-center">
           <div className="w-9 h-5 bg-gray-300 rounded-full animate-pulse"></div>
           <span className="w-10 ml-3 block py-1.5 rounded bg-gray-200 animate-pulse"></span>
         </div>
-      )}
-      {typeof value === "boolean" ? (
+      ) : typeof value === "boolean" ? (
         <label className="inline-flex items-center cursor-pointer">
           <input
             type="checkbox"
