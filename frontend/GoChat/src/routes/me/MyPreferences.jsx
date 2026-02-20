@@ -95,7 +95,7 @@ function PreferenceSectionToggle({
   return (
     <section className="flex items-center justify-between px-2 py-1 my-2">
       <h3 className="text-sm">{preferenceTitle}</h3>
-      if(isFetching) {}
+
       {isFetching ? (
         <div className="flex items-center">
           <div className="w-9 h-5 bg-gray-300 rounded-full animate-pulse"></div>
