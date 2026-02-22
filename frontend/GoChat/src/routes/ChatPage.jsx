@@ -49,6 +49,7 @@ export function ChatPage() {
             backgroundAttachment: "fixed",
             backgroundRepeat: "repeat",
             backgroundPosition: "center",
+            backgroundSize: "cover",
           }}
         >
           <div className="inset-0 absolute bg-gray-600/20"></div>
