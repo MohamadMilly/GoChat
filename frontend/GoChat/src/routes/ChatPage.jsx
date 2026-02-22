@@ -46,7 +46,7 @@ export function ChatPage() {
           className="w-full relative basis-full flex-1 overflow-hidden"
           style={{
             backgroundImage: `url(${chatBackground})`,
-            backgroundAttachment: "fixed",
+            backgroundAttachment: "scroll",
             backgroundRepeat: "repeat",
             backgroundPosition: "center",
             backgroundSize: "cover",

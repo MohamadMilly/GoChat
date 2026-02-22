@@ -9,7 +9,12 @@ export function ChatsListHeader() {
         <div className="flex items-center gap-x-3">
           <img className="w-10 h-10" src="/GoChat_logo.png" alt="GoChat logo" />
           <div>
-            <div className="text-lg font-semibold text-cyan-800">GoChat</div>
+            <div
+              className="text-lg font-semibold tracking-tight font-rupik
+             text-cyan-600"
+            >
+              GoChat
+            </div>
             <div className="text-xs text-gray-400">
               {isConnected ? "Online" : "Connecting..."}
             </div>
