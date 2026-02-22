@@ -2,17 +2,24 @@ import { InputField } from "../ui/InputField";
 import { SearchBar } from "../ui/SearchBar";
 import { Chats } from "./Chats";
 import { useMyConversations } from "../../hooks/me/useMyConversations";
-import { useEffect } from "react";
+import { useContext, useEffect, useState } from "react";
 import { socket } from "../../socket";
 import { useSearchParams } from "react-router";
 import { filterConversations } from "../../utils/filterConversations";
 import { useSocket } from "../../contexts/SocketContext";
 import { ChatEntriesLoading } from "../skeletonLoadingComponents/ChatEntriesLoading";
+import Button from "../ui/Button";
+import { ArrowBigLeft, ArrowBigRight } from "lucide-react";
+import { ChatsListContext } from "../../routes/ChatsListPage";
 
 export function ChatsPanel() {
   const { isConnected } = useSocket();
   const { isFetching, conversations, error } = useMyConversations();
   const [searchParams] = useSearchParams();
+
+  const { handleChatsPanelCollapse, isChatsPanelCollapsed } =
+    useContext(ChatsListContext);
+
   const query = searchParams.get("name");
 
   useEffect(() => {
@@ -28,23 +35,39 @@ export function ChatsPanel() {
 
   const filteredConversations = filterConversations(conversations, query);
   return (
-    <aside className="md:col-start-1 md:col-end-2 border-r-2 border-gray-200 bg-white flex flex-col max-h-full">
-      <SearchBar name="name" query={query} label={"Search Chat"} />
-      <p className="px-3 text-sm text-gray-500">
-        {isFetching ? (
-          <span className="inline-block w-5 p-1.5 bg-gray-200 animate-pulse rounded"></span>
+    <aside
+      className={`md:z-100 group ${isChatsPanelCollapsed ? " -translate-x-full  absolute top-0 bottom-0" : "md:col-start-1 md:col-end-2 relative"}`}
+    >
+      <Button
+        className={`absolute hidden md:flex ${isChatsPanelCollapsed ? "opacity-100" : "opacity-0"} text-gray-600 border border-gray-200 top-1/2 right-0 transition-all duration-300 group-hover:opacity-100 translate-x-3/4 w-11 h-11 justify-center items-center rounded-full!`}
+        onClick={() => handleChatsPanelCollapse(!isChatsPanelCollapsed)}
+      >
+        {isChatsPanelCollapsed ? (
+          <ArrowBigRight size={22} />
         ) : (
-          filteredConversations?.length || 0
-        )}{" "}
-        <span>chats</span>
-      </p>
-      {isFetching ? (
-        <ChatEntriesLoading />
-      ) : error ? (
-        <p>Error: {error.message}</p>
-      ) : (
-        <Chats chatsEntries={filteredConversations} />
-      )}
+          <ArrowBigLeft size={22} />
+        )}
+      </Button>
+      <div
+        className={`border-r-2 border-gray-200 bg-white flex flex-col max-h-full ${isChatsPanelCollapsed ? "animate-fade" : "animate-slideup"} `}
+      >
+        <SearchBar name="name" query={query} label={"Search Chat"} />
+        <p className="px-3 text-sm text-gray-500">
+          {isFetching ? (
+            <span className="inline-block w-5 p-1.5 bg-gray-200 animate-pulse rounded"></span>
+          ) : (
+            filteredConversations?.length || 0
+          )}{" "}
+          <span>chats</span>
+        </p>
+        {isFetching ? (
+          <ChatEntriesLoading />
+        ) : error ? (
+          <p>Error: {error.message}</p>
+        ) : (
+          <Chats chatsEntries={filteredConversations} />
+        )}
+      </div>
     </aside>
   );
 }

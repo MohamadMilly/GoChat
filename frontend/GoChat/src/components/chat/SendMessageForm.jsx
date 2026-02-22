@@ -18,11 +18,12 @@ export function SendMessageForm() {
   const messagesQueueRef = useRef([]);
   const [hasAttached, setHasAttached] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-
+  const messageTextAreaRef = useRef(null);
   const [mediaFileData, setMediaFileData] = useState({
     file: null,
     mimeType: null,
   });
+
   useEffect(() => {
     let ignore = false;
     if (messagesQueueRef.current.length > 0) {
@@ -67,9 +68,7 @@ export function SendMessageForm() {
   const { conversationId } = useContext(ChatPageContext);
   const queryClient = useQueryClient();
   const { user } = useAuth();
-  const onMessageChange = (e) => {
-    setMessage(e.target.value);
-  };
+
   const messageRef = useRef(message);
   useEffect(() => {
     messageRef.current = message;
@@ -159,6 +158,14 @@ export function SendMessageForm() {
   const handlePickEmoji = (emojiObj) => {
     setMessage((prev) => prev + emojiObj.emoji);
   };
+  const onMessageChange = (e) => {
+    const el = messageTextAreaRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = Math.min(el.scrollHeight, 240) + "px";
+
+    setMessage(e.target.value);
+  };
   return (
     <form className="sticky bottom-0 z-20" method="POST" onSubmit={onSend}>
       <EmojiPicker
@@ -192,10 +199,11 @@ export function SendMessageForm() {
         <textarea
           id="chat"
           rows="1"
-          className="block mx-4 p-2.5 w-full text-sm text-gray-900 bg-white rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 "
+          className="block max-h-60 resize-none min-h-15 mx-4 p-2.5 w-full text-sm text-gray-900 bg-white rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 "
           placeholder="Your message..."
           onChange={onMessageChange}
           value={message}
+          ref={messageTextAreaRef}
         ></textarea>
 
         <button

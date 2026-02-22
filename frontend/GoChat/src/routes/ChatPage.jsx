@@ -2,13 +2,14 @@ import { useParams } from "react-router";
 import { SendMessageForm } from "../components/chat/SendMessageForm";
 import { ChatHeader } from "../components/chat/ChatHeader";
 import { MessagesList } from "../components/chat/MessagesList";
-import { createContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { socket } from "../socket";
 import chatBackground from "../assets/chat_background.png";
 import { useRef } from "react";
 import { useSocket } from "../contexts/SocketContext";
 import Button from "../components/ui/Button";
 import { X } from "lucide-react";
+import { ChatsListContext } from "./ChatsListPage";
 
 export const ChatPageContext = createContext({
   conversationId: null,
@@ -21,7 +22,7 @@ export function ChatPage() {
   const { isConnected } = useSocket();
   const [isInPreviewMode, setIsInPreviewMode] = useState(false);
   const [previewImageURL, setPreviewImageURL] = useState(null);
-
+  const { isChatsPanelCollapsed } = useContext(ChatsListContext);
   useEffect(() => {
     if (!isConnected) return;
     socket.emit("join chat", String(id));
@@ -37,7 +38,9 @@ export function ChatPage() {
         setPreviewImageURL,
       }}
     >
-      <section className="flex flex-col md:col-start-2 md:col-end-3 md:row-start-1 md:row-end-2 absolute inset-0 h-full w-full md:static scrollbar-custom overflow-hidden ">
+      <section
+        className={`flex flex-col ${isChatsPanelCollapsed ? "md:col-start-1 md:col-end-2" : " md:col-start-2 md:col-end-3"} md:row-start-1 md:row-end-2 absolute inset-0 h-screen w-screen md:w-full md:h-full md:static scrollbar-custom overflow-hidden `}
+      >
         <ChatHeader />
         <section
           className="w-full relative basis-full flex-1 overflow-hidden"

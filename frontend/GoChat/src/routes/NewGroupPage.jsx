@@ -6,15 +6,17 @@ import { filterUsers } from "../utils/filterUsers";
 import { Contact } from "../components/users/Contact";
 import { useCreateConversation } from "../hooks/useCreateConversation";
 import Button from "../components/ui/Button";
-import { PlusCircle, Check } from "lucide-react";
+import { PlusCircle, Check, Trash } from "lucide-react";
 import { InputField } from "../components/ui/InputField";
 import { TextArea } from "../components/ui/TextArea";
+import { supabase } from "../utils/supabase";
 
 export function NewGroupPage() {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const { users, isFetching, error } = useMyContacts();
   const [selectedMembers, setSelectedMembers] = useState([]);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [groupMetaData, setGroupMetaData] = useState({
     title: "",
     avatar: "",
@@ -22,7 +24,7 @@ export function NewGroupPage() {
     type: "GROUP",
   });
 
-  const [avatarFile, setAvatarFile] = useState(null);
+  const [avatarPreviewURL, setAvatarPreviewURL] = useState(null);
   const {
     mutate: createGroup,
     data,
@@ -42,7 +44,12 @@ export function NewGroupPage() {
       [key]: e.target.value,
     }));
   };
-
+  const handleCreateGroup = () => {
+    createGroup({
+      participants: selectedMembers,
+      ...groupMetaData,
+    });
+  };
   const [minStep, maxStep] = [1, 2];
   // wizard navigation
   const goBack = () => {
@@ -56,6 +63,7 @@ export function NewGroupPage() {
     if (step > maxStep) return;
     if (step === 2) {
       handleCreateGroup();
+      return;
     }
     setStep((prev) => prev + 1);
   };
@@ -69,14 +77,36 @@ export function NewGroupPage() {
       setSelectedMembers((prev) => [...prev, user]);
     }
   };
-  const handleAvatarSelection = (e) => {
-    setAvatarFile(e.target.files[0]);
+  const handleAvatarSelection = async (e) => {
+    const avatarFile = e.target.files[0];
+    const previewURL = URL.createObjectURL(avatarFile);
+    setAvatarPreviewURL(previewURL);
+    try {
+      setIsUploadingAvatar(true);
+      const { data, error } = await supabase.storage
+        .from("images")
+        .upload(`${Date.now()}-${avatarFile.name}`, avatarFile);
+      if (error) {
+        throw new Error(error.message);
+      }
+      const { data: publicUrlData } = supabase.storage
+        .from("images")
+        .getPublicUrl(data.path);
+      setGroupMetaData((prev) => ({
+        ...prev,
+        avatar: publicUrlData.publicUrl,
+      }));
+    } catch (err) {
+      console.error(err.message);
+    } finally {
+      setIsUploadingAvatar(false);
+    }
   };
-  const handleCreateGroup = () => {
-    createGroup({
-      participants: selectedMembers,
-      ...groupMetaData,
-    });
+
+  const handleResetAvatar = () => {
+    setAvatarPreviewURL("");
+    setGroupMetaData((prev) => ({ ...prev, avatar: "" }));
+    avatarInputRef.current.value = "";
   };
   if (isSuccess && !!data) {
     return <Navigate to={`/chats/group/${data.conversation.id}`} />;
@@ -101,7 +131,7 @@ export function NewGroupPage() {
       <form
         onSubmit={(e) => e.preventDefault()}
         action="POST
-      
+        
       "
       >
         {step === 1 && (
@@ -149,17 +179,42 @@ export function NewGroupPage() {
                 hidden={true}
                 accept="image/*"
                 onChange={handleAvatarSelection}
-                value={groupMetaData.avatar}
               />
               <button
-                className="w-40 h-40 bg-gray-100 rounded flex justify-center items-center"
+                className="w-40 h-40 bg-gray-100/60 hover:bg-gray-100 transition-colors cursor-pointer rounded flex justify-center items-center group"
                 type="button"
                 onClick={() => avatarInputRef.current.click()}
+                disabled={!!groupMetaData.avatar}
               >
-                {groupMetaData.avatar ? (
-                  <img src={groupMetaData.avatar} />
+                {groupMetaData.avatar || avatarPreviewURL ? (
+                  <div className="relative w-full h-full rounded">
+                    {isUploadingAvatar ? (
+                      <div className="absolute inset-0 rounded bg-gray-900/60 flex justify-center items-center ">
+                        <span className="text-xs text-white">Uploading...</span>
+                      </div>
+                    ) : (
+                      <div className="absolute opacity-0 inset-0 rounded justify-center items-center flex bg-gray-900/60 group-hover:opacity-100 group-focus:opacity-100 transition-all duration-300">
+                        <Button
+                          onClick={handleResetAvatar}
+                          className={
+                            "w-15 h-15 rounded-full! text-red-600 bg-white/10 border border-white/20 flex justify-center items-center"
+                          }
+                        >
+                          <Trash size={30} />
+                        </Button>
+                      </div>
+                    )}
+
+                    <img
+                      className="object-cover w-full h-full rounded"
+                      src={groupMetaData.avatar || avatarPreviewURL}
+                    />
+                  </div>
                 ) : (
-                  <PlusCircle size={24} color="#99a1af" />
+                  <div className="flex justify-between items-center flex-col gap-2 text-[#99a1af]">
+                    <PlusCircle size={24} />
+                    <span className="text-xs">Click to upload an image</span>
+                  </div>
                 )}
               </button>
             </div>

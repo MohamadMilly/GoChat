@@ -29,6 +29,9 @@
   .animate-fade {
     animation: fade 0.3s 1 forwards;
   }
+  .animate-fill-mode-none {
+    animation-fill-mode: none;
+  }
   @keyframes slidedown {
     from {
       display: block;
