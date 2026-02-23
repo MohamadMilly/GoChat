@@ -13,7 +13,7 @@ const filterProfile = require("../utils/filterProfile");
 const sendMessagePost = async (req, res) => {
   const currentUser = req.currentUser;
   const conversationId = req.params.conversationId;
-  const { content, type, fileURL, mimeType } = req.body;
+  const { content, type, fileURL, mimeType, repliedMessageId } = req.body;
   try {
     const createdMessage = await prisma.message.create({
       data: {
@@ -31,6 +31,13 @@ const sendMessagePost = async (req, res) => {
         type: type,
         fileURL: fileURL || "",
         mimeType: mimeType || "",
+        repliedMessage: repliedMessageId
+          ? {
+              connect: {
+                id: parseInt(repliedMessageId),
+              },
+            }
+          : null,
       },
     });
     return res.json({
@@ -79,6 +86,11 @@ const getConversationMessagesGet = async (req, res) => {
         sender: {
           include: {
             profile: true,
+          },
+        },
+        repliedMessage: {
+          include: {
+            sender: true,
           },
         },
         readers: {

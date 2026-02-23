@@ -37,6 +37,7 @@ export function Avatar({
             className="object-cover h-full w-full rounded-full"
             src={src}
             alt="chat avatar"
+            loading="lazy"
           />
         ) : (
           <span

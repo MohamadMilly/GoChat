@@ -34,7 +34,7 @@ export function MessagesList({ convId = null }) {
   return (
     <ul
       ref={messagesListRef}
-      className="p-1 h-full overflow-visible overflow-y-auto z-10 scrollbar-custom"
+      className="flex-1 p-1 h-full overflow-visible overflow-y-auto overflow-x-hidden z-10 scrollbar-custom"
     >
       {messages && messages.length === 0 ? (
         <p

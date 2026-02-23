@@ -3,12 +3,14 @@ import { socket } from "../../socket";
 import { useEffect } from "react";
 import { useRef } from "react";
 import { MediaDrawer } from "./MediaDrawer";
-import { Paperclip, Smile, Send } from "lucide-react";
+import { Paperclip, Smile, Send, X } from "lucide-react";
 import { ChatPageContext } from "../../routes/ChatPage";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "../../contexts/AuthContext";
 import { supabase } from "../../utils/supabase";
 import EmojiPicker from "emoji-picker-react";
+import { useSearchParams } from "react-router";
+import Button from "../ui/Button";
 
 let counter = 0;
 
@@ -23,7 +25,8 @@ export function SendMessageForm() {
     file: null,
     mimeType: null,
   });
-
+  const { setRepliedMessage, repliedMessage } = useContext(ChatPageContext);
+  const [searchParams] = useSearchParams();
   useEffect(() => {
     let ignore = false;
     if (messagesQueueRef.current.length > 0) {
@@ -104,6 +107,7 @@ export function SendMessageForm() {
           : "FILE"
         : "TEXT",
       status: "pending",
+      repliedMessage: repliedMessage,
     };
     queryClient.setQueryData(
       ["conversation", "messages", conversationId],
@@ -145,6 +149,7 @@ export function SendMessageForm() {
           fileURL: "",
           mimeType: "text/plain",
           type: "TEXT",
+          repliedMessageId: repliedMessage ? repliedMessage.id : null,
         },
         String(conversationId),
         client_offset,
@@ -166,62 +171,84 @@ export function SendMessageForm() {
 
     setMessage(e.target.value);
   };
+
   return (
-    <form className="sticky bottom-0 z-20" method="POST" onSubmit={onSend}>
-      <EmojiPicker
-        onEmojiClick={handlePickEmoji}
-        open={showEmojiPicker}
-        width={"100%"}
-      />
+    <div className="z-20">
+      {repliedMessage && (
+        <div className="relative px-4 py-3 bg-gray-50/50 backdrop-blur-xs border-2 border-gray-100/50 shadow-gray-100 shadow-inner m-2 rounded-lg animate-slideup ">
+          <strong className="text-gray-800">
+            {repliedMessage.sender.firstname +
+              " " +
+              repliedMessage.sender.lastname}
+          </strong>
+          <p className="text-sm text-gray-600 line-clamp-1">
+            {repliedMessage.content}
+          </p>
+          <button
+            className={"absolute top-2 right-2 text-gray-600 cursor-pointer"}
+            onClick={() => setRepliedMessage(null)}
+          >
+            <p className="sr-only">Cancel reply</p>
+            <X size={20} />
+          </button>
+        </div>
+      )}
+      <form method="POST" onSubmit={onSend}>
+        <EmojiPicker
+          onEmojiClick={handlePickEmoji}
+          open={showEmojiPicker}
+          width={"100%"}
+        />
 
-      <label htmlFor="chat" className="sr-only">
-        Your message
-      </label>
-      <div className="flex items-center px-3 py-2 rounded-t-lg bg-white shadow">
-        <button
-          onClick={() => setIsDrawerVisible((prev) => !prev)}
-          type="button"
-          className="p-2 text-gray-500 rounded-lg cursor-pointer hover:text-gray-900 hover:bg-gray-100"
-        >
-          <Paperclip />
-          <span className="sr-only">Attach file</span>
-        </button>
+        <label htmlFor="chat" className="sr-only">
+          Your message
+        </label>
+        <div className="flex items-center px-3 py-2 rounded-t-lg bg-white shadow">
+          <button
+            onClick={() => setIsDrawerVisible((prev) => !prev)}
+            type="button"
+            className="p-2 text-gray-500 rounded-lg cursor-pointer hover:text-gray-900 hover:bg-gray-100"
+          >
+            <Paperclip />
+            <span className="sr-only">Attach file</span>
+          </button>
 
-        <button
-          type="button"
-          className="p-2 text-gray-500 rounded-lg cursor-pointer hover:text-gray-900 hover:bg-gray-100"
-          onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-        >
-          <Smile />
-          <span className="sr-only">Emoji</span>
-        </button>
+          <button
+            type="button"
+            className="p-2 text-gray-500 rounded-lg cursor-pointer hover:text-gray-900 hover:bg-gray-100"
+            onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+          >
+            <Smile />
+            <span className="sr-only">Emoji</span>
+          </button>
 
-        <textarea
-          id="chat"
-          rows="1"
-          className="block max-h-60 resize-none min-h-15 mx-4 p-2.5 w-full text-sm text-gray-900 bg-white rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 "
-          placeholder="Your message..."
-          onChange={onMessageChange}
-          value={message}
-          ref={messageTextAreaRef}
-        ></textarea>
+          <textarea
+            id="chat"
+            rows="1"
+            className="block max-h-60 resize-none min-h-15 mx-4 p-2.5 w-full text-sm text-gray-900 bg-white rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 "
+            placeholder="Your message..."
+            onChange={onMessageChange}
+            value={message}
+            ref={messageTextAreaRef}
+          ></textarea>
 
-        <button
-          type="submit"
-          className="inline-flex justify-center p-2 text-blue-600 rounded-full cursor-pointer hover:bg-blue-100 "
-        >
-          <Send />
-          <span className="sr-only">Send message</span>
-        </button>
-      </div>
-      <MediaDrawer
-        isVisible={isDrawerVisible}
-        setMediaFileData={setMediaFileData}
-        mediaFileData={mediaFileData}
-        setIsVisible={setIsDrawerVisible}
-        setPreviewFileURl={setPreviewFileURL}
-        setHasAttached={setHasAttached}
-      />
-    </form>
+          <button
+            type="submit"
+            className="inline-flex justify-center p-2 text-blue-600 rounded-full cursor-pointer hover:bg-blue-100 "
+          >
+            <Send />
+            <span className="sr-only">Send message</span>
+          </button>
+        </div>
+        <MediaDrawer
+          isVisible={isDrawerVisible}
+          setMediaFileData={setMediaFileData}
+          mediaFileData={mediaFileData}
+          setIsVisible={setIsDrawerVisible}
+          setPreviewFileURl={setPreviewFileURL}
+          setHasAttached={setHasAttached}
+        />
+      </form>
+    </div>
   );
 }

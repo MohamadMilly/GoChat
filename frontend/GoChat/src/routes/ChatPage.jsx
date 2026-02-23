@@ -23,6 +23,7 @@ export function ChatPage() {
   const [isInPreviewMode, setIsInPreviewMode] = useState(false);
   const [previewImageURL, setPreviewImageURL] = useState(null);
   const { isChatsPanelCollapsed } = useContext(ChatsListContext);
+  const [repliedMessage, setRepliedMessage] = useState(null);
   useEffect(() => {
     if (!isConnected) return;
     socket.emit("join chat", String(id));
@@ -36,6 +37,8 @@ export function ChatPage() {
         pendingMessagesRef,
         setIsInPreviewMode,
         setPreviewImageURL,
+        setRepliedMessage,
+        repliedMessage,
       }}
     >
       <section
@@ -43,7 +46,7 @@ export function ChatPage() {
       >
         <ChatHeader />
         <section
-          className="w-full relative basis-full flex-1 overflow-hidden"
+          className="w-full relative basis-full flex flex-col flex-1 overflow-hidden"
           style={{
             backgroundImage: `url(${chatBackground})`,
             backgroundAttachment: "scroll",
@@ -54,8 +57,9 @@ export function ChatPage() {
         >
           <div className="inset-0 absolute bg-gray-600/20"></div>
           <MessagesList />
+          <SendMessageForm />
         </section>
-        <SendMessageForm />
+
         {isInPreviewMode && (
           <div className="fixed z-900 inset-0 flex items-center justify-center bg-black/80 backdrop-blur-md animate-pop">
             <img

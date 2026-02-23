@@ -57,7 +57,7 @@ export const ChatHeader = memo(({ id }) => {
   );
 
   return (
-    <header className="sticky top-0 z-20 border-b-2 border-gray-100 px-4 py-2 shadow-lg bg-white flex items-center gap-2">
+    <header className="z-20 border-b-2 border-gray-100 px-4 py-2 shadow-lg bg-white flex items-center gap-2">
       <Button
         onClick={() => navigate("/chats", { viewTransition: true })}
         className={"text-gray-600 md:hidden"}

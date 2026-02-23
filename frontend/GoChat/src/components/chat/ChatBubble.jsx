@@ -15,6 +15,7 @@ import { ChatBubbleStatus } from "./chatBubbleStatus";
 import { ReadersMenu } from "./ReadersMenu";
 import { ChatPageContext } from "../../routes/ChatPage";
 import Button from "../ui/Button";
+import { useSearchParams } from "react-router";
 
 function VideoFile({ link }) {
   return (
@@ -75,6 +76,7 @@ function ImageFile({ mimeType, fileURL }) {
         className="h-auto rounded-xl object-cover block cursor-pointer w-full"
         src={fileURL}
         alt="Sended Message image"
+        loading="lazy"
       />
     </div>
   );
@@ -158,6 +160,8 @@ export const ChatBubble = memo(
     const [isFadeRunning, setIsFadeRunning] = useState(false);
     const messagesContainerRef = useRef(null);
     const messageContentContainerRef = useRef(null);
+    const { setRepliedMessage } = useContext(ChatPageContext);
+    const [searchParams, setSearchParams] = useSearchParams();
     const fullname = message.sender.firstname + " " + message.sender.lastname;
 
     const isThereAvatar = !!message.sender.profile?.avatar;
@@ -196,7 +200,6 @@ export const ChatBubble = memo(
           message.status !== "pending"
         ) {
           socket.emit("read message", message.id, user.id);
-          console.log("message is being read");
         }
       });
       const observedMessage = messagesContainerRef.current;
@@ -228,6 +231,32 @@ export const ChatBubble = memo(
         clearTimeout(timer);
       };
     }, [isReadersVisible]);
+    const handleReply = (message) => {
+      setRepliedMessage(message);
+      setSearchParams({ reply: message?.id || message.createdAt });
+    };
+    useEffect(() => {
+      messageContentContainerRef.current.addEventListener("mousedown", (e) => {
+        const startX = e.clientX;
+
+        const handleMouseMove = (e) => {
+          const newX = startX - e.clientX;
+
+          messagesContainerRef.current.style.right = newX + "px";
+
+          if (Math.abs(newX) > 100) {
+            handleReply(message);
+          }
+        };
+        const handleMouseUp = () => {
+          document.removeEventListener("mousemove", handleMouseMove);
+          document.removeEventListener("mouseup", handleMouseUp);
+          messagesContainerRef.current.style.right = "0px";
+        };
+        document.addEventListener("mousemove", handleMouseMove);
+        document.addEventListener("mouseup", handleMouseUp);
+      });
+    });
 
     return (
       <ChatBubbleContext
@@ -240,7 +269,7 @@ export const ChatBubble = memo(
       >
         <li
           ref={messagesContainerRef}
-          className={`my-1 flex items-end gap-1 text-sm md:text-base animate-pop transition-all duration-300 ${hideAvatar && isGroupMessage ? "pl-12" : ""} ${isReadersVisible && "bg-cyan-300/40"}`}
+          className={`my-1 relative flex items-end gap-1 text-sm md:text-base animate-pop transition-all duration-300 ${hideAvatar && isGroupMessage ? "pl-12" : ""} ${isReadersVisible && "bg-cyan-300/40"}`}
         >
           {isGroupMessage && !isMyMessage && !hideAvatar && (
             <TransitionLink
@@ -279,7 +308,22 @@ export const ChatBubble = memo(
                     {fullname}
                   </p>
                 )}
-
+                {message.repliedMessage && (
+                  <div
+                    className={`px-2 border border-cyan-400 max-w-80 min-w-50 py-0.5 my-0.5 rounded flex flex-col gap-0.5 ${isMyMessage ? "bg-cyan-500/50" : "bg-cyan-200/10"}`}
+                  >
+                    <strong className="text-sm">
+                      {message.repliedMessage.sender.id === user.id
+                        ? "You"
+                        : message.repliedMessage.sender.firstname +
+                          " " +
+                          message.repliedMessage.sender.lastname}
+                    </strong>
+                    <p className="text-xs line-clamp-2">
+                      {message.repliedMessage.content}
+                    </p>
+                  </div>
+                )}
                 {message.content && (
                   <p className="wrap-break-word whitespace-pre-wrap" dir="auto">
                     {message.content}
@@ -306,7 +350,11 @@ export const ChatBubble = memo(
                   {new Date(message.createdAt).toLocaleTimeString()}
                 </span>
               </div>
-              {user.id === message.senderId && <ReadersMenu />}
+              {user.id === message.senderId && (
+                <>
+                  <ReadersMenu />
+                </>
+              )}
             </div>
           </div>
         </li>

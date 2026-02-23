@@ -12,7 +12,7 @@ generator client {
 datasource db {
   provider = "postgresql"
   url = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+ // directUrl = env("DIRECT_URL")
 }
 
 /* 
@@ -171,6 +171,9 @@ model Message {
   mimeType String?
   clientOffset String?
   readers MessageOnReader[]
+  repliedMessage Message? @relation(fields: [repliedMessageId] ,references: [id],"reply to message")
+  repliedMessageId Int?
+  replies Message[] @relation("reply to message")
 }
 
 model VerificationCode {

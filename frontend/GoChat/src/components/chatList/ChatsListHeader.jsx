@@ -4,7 +4,7 @@ import { Link } from "../ui/Link";
 export function ChatsListHeader() {
   const { isConnected } = useSocket();
   return (
-    <header className="col-start-1 col-end-3 row-start-1 row-end-2 bg-gray-50 shadow-sm">
+    <header className="col-start-1 col-end-3 row-start-1 row-end-2 bg-gray-50 shadow-xs">
       <nav className="flex items-center justify-between gap-x-4 px-4 h-16">
         <div className="flex items-center gap-x-3">
           <img className="w-10 h-10" src="/GoChat_logo.png" alt="GoChat logo" />

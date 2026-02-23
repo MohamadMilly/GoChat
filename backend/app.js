@@ -71,6 +71,7 @@ io.on("connection", async (socket) => {
                 profile: true,
               },
             },
+            repliedMessage: true,
           },
           orderBy: {
             createdAt: "asc",
@@ -116,13 +117,28 @@ io.on("connection", async (socket) => {
                 id: parseInt(convId),
               },
             },
-            ...message,
+            content: message.content,
+            fileURL: message.fileURL,
+            mimeType: message.mimeType,
+            type: message.type,
             clientOffset: clientOffset,
+            repliedMessage: message.repliedMessageId
+              ? {
+                  connect: {
+                    id: message.repliedMessageId,
+                  },
+                }
+              : undefined,
           },
           include: {
             sender: {
               include: {
                 profile: true,
+              },
+            },
+            repliedMessage: {
+              include: {
+                sender: true,
               },
             },
           },
