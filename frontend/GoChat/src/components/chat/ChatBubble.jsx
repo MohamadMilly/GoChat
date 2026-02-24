@@ -250,7 +250,7 @@ export const ChatBubble = memo(
 
       const handleMove = (currentX) => {
         const diffX = startX - currentX;
-
+        container.style.transition = "none";
         if (diffX > 0 && diffX < 150) {
           container.style.right = diffX + "px";
         }
@@ -262,9 +262,8 @@ export const ChatBubble = memo(
       };
 
       const handleEnd = () => {
-        container.style.transition = "transform 0.3s ease";
         container.style.right = "0px";
-
+        container.style.transition = "all 0.3s ease";
         document.removeEventListener("mousemove", onMouseMove);
         document.removeEventListener("mouseup", handleEnd);
         document.removeEventListener("touchmove", onTouchMove);
@@ -303,7 +302,7 @@ export const ChatBubble = memo(
       >
         <li
           ref={messagesContainerRef}
-          className={`my-1 relative flex items-end gap-1 text-sm md:text-base animate-pop transition-colors duration-300 ${hideAvatar && isGroupMessage ? "pl-12" : ""} ${isReadersVisible && "bg-cyan-300/40"}`}
+          className={`my-1 will-change-auto relative flex items-end gap-1 text-sm md:text-base animate-pop transition-all duration-300 ${hideAvatar && isGroupMessage ? "pl-12" : ""} ${isReadersVisible && "bg-cyan-300/40"}`}
         >
           {isGroupMessage && !isMyMessage && !hideAvatar && (
             <TransitionLink
