@@ -5,6 +5,7 @@ import {
   createContext,
   memo,
   useContext,
+  useCallback,
 } from "react";
 import { Avatar } from "./Avatar";
 import { TransitionLink } from "../ui/TransitionLink";
@@ -231,71 +232,66 @@ export const ChatBubble = memo(
         clearTimeout(timer);
       };
     }, [isReadersVisible]);
-    const handleReply = (message) => {
-      setRepliedMessage(message);
-      setSearchParams({ reply: message?.id || message.createdAt });
-    };
+    const handleReply = useCallback(
+      (message) => {
+        setRepliedMessage(message);
+        setSearchParams({ reply: message?.id || message.createdAt });
+      },
+      [setRepliedMessage, setSearchParams],
+    );
     useEffect(() => {
+      const container = messagesContainerRef.current;
+      const content = messageContentContainerRef.current;
+
+      if (!container || !content) return;
+
       let hasTriggered = false;
-      messageContentContainerRef.current.addEventListener("mousedown", (e) => {
-        const startX = e.clientX;
+      let startX = 0;
 
-        const handleMouseMove = (e) => {
-          const newX = startX - e.clientX;
+      const handleMove = (currentX) => {
+        const diffX = startX - currentX;
 
-          messagesContainerRef.current.style.right = newX + "px";
+        if (diffX > 0 && diffX < 150) {
+          container.style.right = diffX + "px";
+        }
 
-          if (Math.abs(newX) > 100 && !hasTriggered) {
-            handleReply(message);
-            hasTriggered = true;
-          }
-        };
-        const handleMouseUp = () => {
-          document.removeEventListener("mousemove", handleMouseMove);
-          document.removeEventListener("mouseup", handleMouseUp);
-          messagesContainerRef.current.style.right = "0px";
-        };
-        document.addEventListener("mousemove", handleMouseMove);
-        document.addEventListener("mouseup", handleMouseUp);
-      });
+        if (diffX > 100 && !hasTriggered) {
+          handleReply(message);
+          hasTriggered = true;
+        }
+      };
 
-      messageContentContainerRef.current.addEventListener("touchstart", (e) => {
-        const startX = e.touches[0].clientX;
+      const handleEnd = () => {
+        container.style.transition = "transform 0.3s ease";
+        container.style.right = "0px";
 
-        const handleTouchMove = (e) => {
-          const currentX = e.touches[0].clientX;
-          const diffX = startX - currentX;
+        document.removeEventListener("mousemove", onMouseMove);
+        document.removeEventListener("mouseup", handleEnd);
+        document.removeEventListener("touchmove", onTouchMove);
+        document.removeEventListener("touchend", handleEnd);
+        hasTriggered = false;
+      };
 
-          messagesContainerRef.current.style.right = diffX + "px";
+      const onMouseMove = (e) => handleMove(e.clientX);
+      const onTouchMove = (e) => handleMove(e.touches[0].clientX);
 
-          if (diffX > 100 && !hasTriggered) {
-            handleReply(message);
-            hasTriggered = true;
-          }
-        };
+      const handleStart = (e) => {
+        startX = e.type === "mousedown" ? e.clientX : e.touches[0].clientX;
+        document.addEventListener("mousemove", onMouseMove);
+        document.addEventListener("mouseup", handleEnd);
+        document.addEventListener("touchmove", onTouchMove, { passive: false });
+        document.addEventListener("touchend", handleEnd);
+      };
 
-        const handleTouchEnd = () => {
-          // Cleanup listeners
-          document.removeEventListener("touchmove", handleTouchMove);
-          document.removeEventListener("touchend", handleTouchEnd);
+      content.addEventListener("mousedown", handleStart);
+      content.addEventListener("touchstart", handleStart);
 
-          // Reset position with a smooth transition
-          messagesContainerRef.current.style.transition = "transform 0.2s ease";
-          messagesContainerRef.current.style.right = "0px";
+      return () => {
+        content.removeEventListener("mousedown", handleStart);
+        content.removeEventListener("touchstart", handleStart);
+      };
+    }, [message, handleReply]);
 
-          // Clear transition after it finishes so it doesn't lag the next drag
-          setTimeout(() => {
-            messagesContainerRef.current.style.transition = "";
-          }, 200);
-        };
-
-        document.addEventListener("touchmove", handleTouchMove, {
-          passive: false,
-        });
-        document.addEventListener("touchend", handleTouchEnd);
-      });
-      return () => (hasTriggered = false);
-    });
     return (
       <ChatBubbleContext
         value={{
@@ -307,7 +303,7 @@ export const ChatBubble = memo(
       >
         <li
           ref={messagesContainerRef}
-          className={`my-1 relative flex items-end gap-1 text-sm md:text-base animate-pop transition-all duration-300 ${hideAvatar && isGroupMessage ? "pl-12" : ""} ${isReadersVisible && "bg-cyan-300/40"}`}
+          className={`my-1 relative flex items-end gap-1 text-sm md:text-base animate-pop transition-colors duration-300 ${hideAvatar && isGroupMessage ? "pl-12" : ""} ${isReadersVisible && "bg-cyan-300/40"}`}
         >
           {isGroupMessage && !isMyMessage && !hideAvatar && (
             <TransitionLink
