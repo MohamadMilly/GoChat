@@ -236,6 +236,7 @@ export const ChatBubble = memo(
       setSearchParams({ reply: message?.id || message.createdAt });
     };
     useEffect(() => {
+      let hasTriggered = false;
       messageContentContainerRef.current.addEventListener("mousedown", (e) => {
         const startX = e.clientX;
 
@@ -244,8 +245,9 @@ export const ChatBubble = memo(
 
           messagesContainerRef.current.style.right = newX + "px";
 
-          if (Math.abs(newX) > 100) {
+          if (Math.abs(newX) > 100 && !hasTriggered) {
             handleReply(message);
+            hasTriggered = true;
           }
         };
         const handleMouseUp = () => {
@@ -256,8 +258,44 @@ export const ChatBubble = memo(
         document.addEventListener("mousemove", handleMouseMove);
         document.addEventListener("mouseup", handleMouseUp);
       });
-    });
 
+      messageContentContainerRef.current.addEventListener("touchstart", (e) => {
+        const startX = e.touches[0].clientX;
+
+        const handleTouchMove = (e) => {
+          const currentX = e.touches[0].clientX;
+          const diffX = startX - currentX;
+
+          messagesContainerRef.current.style.right = diffX + "px";
+
+          if (diffX > 100 && !hasTriggered) {
+            handleReply(message);
+            hasTriggered = true;
+          }
+        };
+
+        const handleTouchEnd = () => {
+          // Cleanup listeners
+          document.removeEventListener("touchmove", handleTouchMove);
+          document.removeEventListener("touchend", handleTouchEnd);
+
+          // Reset position with a smooth transition
+          messagesContainerRef.current.style.transition = "transform 0.2s ease";
+          messagesContainerRef.current.style.right = "0px";
+
+          // Clear transition after it finishes so it doesn't lag the next drag
+          setTimeout(() => {
+            messagesContainerRef.current.style.transition = "";
+          }, 200);
+        };
+
+        document.addEventListener("touchmove", handleTouchMove, {
+          passive: false,
+        });
+        document.addEventListener("touchend", handleTouchEnd);
+      });
+      return () => (hasTriggered = false);
+    });
     return (
       <ChatBubbleContext
         value={{
@@ -297,7 +335,7 @@ export const ChatBubble = memo(
             <div
               onClick={handleShowReaders}
               ref={messageContentContainerRef}
-              className={`relative w-full px-2 py-1 font-rubik rounded-t-xl ${isMyMessage ? "bg-cyan-700 rounded-br-none rounded-bl-xl text-gray-100" : "bg-gray-100 text-gray-600 rounded-bl-none rounded-br-xl"}`}
+              className={`relative w-full px-2 py-1 font-rubik rounded-t-xl ${isMyMessage ? "bg-cyan-700 rounded-br-none rounded-bl-xl text-gray-100" : "bg-gray-100 text-gray-600 rounded-bl-none rounded-br-xl"} cursor-grab`}
             >
               <div className="min-w-0 w-full">
                 {isGroupMessage && !isMyMessage && !hideName && (
@@ -310,7 +348,7 @@ export const ChatBubble = memo(
                 )}
                 {message.repliedMessage && (
                   <div
-                    className={`px-2 border border-cyan-400 max-w-80 min-w-50 py-0.5 my-0.5 rounded flex flex-col gap-0.5 ${isMyMessage ? "bg-cyan-500/50" : "bg-cyan-200/10"}`}
+                    className={`px-2 border border-cyan-400 max-w-80 min-w-50 py-0.5 my-0.5 rounded flex flex-col gap-0.5 ${isMyMessage ? "bg-cyan-500/50" : "bg-cyan-200/15"} shadow-cyan-300/40 shadow-inner`}
                   >
                     <strong className="text-sm">
                       {message.repliedMessage.sender.id === user.id

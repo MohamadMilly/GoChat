@@ -230,6 +230,7 @@ export function SendMessageForm() {
             onChange={onMessageChange}
             value={message}
             ref={messageTextAreaRef}
+            required
           ></textarea>
 
           <button
