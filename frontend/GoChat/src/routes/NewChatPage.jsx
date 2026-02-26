@@ -34,9 +34,12 @@ export function NewChatPage() {
     return <Navigate to={`/chats/direct/${data.conversation.id}`} />;
   }
   return (
-    <main className="max-w-200 mx-auto bg-white font-rubik relative">
-      <div className="flex justify-start items-center p-2 bg-gray-50/30 rounded-lg mt-2 mb-4">
-        <Button onClick={() => navigate(-1)} className="text-gray-600">
+    <main className="max-w-200 mx-auto bg-white dark:bg-gray-900 font-rubik relative">
+      <div className="flex justify-start items-center p-2 bg-gray-50/30 dark:bg-gray-800/80 rounded-lg mt-2 mb-4">
+        <Button
+          onClick={() => navigate(-1)}
+          className="text-gray-600 dark:text-gray-300"
+        >
           <p className="sr-only">Go Back</p>
           <ArrowBigLeft size={20} />
         </Button>
@@ -47,11 +50,15 @@ export function NewChatPage() {
         {usersError ? (
           <p>Error: {usersError.message}</p>
         ) : isFetchingUsers ? (
-          <p>isLoading</p>
+          <p className="text-xs text-gray-400 dark:text-gray-200 text-center">
+            isLoading
+          </p>
         ) : !query ? (
-          <p className="text-xs text-gray-400 text-center">Search for users</p>
+          <p className="text-xs text-gray-400 dark:text-gray-200 text-center">
+            Search for users
+          </p>
         ) : users && users.length === 0 ? (
-          <p className="text-xs text-gray-400 text-center">
+          <p className="text-xs text-gray-400 dark:text-gray-200 text-center">
             No users are found
           </p>
         ) : (

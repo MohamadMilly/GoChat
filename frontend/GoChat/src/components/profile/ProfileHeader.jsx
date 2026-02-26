@@ -9,7 +9,7 @@ export function ProfileHeader({ dynamicTransitionName, user }) {
         backgroundSize: "cover",
         backgroundPosition: "center",
       }}
-      className="bg-gray-50 min-h-60 flex justify-center items-end"
+      className="bg-gray-50 dark:bg-gray-800 min-h-60 flex justify-center items-end"
     >
       <Avatar
         avatar={null}

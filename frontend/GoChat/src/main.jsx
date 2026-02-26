@@ -12,6 +12,8 @@ const queryClient = new QueryClient();
 import { AuthProvider } from "./contexts/AuthContext.jsx";
 import { ConversationProvider } from "./contexts/ConversationContext.jsx";
 import { SocketProvider } from "./contexts/SocketContext.jsx";
+import { ThemeProvider } from "./contexts/ThemeContext.jsx";
+
 const router = createBrowserRouter(routes);
 
 createRoot(document.getElementById("root")).render(
@@ -20,7 +22,9 @@ createRoot(document.getElementById("root")).render(
       <AuthProvider>
         <SocketProvider>
           <ConversationProvider>
-            <RouterProvider router={router} />
+            <ThemeProvider>
+              <RouterProvider router={router} />
+            </ThemeProvider>
           </ConversationProvider>
         </SocketProvider>
       </AuthProvider>

@@ -175,7 +175,7 @@ export function SendMessageForm() {
   return (
     <div className="z-20">
       {repliedMessage && (
-        <div className="relative px-4 py-3 bg-gray-50/50 backdrop-blur-xs border-2 border-gray-100/50 shadow-gray-100 shadow-inner m-2 rounded-lg animate-slideup ">
+        <div className="relative px-4 py-3 bg-gray-50/50 dark:bg-gray-50/70 backdrop-blur-xs border-2 border-gray-100/50 shadow-gray-100 shadow-inner m-2 rounded-lg animate-slideup ">
           <strong className="text-gray-800">
             {repliedMessage.sender.firstname +
               " " +
@@ -203,11 +203,11 @@ export function SendMessageForm() {
         <label htmlFor="chat" className="sr-only">
           Your message
         </label>
-        <div className="flex items-center px-3 py-2 rounded-t-lg bg-white shadow">
+        <div className="flex items-center px-3 py-2 rounded-t-lg bg-white dark:bg-gray-800 shadow">
           <button
             onClick={() => setIsDrawerVisible((prev) => !prev)}
             type="button"
-            className="p-2 text-gray-500 rounded-lg cursor-pointer hover:text-gray-900 hover:bg-gray-100"
+            className="p-2 text-gray-500 dark:text-gray-300 dark:hover:text-gray-100 rounded-lg cursor-pointer hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-700"
           >
             <Paperclip />
             <span className="sr-only">Attach file</span>
@@ -215,7 +215,7 @@ export function SendMessageForm() {
 
           <button
             type="button"
-            className="p-2 text-gray-500 rounded-lg cursor-pointer hover:text-gray-900 hover:bg-gray-100"
+            className="p-2 text-gray-500 dark:text-gray-300 dark:hover:text-gray-100 rounded-lg cursor-pointer hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-700"
             onClick={() => setShowEmojiPicker(!showEmojiPicker)}
           >
             <Smile />
@@ -225,7 +225,7 @@ export function SendMessageForm() {
           <textarea
             id="chat"
             rows="1"
-            className="block max-h-60 resize-none min-h-15 mx-4 p-2.5 w-full text-sm text-gray-900 bg-white rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 "
+            className="block max-h-60 resize-none min-h-15 mx-4 p-2.5 w-full text-sm text-gray-900 bg-white dark:bg-gray-200 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 "
             placeholder="Your message..."
             onChange={onMessageChange}
             value={message}
@@ -235,7 +235,7 @@ export function SendMessageForm() {
 
           <button
             type="submit"
-            className="inline-flex justify-center p-2 text-blue-600 rounded-full cursor-pointer hover:bg-blue-100 "
+            className="inline-flex justify-center p-2 text-blue-600 dark:text-blue-400 rounded-full cursor-pointer hover:bg-blue-100 dark:hover:bg-cyan-600/10 "
           >
             <Send />
             <span className="sr-only">Send message</span>

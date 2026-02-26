@@ -36,10 +36,10 @@ export function ChatsPanel() {
   const filteredConversations = filterConversations(conversations, query);
   return (
     <aside
-      className={`md:z-100 group ${isChatsPanelCollapsed ? " -translate-x-full  absolute top-0 bottom-0" : "md:col-start-1 md:col-end-2 relative"}`}
+      className={`md:z-100 bg-white dark:bg-gray-900 group ${isChatsPanelCollapsed ? " -translate-x-full  absolute top-0 bottom-0" : "md:col-start-1 md:col-end-2 relative"}`}
     >
       <Button
-        className={`absolute hidden md:flex ${isChatsPanelCollapsed ? "opacity-100" : "opacity-0"} text-gray-600 border border-gray-200 top-1/2 right-0 transition-all duration-300 group-hover:opacity-100 translate-x-3/4 w-11 h-11 justify-center items-center rounded-full!`}
+        className={`absolute z-2 hidden md:flex ${isChatsPanelCollapsed ? "opacity-100" : "opacity-0"} text-gray-600 dark:text-gray-100 border border-gray-200 dark:border-gray-600 dark:bg-gray-800 top-1/2 right-0 -translate-y-1/2 transition-all duration-300 group-hover:opacity-100 translate-x-3/4 w-11 h-11 justify-center items-center rounded-full!`}
         onClick={() => handleChatsPanelCollapse(!isChatsPanelCollapsed)}
       >
         {isChatsPanelCollapsed ? (
@@ -49,10 +49,10 @@ export function ChatsPanel() {
         )}
       </Button>
       <div
-        className={`border-r-2 border-gray-200 bg-white flex flex-col max-h-full ${isChatsPanelCollapsed ? "animate-fade" : "animate-slideup"} `}
+        className={`border-r-2 h-full border-gray-200 dark:border-gray-700 flex flex-col max-h-full ${isChatsPanelCollapsed ? "animate-fade" : "animate-slideup"} `}
       >
         <SearchBar name="name" query={query} label={"Search Chat"} />
-        <p className="px-3 text-sm text-gray-500">
+        <p className="px-3 text-sm text-gray-500 dark:text-gray-200">
           {isFetching ? (
             <span className="inline-block w-5 p-1.5 bg-gray-200 animate-pulse rounded"></span>
           ) : (

@@ -61,9 +61,12 @@ export function FindGroupPage() {
   const query = searchParams.get("title");
   return (
     <>
-      <main className="max-w-200 mx-auto bg-white font-rubik">
-        <div className="flex justify-start items-center p-2 bg-gray-50/30 rounded-lg mt-2 mb-4">
-          <Button onClick={() => navigate(-1)} className="text-gray-600">
+      <main className="max-w-200 mx-auto bg-white dark:bg-gray-900 font-rubik">
+        <div className="flex justify-start items-center p-2 bg-gray-50/30 dark:bg-gray-800/80 rounded-lg mt-2 mb-4">
+          <Button
+            onClick={() => navigate(-1)}
+            className="text-gray-600 dark:text-gray-300"
+          >
             <p className="sr-only">Go Back</p>
             <ArrowBigLeft size={20} />
           </Button>

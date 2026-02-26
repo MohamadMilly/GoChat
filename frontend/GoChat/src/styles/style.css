@@ -6,6 +6,8 @@
   --font-rubik: "Rubik", sans-serif;
 }
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @layer utilities {
   .scrollbar-custom::-webkit-scrollbar {
     width: 4px;

@@ -338,6 +338,52 @@ const getCurrentuserPreferences = async (req, res) => {
   }
 };
 
+const deleteAccountDelete = async (req, res) => {
+  const currentUser = req.currentUser;
+  try {
+    const user = await prisma.user.findUnique({
+      where: {
+        id: currentUser.id,
+      },
+    });
+    if (!user) {
+      return res.status(404).json({
+        message: "User is not found.",
+      });
+    }
+    const randomPassword = await bcrypt.hash(crypto.randomUUID(), 10);
+    const updatedUser = await prisma.user.update({
+      where: {
+        id: currentUser.id,
+      },
+      data: {
+        password: randomPassword,
+        profile: {
+          update: {
+            avatar: "",
+            avatarBackground: "",
+            email: "",
+            phoneNumber: "",
+          },
+        },
+        accountColor: "#191919",
+        firstname: "Deleted",
+        lastname: "Account",
+        username: `Deleted_${currentUser.id}`,
+        deleted: true,
+      },
+    });
+    return res.json({
+      message: "The account is deleted successfully.",
+    });
+  } catch (err) {
+    return res.status(500).json({
+      message: "Unexpected error happened while deleting the account.",
+      error: err.message,
+    });
+  }
+};
+
 module.exports = {
   myConversationsGet,
   queryUsersGet,
@@ -347,4 +393,5 @@ module.exports = {
   getCurrentuserPreferences,
   preferencesPatch,
   editProfilePut,
+  deleteAccountDelete,
 };

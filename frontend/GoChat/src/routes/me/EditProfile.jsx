@@ -20,15 +20,18 @@ function ProfileInputField({
 }) {
   return (
     <div className="flex flex-col gap-1 px-4 py-2 my-4 rounded">
-      <label htmlFor={id} className="text-sm text-cyan-600/80">
+      <label
+        htmlFor={id}
+        className="text-sm text-cyan-600/80 dark:text-cyan-400/80"
+      >
         {label}
       </label>
       {isFetchingProfile ? (
-        <div className="h-8 rounded bg-gray-200 animate-pulse"></div>
+        <div className="h-8 rounded bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
       ) : (
         <input
           onChange={onChange}
-          className="outline-2 outline-gray-200/50 rounded text-sm px-2 py-1 mt-2 focus:outline-cyan-600/50 focus:outline-offset-2 transition-all text-gray-700"
+          className="outline-2 outline-gray-200/50 dark:outline-gray-600/50 rounded text-sm px-2 py-1 mt-2 focus:outline-cyan-600/50 dark:focus:outline-cyan-400/50 focus:outline-offset-2 transition-all text-gray-700 dark:text-gray-100 dark:bg-gray-800"
           id={id}
           type={type}
           value={value}
@@ -50,15 +53,18 @@ function BioTextAreaField({ value, onChange, isFetchingProfile }) {
     el.style.height = Math.min(el.scrollHeight, 150) + "px";
   };
   return (
-    <div className="flex flex-col gap-1 px-4 py-2 my-4 bg-gray-50/30">
-      <label htmlFor={"bio"} className="text-sm text-cyan-600/80">
+    <div className="flex flex-col gap-1 px-4 py-2 my-4 bg-gray-50/30 dark:bg-gray-800/30">
+      <label
+        htmlFor={"bio"}
+        className="text-sm text-cyan-600/80 dark:text-cyan-400"
+      >
         Your Bio
       </label>
       {isFetchingProfile ? (
-        <div className="h-18 rounded bg-gray-200 animate-pulse"></div>
+        <div className="h-18 rounded bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
       ) : (
         <textarea
-          className="outline-2 outline-gray-200/50 focus:outline-cyan-600/50 focus:outline-offset-2 transition-all rounded mt-2 p-2 text-sm text-gray-700 resize-none"
+          className="outline-2 outline-gray-200/50 dark:outline-gray-600/50 focus:outline-cyan-600/50 dark:focus:outline-cyan-400/50 focus:outline-offset-2 transition-all rounded mt-2 p-2 text-sm text-gray-700 dark:text-gray-100 dark:bg-gray-800 resize-none"
           name="bio"
           id="bio"
           ref={textAreaRef}
@@ -69,11 +75,13 @@ function BioTextAreaField({ value, onChange, isFetchingProfile }) {
       )}
       {isFetchingProfile ? (
         <div className="flex items-center gap-1 justify-end">
-          <span className="inline-block py-1.5 w-5 bg-gray-200 animate-pulse rounded"></span>
-          <span className="text-xs text-gray-400 text-end">characters</span>
+          <span className="inline-block py-1.5 w-5 bg-gray-200 dark:bg-gray-700 animate-pulse rounded"></span>
+          <span className="text-xs text-gray-400 dark:text-gray-200 text-end">
+            characters
+          </span>
         </div>
       ) : (
-        <span className="text-xs text-gray-400 text-end">
+        <span className="text-xs text-gray-400 dark:text-gray-200 text-end">
           {bioLength} {bioLength > 1 ? "characters" : "character"}
         </span>
       )}
@@ -123,8 +131,11 @@ function AvatarFileField({
     setPreviewURL("");
   };
   return (
-    <div className="bg-gray-50/30 px-4 py-2 my-4 flex-0 shrink-0 h-full">
-      <label className="text-sm text-cyan-600/80" htmlFor="avatar">
+    <div className="bg-gray-50/30 px-4 py-2 my-4 flex-0 shrink-0 h-full dark:bg-gray-800/30">
+      <label
+        className="text-sm text-cyan-600/80 dark:text-cyan-400/50"
+        htmlFor="avatar"
+      >
         Your Avatar
       </label>
       <input
@@ -138,7 +149,7 @@ function AvatarFileField({
       />
       {isFetchingProfile ? (
         <div className="shrink-0 my-3 flex justify-center">
-          <div className="w-[80px] h-[80px] bg-gray-200 animate-pulse rounded-full"></div>
+          <div className="w-[80px] h-[80px] bg-gray-200 dark:bg-gray-700 animate-pulse rounded-full"></div>
         </div>
       ) : (
         <div className="relative">
@@ -162,13 +173,17 @@ function AvatarFileField({
       <div className="flex items-center justify-center gap-2">
         <Button
           disabled={isFetchingProfile}
-          className={"text-xs bg-white disabled:opacity-50"}
+          className={
+            "text-xs bg-white dark:bg-gray-700 disabled:opacity-50 dark:text-gray-100"
+          }
           onClick={() => avatarFieldRef.current.click()}
         >
           Replace
         </Button>
         <Button
-          className={"bg-red-200 text-red-500/80 text-xs disabled:opacity-50"}
+          className={
+            "bg-red-200 dark:bg-red-700 text-red-500/80 text-xs disabled:opacity-50 dark:text-red-200"
+          }
           onClick={handleDeleteAvatar}
           disabled={isFetchingProfile}
         >
@@ -224,7 +239,7 @@ function AvatarBackgroundFileField({
   };
   return (
     <div
-      className={`flex-1 basis-sm relative overflow-hidden h-48 ${(isFetchingProfile || isUploading) && "animate-pulse"}`}
+      className={`flex-1 basis-sm relative overflow-hidden h-48  ${(isFetchingProfile || isUploading) && "animate-pulse"}`}
       style={{
         backgroundImage: `url(${previewURL || avatarBackgroundURL})`,
         backgroundPosition: "center",
@@ -253,7 +268,9 @@ function AvatarBackgroundFileField({
           <div className="flex items-center gap-2">
             <Button
               disabled={isFetchingProfile}
-              className={"text-xs bg-gray-50 disabled:opacity-50"}
+              className={
+                "text-xs bg-gray-50 disabled:opacity-50 dark:text-gray-100"
+              }
               onClick={() => avatarBackgroundFieldRef.current.click()}
             >
               Replace
@@ -319,16 +336,19 @@ export function EditProfilePage() {
   if (profileError) return <p>Error: {profileError.message}</p>;
 
   return (
-    <main className="max-w-200 mx-auto bg-white font-rubik relative">
-      <div className="flex justify-between items-center p-2 bg-gray-50/30 rounded-lg my-2">
-        <Button onClick={() => navigate(-1)} className="text-gray-600">
+    <main className="max-w-200 mx-auto bg-white dark:bg-gray-900 font-rubik relative">
+      <div className="flex justify-between items-center p-2 bg-gray-50/30 dark:bg-gray-800/80 rounded-lg my-2">
+        <Button
+          onClick={() => navigate(-1)}
+          className="text-gray-600 dark:text-gray-300"
+        >
           <p className="sr-only">Go Back</p>
           <ArrowBigLeft size={20} />
         </Button>
         <Button
           disabled={isFetchingProfile}
           onClick={handleConfirmEdit}
-          className={"text-gray-600"}
+          className={"text-gray-600 dark:text-gray-300"}
         >
           <p className="sr-only">Confirm edits</p>
           <Check size={20} />

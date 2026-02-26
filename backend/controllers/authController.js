@@ -170,8 +170,49 @@ const verifyPost = async (req, res) => {
   }
 };
 
+const changePasswordPatch = async (req, res) => {
+  const currentUser = req.currentUser;
+  const newPassword = req.body.newPassword;
+  const previousPassword = req.body.previousPassword;
+  try {
+    const user = await prisma.user.findUnique({
+      where: {
+        id: currentUser.id,
+      },
+    });
+    if (!user) {
+      return res.status(404).json({
+        message: "User is not found.",
+      });
+    }
+    const match = await bcrypt.compare(previousPassword, user.password);
+    if (!match) {
+      return res.status(401).json({
+        message: "Password is incorrect.",
+      });
+    }
+    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+    const updatedUser = await prisma.user.update({
+      where: {
+        id: currentUser.id,
+      },
+      data: {
+        password: hashedNewPassword,
+      },
+    });
+    return res.json({
+      user: updatedUser,
+    });
+  } catch (err) {
+    return res.status(500).json({
+      message: "unexpected error happened while changing the password",
+    });
+  }
+};
+
 module.exports = {
   loginPost,
   signupPost,
   verifyPost,
+  changePasswordPatch,
 };

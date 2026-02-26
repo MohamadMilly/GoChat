@@ -112,14 +112,14 @@ export function NewGroupPage() {
     return <Navigate to={`/chats/group/${data.conversation.id}`} />;
   }
   return (
-    <main className="max-w-200 mx-auto bg-white font-rubik relative">
-      <div className="flex justify-between items-center p-2 bg-gray-50/30 rounded-lg my-2">
-        <Button onClick={goBack} className="text-gray-600">
+    <main className="max-w-200 mx-auto bg-white dark:bg-gray-900 font-rubik relative">
+      <div className="flex justify-between items-center p-2 bg-gray-50/30 dark:bg-gray-800/80 rounded-lg my-2">
+        <Button onClick={goBack} className="text-gray-600 dark:text-gray-300">
           <p className="text-xs text-gray-500">
             {step === 1 ? "Home" : "Previous"}
           </p>
         </Button>
-        <Button onClick={goNext} className={"text-gray-600"}>
+        <Button onClick={goNext} className={"text-gray-600 dark:text-gray-300"}>
           <p className="text-xs text-gray-500">
             {step === 2 ? <Check size={20} /> : "Next"}
           </p>
@@ -138,7 +138,9 @@ export function NewGroupPage() {
           <section className="p-2 mt-4">
             <ul className="w-full flex flex-col animate-slideup">
               {isFetching ? (
-                <p className="text-xs text-gray-400 text-center">Loading...</p>
+                <p className="text-xs text-gray-400 dark:text-gray-200 text-center">
+                  Loading...
+                </p>
               ) : queriedContacts.length > 0 ? (
                 queriedContacts.map((c) => {
                   const isSelected = !!selectedMembers.find(
@@ -158,7 +160,7 @@ export function NewGroupPage() {
                   );
                 })
               ) : (
-                <p className="text-xs text-center text-gray-400">
+                <p className="text-xs text-center text-gray-400 dark:text-gray-200">
                   No users are found
                 </p>
               )}

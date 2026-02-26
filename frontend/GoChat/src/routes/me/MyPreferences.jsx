@@ -44,7 +44,9 @@ function PrefrenceSectionSelect({
       <div className="text-gray-700">
         <Button
           onClick={toggleMenuVisibility}
-          className={"text-xs text-gray-600 flex items-center gap-x-2"}
+          className={
+            "text-xs text-gray-600 dark:text-gray-300 flex items-center gap-x-2"
+          }
         >
           {isMenuVisible ? <ArrowUp size={15} /> : <ArrowDown size={15} />}
           <span
@@ -57,13 +59,13 @@ function PrefrenceSectionSelect({
         </Button>
         {isMenuVisible && (
           <ul
-            className={`absolute bottom-0 right-0 translate-y-1/3 bg-white shadow-xs p-2 rounded w-50 ${fadeIsRunning ? "animate-fade" : "animate-pop"}`}
+            className={`absolute bottom-0 right-0 translate-y-1/3 bg-white dark:bg-gray-800 shadow-xs p-2 rounded w-50 ${fadeIsRunning ? "animate-fade" : "animate-pop"}`}
           >
             {options.map((option) => {
               return (
                 <li>
                   <button
-                    className="w-full flex justify-start items-center text-xs text-gray-500 hover:text-gray-900 hover:bg-gray-50 py-0.5 px-1 rounded cursor-pointer"
+                    className="w-full flex justify-start items-center text-xs text-gray-500 dark:text-gray-200 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700 py-0.5 px-1 rounded cursor-pointer"
                     key={option.key}
                     onClick={() => handleSelect(option.value)}
                   >
@@ -94,7 +96,7 @@ function PreferenceSectionToggle({
   }
   return (
     <section className="flex items-center justify-between px-2 py-1 my-2">
-      <h3 className="text-sm">{preferenceTitle}</h3>
+      <h3 className="text-sm dark:text-gray-100">{preferenceTitle}</h3>
 
       {isFetching ? (
         <div className="flex items-center">
@@ -120,7 +122,7 @@ function PreferenceSectionToggle({
               peer-checked:bg-cyan-600 dark:peer-checked:bg-cyan-600"
           ></div>
 
-          <span className="ms-3 text-xs text-gray-600">
+          <span className="ms-3 text-xs text-gray-600 dark:text-gray-300">
             {value ? "Enabled" : "Disabled"}
           </span>
         </label>
@@ -136,15 +138,17 @@ export function MyPreferences() {
   if (error) return <p>Error: {error.message}</p>;
 
   return (
-    <main className="max-w-200 mx-auto bg-white font-rubik relative p-2">
-      <div className="flex justify-start items-center p-2 bg-gray-50/30 rounded-lg my-2">
-        <Button onClick={() => navigate(-1)} className="text-gray-600">
+    <main className="max-w-200 mx-auto bg-white dark:bg-gray-900 font-rubik relative p-2">
+      <div className="flex justify-start items-center p-2 bg-gray-50/30 dark:bg-gray-800/80 rounded-lg my-2">
+        <Button
+          onClick={() => navigate(-1)}
+          className="text-gray-600 dark:text-gray-300"
+        >
           <p className="sr-only">Go Back</p>
           <ArrowBigLeft size={20} />
         </Button>
       </div>
-
-      <section className="shadow-xs p-4 rounded-lg my-4 border border-gray-300/50">
+      <section className="shadow-xs p-4 rounded-lg my-4 border border-gray-300/50 bg-gray-50 dark:bg-gray-800 dark:border-gray-700">
         <h2 className="text-lg font-bold tracking-tight text-cyan-600 mb-4">
           Profile prefrences
         </h2>
@@ -186,7 +190,7 @@ export function MyPreferences() {
         />
       </section>
 
-      <section className="shadow-xs p-2 rounded-lg my-4 border border-gray-300/50">
+      <section className="shadow-xs p-2 rounded-lg my-4 border border-gray-300/50 bg-gray-50 dark:bg-gray-800 dark:border-gray-700">
         <PrefrenceSectionSelect
           options={[
             { value: "EMAIL", key: "email" },

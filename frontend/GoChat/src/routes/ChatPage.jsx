@@ -5,11 +5,13 @@ import { MessagesList } from "../components/chat/MessagesList";
 import { createContext, useContext, useEffect, useState } from "react";
 import { socket } from "../socket";
 import chatBackground from "../assets/chat_background.png";
+import darkChatBackground from "../assets/chat_background_dark.png";
 import { useRef } from "react";
 import { useSocket } from "../contexts/SocketContext";
 import Button from "../components/ui/Button";
 import { X } from "lucide-react";
 import { ChatsListContext } from "./ChatsListPage";
+import { useTheme } from "../contexts/ThemeContext";
 
 export const ChatPageContext = createContext({
   conversationId: null,
@@ -24,6 +26,7 @@ export function ChatPage() {
   const [previewImageURL, setPreviewImageURL] = useState(null);
   const { isChatsPanelCollapsed } = useContext(ChatsListContext);
   const [repliedMessage, setRepliedMessage] = useState(null);
+  const { theme } = useTheme();
   useEffect(() => {
     if (!isConnected) return;
     socket.emit("join chat", String(id));
@@ -48,20 +51,20 @@ export function ChatPage() {
         <section
           className="w-full relative basis-full flex flex-col flex-1 overflow-hidden"
           style={{
-            backgroundImage: `url(${chatBackground})`,
+            backgroundImage: `url(${theme === "light" ? chatBackground : darkChatBackground})`,
             backgroundAttachment: "scroll",
             backgroundRepeat: "repeat",
             backgroundPosition: "center",
             backgroundSize: "cover",
           }}
         >
-          <div className="inset-0 absolute bg-gray-600/20"></div>
+          <div className="inset-0 absolute bg-gray-600/20 dark:bg-gray-800/60 backdrop-contrast-150"></div>
           <MessagesList />
           <SendMessageForm />
         </section>
 
         {isInPreviewMode && (
-          <div className="fixed z-900 inset-0 flex items-center justify-center bg-black/80 backdrop-blur-md animate-pop">
+          <div className="fixed z-900 inset-0 flex items-center justify-center bg-black/80 backdrop-blur-md animate-pop overflow-y-auto">
             <img
               src={previewImageURL}
               alt="Preview"

@@ -57,7 +57,7 @@ export const ChatHeader = memo(({ id }) => {
   );
 
   return (
-    <header className="z-20 border-b-2 border-gray-100 px-4 py-2 shadow-lg bg-white flex items-center gap-2">
+    <header className="z-20 border-b-2 border-gray-100 dark:border-gray-700 px-4 py-2 shadow-lg bg-white dark:bg-gray-800 flex items-center gap-2">
       <Button
         onClick={() => navigate("/chats", { viewTransition: true })}
         className={"text-gray-600 md:hidden"}
@@ -81,8 +81,8 @@ export const ChatHeader = memo(({ id }) => {
           color={color}
         />
         <div className="flex flex-col justify-center items-start">
-          <p className="text-sm">{chatTitle}</p>
-          <span className="text-xs text-gray-700">
+          <p className="text-sm text-gray-900 dark:text-gray-50">{chatTitle}</p>
+          <span className="text-xs text-gray-700 dark:text-gray-100">
             {isGroup ? (
               thisChatTypingUsers.length > 0 ? (
                 thisChatTypingUsers.map((userData) => {

@@ -330,7 +330,7 @@ export const ChatBubble = memo(
             <div
               onClick={handleShowReaders}
               ref={messageContentContainerRef}
-              className={`relative w-full px-2 py-1 font-rubik rounded-t-xl ${isMyMessage ? "bg-cyan-700 rounded-br-none rounded-bl-xl text-gray-100" : "bg-gray-100 text-gray-600 rounded-bl-none rounded-br-xl"} cursor-grab`}
+              className={`relative w-full px-2 py-1 font-rubik rounded-t-xl ${isMyMessage ? "bg-cyan-700 dark:bg-cyan-600 rounded-br-none rounded-bl-xl text-gray-100" : "bg-gray-100 text-gray-600 dark:bg-gray-700 rounded-bl-none rounded-br-xl"} cursor-grab`}
             >
               <div className="min-w-0 w-full">
                 {isGroupMessage && !isMyMessage && !hideName && (
@@ -343,7 +343,7 @@ export const ChatBubble = memo(
                 )}
                 {message.repliedMessage && (
                   <div
-                    className={`px-2 border border-cyan-400 max-w-80 min-w-50 py-0.5 my-0.5 rounded flex flex-col gap-0.5 ${isMyMessage ? "bg-cyan-500/50" : "bg-cyan-200/15"} shadow-cyan-300/40 shadow-inner`}
+                    className={`px-2 border-l-5 dark:text-gray-300 border-cyan-700 max-w-80 min-w-50 py-0.5 my-0.5 rounded flex flex-col gap-0.5 ${isMyMessage ? "bg-cyan-500/50 dark:bg-cyan-400/50" : "bg-cyan-400/15"} shadow-cyan-300/40 shadow-inner`}
                   >
                     <strong className="text-sm">
                       {message.repliedMessage.sender.id === user.id
@@ -358,7 +358,10 @@ export const ChatBubble = memo(
                   </div>
                 )}
                 {message.content && (
-                  <p className="wrap-break-word whitespace-pre-wrap" dir="auto">
+                  <p
+                    className="wrap-break-word whitespace-pre-wrap dark:text-gray-200 "
+                    dir="auto"
+                  >
                     {message.content}
                   </p>
                 )}

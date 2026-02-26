@@ -21,7 +21,7 @@ export function Avatar({
   return (
     <div className={`relative ${className}`}>
       <div
-        className={`flex justify-center items-center shrink-0 w-[var(--size)] h-[var(--size)] rounded-full overflow-hidden ${
+        className={`flex shadow-inner shadow-gray-200/60 justify-center items-center shrink-0 w-[var(--size)] h-[var(--size)] rounded-full overflow-hidden ${
           color ? "bg-[var(--chat-color)]" : "bg-gray-100"
         }`}
         style={{

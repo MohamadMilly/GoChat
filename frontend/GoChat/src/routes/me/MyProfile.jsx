@@ -23,9 +23,12 @@ export function MyProfile() {
     : null;
 
   return (
-    <main className="max-w-200 mx-auto bg-white font-rubik relative">
-      <div className="flex justify-between items-center p-2 bg-gray-50/30 rounded-lg my-2">
-        <Button onClick={() => navigate(-1)} className="text-gray-600">
+    <main className="max-w-200 mx-auto bg-white dark:bg-gray-900 font-rubik relative">
+      <div className="flex justify-between items-center p-2 bg-gray-50/30 dark:bg-gray-800/80 rounded-lg my-2">
+        <Button
+          onClick={() => navigate(-1)}
+          className="text-gray-600 dark:text-gray-300"
+        >
           <p className="sr-only">Go Back</p>
           <ArrowBigLeft size={20} />
         </Button>
@@ -33,7 +36,7 @@ export function MyProfile() {
           onClick={() =>
             navigate("/users/me/profile/edit", { viewTransition: true })
           }
-          className="text-gray-600"
+          className="text-gray-600 dark:text-gray-300"
         >
           <p className="sr-only">Edit Profile</p>
           <Pen size={20} />
@@ -52,7 +55,7 @@ export function MyProfile() {
             isConnected={isConnected}
             lastSeen={user.profile.lastSeen}
           />
-          <section className="px-4 mt-4 py-2 bg-white shadow-sm rounded-md">
+          <section className="px-4 mt-4 py-2 bg-white dark:bg-gray-800 divide-y divide-gray-300 dark:divide-gray-700 shadow-sm rounded-md">
             <ProfileSection
               value={user.username}
               title={"Username"}
