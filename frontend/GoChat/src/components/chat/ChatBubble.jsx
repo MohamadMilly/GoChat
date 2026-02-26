@@ -343,7 +343,11 @@ export const ChatBubble = memo(
                 )}
                 {message.repliedMessage && (
                   <div
-                    className={`px-2 border-l-5 dark:text-gray-300 border-cyan-700 max-w-80 min-w-50 py-0.5 my-0.5 rounded flex flex-col gap-0.5 ${isMyMessage ? "bg-cyan-500/50 dark:bg-cyan-400/50" : "bg-cyan-400/15"} shadow-cyan-300/40 shadow-inner`}
+                    className={`px-2 border-l-5 dark:text-gray-300 border-[var(--accountColor)] max-w-80 min-w-50 py-0.5 my-0.5 rounded flex flex-col gap-0.5 ${isMyMessage ? "bg-[var(--accountColor)]/20" : "bg-[var(--accountColor)]/10"} shadow-[var(--accountColor)]/40 shadow-inner`}
+                    style={{
+                      "--accountColor":
+                        message.repliedMessage.sender?.accountColor,
+                    }}
                   >
                     <strong className="text-sm">
                       {message.repliedMessage.sender.id === user.id

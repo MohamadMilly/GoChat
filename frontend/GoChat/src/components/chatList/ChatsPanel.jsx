@@ -54,7 +54,7 @@ export function ChatsPanel() {
         <SearchBar name="name" query={query} label={"Search Chat"} />
         <p className="px-3 text-sm text-gray-500 dark:text-gray-200">
           {isFetching ? (
-            <span className="inline-block w-5 p-1.5 bg-gray-200 animate-pulse rounded"></span>
+            <span className="inline-block w-5 p-1.5 bg-gray-200 dark:bg-gray-600 animate-pulse rounded"></span>
           ) : (
             filteredConversations?.length || 0
           )}{" "}
