@@ -223,6 +223,7 @@ const getMyContactsGet = async (req, res) => {
           },
         },
         NOT: { id: currentUser.id },
+        deleted: false,
       },
       include: { profile: true },
     });

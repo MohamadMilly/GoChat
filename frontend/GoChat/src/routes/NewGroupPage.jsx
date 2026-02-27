@@ -166,7 +166,10 @@ export function NewGroupPage() {
         {step === 2 && (
           <section className="p-2 mt-4">
             <div className="flex flex-col gap-2 px-4 py-2 my-4">
-              <label className="text-sm text-cyan-600" htmlFor="avatar">
+              <label
+                className="text-sm text-cyan-600 dark:text-cyan-400"
+                htmlFor="avatar"
+              >
                 Avatar
               </label>
               <input
@@ -179,7 +182,7 @@ export function NewGroupPage() {
                 onChange={handleAvatarSelection}
               />
               <button
-                className="w-40 h-40 bg-gray-100/60 hover:bg-gray-100 transition-colors cursor-pointer rounded flex justify-center items-center group"
+                className="w-40 h-40 bg-gray-100/60 dark:bg-gray-800/60 hover:bg-gray-100 dark:hover:bg-gray-700/60 transition-colors cursor-pointer rounded flex justify-center items-center group"
                 type="button"
                 onClick={() => avatarInputRef.current.click()}
                 disabled={!!groupMetaData.avatar}
@@ -209,7 +212,7 @@ export function NewGroupPage() {
                     />
                   </div>
                 ) : (
-                  <div className="flex justify-between items-center flex-col gap-2 text-[#99a1af]">
+                  <div className="flex justify-between items-center flex-col gap-2 text-[#99a1af] dark:text-gray-200">
                     <PlusCircle size={24} />
                     <span className="text-xs">Click to upload an image</span>
                   </div>
@@ -223,8 +226,8 @@ export function NewGroupPage() {
               onChange={(e) => onFieldChange(e, "title")}
               value={groupMetaData.title}
               name={"title"}
-              labelClassName={"text-cyan-600"}
-              inputClassName="outline-2 outline-gray-200/50 rounded text-sm px-2 py-1 mt-2 focus:outline-cyan-600/50 focus:outline-offset-2 transition-all text-gray-700"
+              labelClassName={"text-cyan-600 dark:text-cyan-400"}
+              inputClassName="outline-2 outline-gray-200/50 dark:outline-gray-200/20 rounded text-sm px-2 py-1 mt-2 focus:outline-cyan-600/50 dark:focus:outline-cyan-400/50 focus:outline-offset-2 transition-all text-gray-700 dark:text-gray-100"
             />
             <TextArea
               id={"description"}
@@ -232,7 +235,7 @@ export function NewGroupPage() {
               onChange={(e) => onFieldChange(e, "description")}
               name={"description"}
               value={groupMetaData.description}
-              labelClassName="text-cyan-600/80"
+              labelClassName="text-cyan-600/80 dark:text-cyan-400/80"
               isOptional={true}
             />
           </section>
