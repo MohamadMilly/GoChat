@@ -4,6 +4,7 @@ import { ChatsListHeader } from "../components/chatList/ChatsListHeader";
 import { ChatsPanel } from "../components/chatList/ChatsPanel";
 import { SideDrawer } from "../components/ui/SideDrawer";
 import { createContext, useState } from "react";
+import { useLanguage } from "../contexts/LanguageContext";
 
 const storedChatsPanelStatus = JSON.parse(
   localStorage.getItem("isChatsPanelCollapsed"),
@@ -15,6 +16,7 @@ export function ChatsListPage() {
   const [isChatsPanelCollapsed, setIsChatsPanelCollapsed] = useState(
     storedChatsPanelStatus,
   );
+  const { language } = useLanguage();
   const handleChatsPanelCollapse = (value) => {
     setIsChatsPanelCollapsed(value);
     localStorage.setItem("isChatsPanelCollapsed", value);
@@ -23,7 +25,10 @@ export function ChatsListPage() {
     <ChatsListContext
       value={{ isChatsPanelCollapsed, handleChatsPanelCollapse }}
     >
-      <div className="flex flex-col h-screen">
+      <div
+        dir={language === "Arabic" ? "rtl" : "ltr"}
+        className="flex flex-col h-screen"
+      >
         <SideDrawer />
         <ChatsListHeader />
         <main

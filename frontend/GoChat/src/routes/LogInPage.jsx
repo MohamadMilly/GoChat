@@ -9,8 +9,12 @@ import chatBackground from "../assets/chat_background.png";
 import { Link } from "../components/ui/Link";
 import Button from "../components/ui/Button";
 import { useAuth } from "../contexts/AuthContext";
+import translations from "../translations";
+import { useLanguage } from "../contexts/LanguageContext";
 
 export function LogInPage() {
+  const { language } = useLanguage();
+  const PageTranslations = translations.LogInPage;
   const [loginData, setLoginData] = useState({
     username: "",
     password: "",
@@ -72,26 +76,25 @@ export function LogInPage() {
         <div className="inset-0 z-1 absolute bg-gray-800/60 backdrop-blur-xs"></div>
         <article className="z-10 relative top-1/3">
           <h2 className="text-5xl font-bold tracking-tight text-cyan-200 mb-6 text-shadow-xs text-shadow-cyan-100">
-            Welcome to GoChat{" "}
+            {PageTranslations[language].Welcome}
           </h2>
           <p className="max-w-120 text-sm text-gray-200">
-            If you already have an account , fill the login form with your
-            credentials,then wait for the verification code.{" "}
+            {PageTranslations[language].Description}
           </p>
           <p className="text-xs text-gray-300 mt-6">
-            Don't have an accont?{" "}
+            {translations.LogInPage[language].DontHaveAccount}{" "}
             <Link
               className="text-xs text-cyan-200 border-2 border-cyan-200 rounded"
               route={"/auth/signup"}
             >
-              Sign up
+              {PageTranslations[language].SignUp}
             </Link>
           </p>
         </article>
       </section>
       <section className="basis-xl px-4 flex flex-1 flex-col items-center">
         <h2 className="font-rubik text-4xl font-bold text-center my-12 tracking-tight text-cyan-800 ">
-          Log in
+          {PageTranslations[language].LogInButton}
         </h2>
         <form
           onSubmit={handleVerifyCode}
@@ -101,7 +104,7 @@ export function LogInPage() {
           {step === 1 && (
             <section>
               <InputField
-                label={"Username"}
+                label={PageTranslations[language].Username}
                 id="username"
                 type={"text"}
                 name={"username"}
@@ -109,7 +112,7 @@ export function LogInPage() {
                 onChange={(e) => onFieldChange("username", e)}
               />
               <InputField
-                label={"Password"}
+                label={PageTranslations[language].Password}
                 id="password"
                 name="password"
                 type="password"
@@ -125,7 +128,7 @@ export function LogInPage() {
                   login(loginData);
                 }}
               >
-                Login
+                {PageTranslations[language].LoginButton}
               </Button>
             </section>
           )}
@@ -143,7 +146,7 @@ export function LogInPage() {
                 </span>
               </p>
               <InputField
-                label={"Verification Code"}
+                label={PageTranslations[language].VerificationCode}
                 id="code"
                 name="code"
                 type={"text"}
@@ -155,13 +158,13 @@ export function LogInPage() {
                   onClick={goBack}
                   className={"border border-cyan-600 text-xs text-cyan-600"}
                 >
-                  Go back and edit
+                  {PageTranslations[language].GoBackAndEdit}
                 </Button>
                 <Button
                   type="submit"
                   className={"text-xs bg-cyan-600! text-white"}
                 >
-                  Verify code
+                  {PageTranslations[language].VerifyCodeButton}
                 </Button>
               </div>
             </section>

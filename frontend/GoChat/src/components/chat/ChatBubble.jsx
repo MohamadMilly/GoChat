@@ -17,14 +17,17 @@ import { ReadersMenu } from "./ReadersMenu";
 import { ChatPageContext } from "../../routes/ChatPage";
 import Button from "../ui/Button";
 import { useSearchParams } from "react-router";
+import translations from "../../translations";
+import { useLanguage } from "../../contexts/LanguageContext";
 
 function VideoFile({ link }) {
+  const { language } = useLanguage();
   return (
     <div className="w-full max-w-[28rem] mx-0 my-1">
       <video className="w-full h-auto max-h-[40vh] rounded" controls>
         <source src={link} type="video/mp4" />
         <source src={link} type="video/ogg"></source>
-        Your browser does not support the video tag.
+        {translations.ChatBubble[language].BrowserNotSupport}
       </video>
     </div>
   );
@@ -60,6 +63,7 @@ function ImageFile({ mimeType, fileURL }) {
     setIsInPreviewMode(true);
     setPreviewImageURL(fileURL);
   };
+  const { language } = useLanguage();
   return (
     <div className="p-0.5 rounded-xl max-w-md overflow-hidden relative group">
       <span className="absolute top-3 left-3 text-xs text-gray-400 bg-gray-50/10 backdrop-blur-xs rounded z-10">
@@ -70,7 +74,7 @@ function ImageFile({ mimeType, fileURL }) {
           onClick={() => handlePreview(fileURL)}
           className="w-full h-full text-2xl text-gray-50 cursor-pointer tracking-tight"
         >
-          Click to preview
+          {translations.ChatBubble[language].ClickToPreview}
         </button>
       </div>
       <img
@@ -84,6 +88,7 @@ function ImageFile({ mimeType, fileURL }) {
 }
 
 function MediaFilePreview({ fileURL, mimeType }) {
+  const { language } = useLanguage();
   if (!fileURL) return null;
   if (mimeType.includes("image")) {
     return <ImageFile fileURL={fileURL} mimeType={mimeType} />;
@@ -95,7 +100,7 @@ function MediaFilePreview({ fileURL, mimeType }) {
           icon={<Braces size={30} />}
           link={fileURL}
           colors={{ text: "text-yellow-300", bg: "bg-yellow-100" }}
-          label="JSON File"
+          label={translations.ChatBubble[language].JSONFile}
         />
       );
     } else if (mimeType.includes("pdf")) {
@@ -104,7 +109,7 @@ function MediaFilePreview({ fileURL, mimeType }) {
           icon={<FileText size={30} />}
           link={fileURL}
           colors={{ text: "text-red-500", bg: "bg-red-200" }}
-          label="PDF File"
+          label={translations.ChatBubble[language].PDFFile}
         />
       );
     } else if (mimeType.includes("zip")) {
@@ -113,7 +118,7 @@ function MediaFilePreview({ fileURL, mimeType }) {
           icon={<FileArchive size={30} />}
           link={fileURL}
           colors={{ text: "text-yellow-300", bg: "bg-yellow-100" }}
-          label="ZIP File"
+          label={translations.ChatBubble[language].ZIPFile}
         />
       );
     }
@@ -129,7 +134,7 @@ function MediaFilePreview({ fileURL, mimeType }) {
       icon={<File size={30} />}
       link={fileURL}
       colors={{ text: "text-gray-500", bg: "bg-gray-200" }}
-      label="File"
+      label={translations.ChatBubble[language].FileLabel}
     />
   );
 }
@@ -163,6 +168,7 @@ export const ChatBubble = memo(
     const messageContentContainerRef = useRef(null);
     const { setRepliedMessage } = useContext(ChatPageContext);
     const [searchParams, setSearchParams] = useSearchParams();
+    const { language } = useLanguage();
     const fullname = message.sender.firstname + " " + message.sender.lastname;
 
     const isThereAvatar = !!message.sender.profile?.avatar;
@@ -351,7 +357,7 @@ export const ChatBubble = memo(
                   >
                     <strong className="text-sm">
                       {message.repliedMessage.sender.id === user.id
-                        ? "You"
+                        ? translations.ChatBubble[language].YouLabel
                         : message.repliedMessage.sender.firstname +
                           " " +
                           message.repliedMessage.sender.lastname}
@@ -374,7 +380,7 @@ export const ChatBubble = memo(
                 <span
                   className={`text-xs block ${isMyMessage ? "text-white text-right" : "text-gray-500"}`}
                 >
-                  edited
+                  {translations.ChatBubble[language].Edited}
                 </span>
               )}
               <div className="flex items-center gap-2">

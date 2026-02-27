@@ -12,10 +12,13 @@ import EmojiPicker from "emoji-picker-react";
 import { useSearchParams } from "react-router";
 import Button from "../ui/Button";
 import { useTheme } from "../../contexts/ThemeContext";
+import translations from "../../translations";
+import { useLanguage } from "../../contexts/LanguageContext";
 
 let counter = 0;
 
 export function SendMessageForm() {
+  const { language } = useLanguage();
   const [message, setMessage] = useState("");
   const [isDrawerVisible, setIsDrawerVisible] = useState(false);
   const messagesQueueRef = useRef([]);
@@ -178,7 +181,7 @@ export function SendMessageForm() {
     setHasAttached(false);
   };
   return (
-    <div className="z-20">
+    <div dir={language === "Arabic" ? "rtl" : "ltr"} className="z-20">
       {repliedMessage && (
         <div className="relative px-4 py-3 bg-gray-50/50 dark:bg-gray-50/70 backdrop-blur-xs border-2 border-gray-100/50 shadow-gray-100 shadow-inner m-2 rounded-lg animate-slideup ">
           <strong className="text-gray-800">
@@ -193,7 +196,9 @@ export function SendMessageForm() {
             className={"absolute top-2 right-2 text-gray-600 cursor-pointer"}
             onClick={() => setRepliedMessage(null)}
           >
-            <p className="sr-only">Cancel reply</p>
+            <p className="sr-only">
+              {translations.SendMessageForm[language].CancelReplySR}
+            </p>
             <X size={20} />
           </button>
         </div>
@@ -202,14 +207,18 @@ export function SendMessageForm() {
         <div className="dark:bg-gray-800 dark:text-gray-300 p-2 rounded flex items-center justify-between">
           <div className="flex items-center gap-1">
             <Paperclip size={18} />
-            <p className="text-xs">File Attached</p>
+            <p className="text-xs">
+              {translations.SendMessageForm[language].FileAttached}
+            </p>
           </div>
           <Button
             onClick={handleUnAttach}
             className={"w-7 h-7 flex items-center justify-center"}
           >
             {" "}
-            <span className="sr-only">UnAttach file</span>
+            <span className="sr-only">
+              {translations.SendMessageForm[language].UnAttachSR}
+            </span>
             <X size={10} className="shrink-0" />
           </Button>
         </div>
@@ -225,7 +234,7 @@ export function SendMessageForm() {
         />
 
         <label htmlFor="chat" className="sr-only">
-          Your message
+          {translations.SendMessageForm[language].YourMessageSR}
         </label>
         <div className="flex items-center px-3 py-2 rounded-t-lg bg-white dark:bg-gray-800 shadow">
           <button
@@ -234,7 +243,9 @@ export function SendMessageForm() {
             className="p-2 text-gray-500 dark:text-gray-300 dark:hover:text-gray-100 rounded-lg cursor-pointer hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-700"
           >
             <Paperclip />
-            <span className="sr-only">Attach file</span>
+            <span className="sr-only">
+              {translations.SendMessageForm[language].AttachFileSR}
+            </span>
           </button>
 
           <button
@@ -243,14 +254,17 @@ export function SendMessageForm() {
             onClick={() => setShowEmojiPicker(!showEmojiPicker)}
           >
             <Smile />
-            <span className="sr-only">Emoji</span>
+            <span className="sr-only">
+              {translations.SendMessageForm[language].EmojiSR}
+            </span>
           </button>
 
           <textarea
+            dir="auto"
             id="chat"
             rows="1"
             className="block max-h-37.5 resize-none min-h-15 mx-4 p-2.5 w-full text-sm text-gray-900 bg-white dark:bg-gray-900 dark:text-gray-50 outline-2 outline-gray-400/20 dark:outline-gray-200/20 focus:outline-offset-2 focus:outline-cyan-600/80 dark:focus:outline-cyan-400/80 rounded-lg"
-            placeholder="Your message..."
+            placeholder={translations.SendMessageForm[language].Placeholder}
             onChange={onMessageChange}
             value={message}
             ref={messageTextAreaRef}
@@ -262,7 +276,9 @@ export function SendMessageForm() {
             className="inline-flex justify-center p-2 text-blue-600 dark:text-blue-400 rounded-full cursor-pointer hover:bg-blue-100 dark:hover:bg-cyan-600/10 "
           >
             <Send />
-            <span className="sr-only">Send message</span>
+            <span className="sr-only">
+              {translations.SendMessageForm[language].SendMessageSR}
+            </span>
           </button>
         </div>
         <MediaDrawer

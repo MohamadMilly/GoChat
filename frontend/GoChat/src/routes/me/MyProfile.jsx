@@ -8,8 +8,12 @@ import { ProfileSection } from "../../components/profile/ProfileSection";
 import { AtSign, ArrowBigLeft, Pen } from "lucide-react";
 import Button from "../../components/ui/Button";
 import { UserProfileLoading } from "../../components/skeletonLoadingComponents/UserProfileLoading";
+import translations from "../../translations";
+import { useLanguage } from "../../contexts/LanguageContext";
 
 export function MyProfile() {
+  const { language } = useLanguage();
+  const PageTranslations = translations.Profile;
   const { user, preferences, isFetching, error } = useMe();
   const navigate = useNavigate();
   const { isConnected } = useSocket();
@@ -29,7 +33,7 @@ export function MyProfile() {
           onClick={() => navigate(-1)}
           className="text-gray-600 dark:text-gray-300"
         >
-          <p className="sr-only">Go Back</p>
+          <p className="sr-only">{translations.Common[language].GoBackSR}</p>
           <ArrowBigLeft size={20} />
         </Button>
         <Button
@@ -38,7 +42,7 @@ export function MyProfile() {
           }
           className="text-gray-600 dark:text-gray-300"
         >
-          <p className="sr-only">Edit Profile</p>
+          <p className="sr-only">{PageTranslations[language].EditProfile}</p>
           <Pen size={20} />
         </Button>
       </div>
@@ -58,30 +62,30 @@ export function MyProfile() {
           <section className="px-4 mt-4 py-2 bg-white dark:bg-gray-800 divide-y divide-gray-300 dark:divide-gray-700 shadow-sm rounded-md">
             <ProfileSection
               value={user.username}
-              title={"Username"}
+              title={PageTranslations[language].Username}
               icon={<AtSign size={20} />}
             />
             <ProfileSection
-              title={"Bio"}
+              title={PageTranslations[language].Bio}
               value={user.profile?.bio}
               isHidden={preferences.isBioHidden}
             />
 
             <ProfileSection
-              title={"Phone number"}
+              title={PageTranslations[language].Phone}
               value={user.profile?.phoneNumber}
               isHidden={preferences.isPhoneNumberHidden}
             />
 
             <ProfileSection
               isHidden={preferences.isEmailHidden}
-              title={"Email"}
+              title={PageTranslations[language].Email}
               value={user.profile?.email}
             />
 
             <ProfileSection
               isHidden={preferences.isBirthdayHidden}
-              title={"Birthday"}
+              title={PageTranslations[language].Birthday}
               value={user.profile?.bidthday}
             />
           </section>

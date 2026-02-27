@@ -10,6 +10,8 @@ import { MessagesList } from "./MessagesList";
 import { ArrowBigLeft } from "lucide-react";
 import { useJoinGroup } from "../../hooks/me/useJoinGroup";
 import { useTheme } from "../../contexts/ThemeContext";
+import translations from "../../translations";
+import { useLanguage } from "../../contexts/LanguageContext";
 
 function GroupPreviewFooter() {
   const { id } = useParams();
@@ -26,8 +28,16 @@ function GroupPreviewFooter() {
     error: joinError,
     isSuccess,
   } = useJoinGroup();
-  if (isFetchingMyConversations) return <p>Loading...</p>;
-  if (myConversationsError) return <p>Error: {myConversationsError.message}</p>;
+  const { language } = useLanguage();
+  if (isFetchingMyConversations)
+    return <p>{translations.GroupPreview[language].Loading}</p>;
+  if (myConversationsError)
+    return (
+      <p>
+        {translations.GroupPreview[language].ErrorPrefix}{" "}
+        {myConversationsError.message}
+      </p>
+    );
 
   const isJoined = conversations.some((conversation) => conversation.id == id);
   const isLoggedIn = !!user;
@@ -44,30 +54,27 @@ function GroupPreviewFooter() {
         isJoined ? (
           <>
             <p className="text-sm text-gray-400 dark:text-gray-200">
-              You are already in this group
+              {translations.GroupPreview[language].AlreadyInGroup}
             </p>
             <Link
               route={`/chats/group/${id}`}
               className="text-xs rounded-md dark:text-gray-200 dark:bg-gray-700"
             >
-              Go to the chat
+              {translations.GroupPreview[language].GoToChat}
             </Link>{" "}
           </>
         ) : (
           <>
             <p className="text-sm text-gray-400">
-              You are in read-only preview. Join the group to send messages
+              {translations.GroupPreview[language].ReadOnlyJoinPrompt}
             </p>
             <Button onClick={handleJoinGroup} className={"text-xs"}>
-              Join
+              {translations.GroupPreview[language].JoinButton}
             </Button>
           </>
         )
       ) : (
-        <p>
-          You are in read-only preview. Log in to join/send messages to this
-          group.
-        </p>
+        <p>{translations.GroupPreview[language].ReadOnlyLoginPrompt}</p>
       )}
     </div>
   );

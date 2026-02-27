@@ -4,6 +4,8 @@ import Button from "../components/ui/Button";
 import { ArrowBigLeft } from "lucide-react";
 import { useGroups } from "../hooks/useGroups";
 import { Avatar } from "../components/chat/Avatar";
+import translations from "../translations";
+import { useLanguage } from "../contexts/LanguageContext";
 
 function GroupPreviewCard(props) {
   const navigate = useNavigate();
@@ -61,6 +63,7 @@ export function FindGroupPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const query = searchParams.get("title");
+  const { language } = useLanguage();
   return (
     <>
       <main className="max-w-200 mx-auto bg-white dark:bg-gray-900 font-rubik">
@@ -69,11 +72,15 @@ export function FindGroupPage() {
             onClick={() => navigate(-1)}
             className="text-gray-600 dark:text-gray-300"
           >
-            <p className="sr-only">Go Back</p>
+            <p className="sr-only">{translations.Common[language].GoBackSR}</p>
             <ArrowBigLeft size={20} />
           </Button>
         </div>
-        <SearchBar name="title" label={"Search Group"} query={query} />
+        <SearchBar
+          name="title"
+          label={translations.SearchBar[language].SearchGroup}
+          query={query}
+        />
         <section className="p-2 mt-4">
           <GroupsList query={query} />
         </section>

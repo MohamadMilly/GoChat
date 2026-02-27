@@ -19,9 +19,54 @@ import {
 import { useTheme } from "../../contexts/ThemeContext";
 import { useDeleteAccount } from "../../hooks/me/useDeleteAccount";
 import { useState } from "react";
+import { useLanguage } from "../../contexts/LanguageContext";
+
+const PageTranslations = {
+  Arabic: {
+    RouteTitle: "الإعدادات",
+    GoBackSR: "العودة",
+    AccountSectionTitle: "الحساب",
+    logOutButtonText: "تسجيل الخروج",
+    ChangePassword: "تغيير كلمة المرور",
+    GeneralSectionTitle: "عام",
+    LanguageLabel: "اللغة",
+    OptionArabic: "العربية",
+    OptionEnglish: "الإنجليزية",
+    ThemeLabel: "المظهر",
+    ThemeNames: { light: "فاتح", dark: "داكن" },
+    DangerZoneTitle: "منطقة الخطر",
+    DeleteAccountButtonText: "حذف الحساب",
+    DeleteAccountDialogTitle: "حذف الحساب",
+    DeleteAccountDialogBody:
+      "هل أنت متأكد أنك تريد حذف حسابك؟ لا يمكن التراجع عن هذا الإجراء.",
+    DeleteButtonText: "حذف",
+    CancelButtonText: "إلغاء",
+  },
+  English: {
+    RouteTitle: "Settings",
+    GoBackSR: "Go Back",
+    AccountSectionTitle: "Account",
+    logOutButtonText: "Log out",
+    ChangePassword: "Change password",
+    GeneralSectionTitle: "General",
+    LanguageLabel: "Language",
+    OptionArabic: "Arabic",
+    OptionEnglish: "English",
+    ThemeLabel: "Theme",
+    ThemeNames: { light: "light", dark: "dark" },
+    DangerZoneTitle: "Danger Zone",
+    DeleteAccountButtonText: "Delete Account",
+    DeleteAccountDialogTitle: "Delete account",
+    DeleteAccountDialogBody:
+      "Are you sure you want to delete your account? This action cannot be undone.",
+    DeleteButtonText: "Delete",
+    CancelButtonText: "Cancel",
+  },
+};
 
 function ThemeButton() {
   const { theme, handleSetTheme } = useTheme();
+  const { language } = useLanguage();
   const handleToggleTheme = () => {
     const nextTheme = theme === "light" ? "dark" : "light";
     handleSetTheme(nextTheme);
@@ -36,9 +81,9 @@ function ThemeButton() {
       {" "}
       <div className="flex items-center gap-2">
         <Palette size={18} />
-        <span>Theme</span>
+        <span>{PageTranslations[language].ThemeLabel}</span>
       </div>
-      <span>{theme}</span>
+      <span>{PageTranslations[language].ThemeNames[theme] ?? theme}</span>
     </Button>
   );
 }
@@ -52,6 +97,7 @@ function DeleteAccountButton() {
     isSuccess,
   } = useDeleteAccount();
   const { logout } = useAuth();
+  const { language } = useLanguage();
   const handleDeleteAccount = () => {
     deleteAccount();
     logout();
@@ -86,12 +132,11 @@ function DeleteAccountButton() {
                       as="h3"
                       className="text-base font-semibold text-gray-900"
                     >
-                      Delete account
+                      {PageTranslations[language].DeleteAccountDialogTitle}
                     </DialogTitle>
                     <div className="mt-2">
                       <p className="text-sm text-gray-500">
-                        Are you sure you want to delete your account? This
-                        action cannot be undone.
+                        {PageTranslations[language].DeleteAccountDialogBody}
                       </p>
                     </div>
                   </div>
@@ -106,7 +151,7 @@ function DeleteAccountButton() {
                   }}
                   className="inline-flex w-full justify-center rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-red-500 sm:ml-3 sm:w-auto"
                 >
-                  Delete
+                  {PageTranslations[language].DeleteButtonText}
                 </button>
                 <button
                   type="button"
@@ -114,7 +159,7 @@ function DeleteAccountButton() {
                   onClick={() => setOpen(false)}
                   className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-xs inset-ring inset-ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto"
                 >
-                  Cancel
+                  {PageTranslations[language].CancelButtonText}
                 </button>
               </div>
             </DialogPanel>
@@ -129,15 +174,60 @@ function DeleteAccountButton() {
         }
       >
         <Trash size={18} />
-        <span>Delete Account</span>
+        <span>{PageTranslations[language].DeleteAccountButtonText}</span>
       </Button>
     </>
+  );
+}
+
+function LanguageButton() {
+  const { language, handleLanguageSet } = useLanguage();
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="relative">
+      <Button
+        onClick={() => setOpen(!open)}
+        className={
+          "text-sm py-2 w-full text-start my-2 flex items-center justify-between dark:text-gray-100 text-gray-500"
+        }
+      >
+        <div className="flex items-center gap-2">
+          <Languages size={18} />
+          <span>{PageTranslations[language].LanguageLabel}</span>
+        </div>
+
+        <span className="text-sm">{language}</span>
+      </Button>
+      {open && (
+        <div className="absolute top-2 right-4 z-10 p-2 rounded bg-gray-50 shadow dark:bg-gray-700">
+          <button
+            onClick={() => {
+              handleLanguageSet("Arabic");
+              setOpen(false);
+            }}
+            className="w-full text-start text-sm dark:text-gray-200 text-gray-400 dark:hover:bg-gray-600/30 hover:bg-gray-100 cursor-pointer p-1 rounded"
+          >
+            {PageTranslations[language].OptionArabic}
+          </button>
+          <button
+            onClick={() => {
+              handleLanguageSet("English");
+              setOpen(false);
+            }}
+            className="w-full text-start text-sm dark:text-gray-200 text-gray-400 dark:hover:bg-gray-600/30 hover:bg-gray-100 p-1 rounded  cursor-pointer"
+          >
+            {PageTranslations[language].OptionEnglish}
+          </button>
+        </div>
+      )}
+    </div>
   );
 }
 
 export function Settings() {
   const { logout } = useAuth();
   const navigate = useNavigate();
+  const { language } = useLanguage();
 
   return (
     <main className="max-w-200 mx-auto bg-white dark:bg-gray-900 font-rubik relative p-2">
@@ -146,17 +236,17 @@ export function Settings() {
           onClick={() => navigate(-1)}
           className="text-gray-600 dark:text-gray-300"
         >
-          <p className="sr-only">Go Back</p>
+          <p className="sr-only">{PageTranslations[language].GoBackSR}</p>
           <ArrowBigLeft size={20} />
         </Button>
       </div>
-      <section className="p-4 my-4">
+      <section dir={language === "Arabic" ? "rtl" : "ltr"} className="p-4 my-4">
         <h2 className="text-lg tracking-tight font-bold text-cyan-600">
-          Settings
+          {PageTranslations[language].RouteTitle}
         </h2>
         <div className="my-4 bg-gray-50 dark:bg-gray-800 shadow-xs border border-gray-100 dark:border-gray-700 p-4 rounded">
           <h3 className="text-gray-600 dark:text-gray-50 tracking-tight mb-4 font-medium">
-            Account
+            {PageTranslations[language].AccountSectionTitle}
           </h3>
           <Button
             className={
@@ -168,7 +258,7 @@ export function Settings() {
             }}
           >
             <LogOut size={18} />
-            <span>Log out</span>
+            <span>{PageTranslations[language].logOutButtonText}</span>
           </Button>
           <Button
             className={
@@ -176,26 +266,19 @@ export function Settings() {
             }
           >
             <RotateCcwKey size={18} />
-            <span>Change password</span>
+            <span>{PageTranslations[language].ChangePassword}</span>
           </Button>
         </div>
         <div className="my-4 bg-gray-50 dark:bg-gray-800 shadow-xs border border-gray-100 dark:border-gray-700 p-4 rounded">
           <h3 className="text-gray-600 dark:text-gray-50 tracking-tight mb-4 font-medium">
-            General
+            {PageTranslations[language].GeneralSectionTitle}
           </h3>
-          <Button
-            className={
-              "text-sm py-2 w-full text-start my-2 flex items-center gap-2 dark:text-gray-100 text-gray-500"
-            }
-          >
-            <Languages size={18} />
-            <span>Language</span>
-          </Button>
+          <LanguageButton />
           <ThemeButton />
         </div>
         <div className="my-4 bg-red-50 dark:bg-red-900/20 shadow-xs border border-red-300 dark:border-red-600 p-4 rounded">
           <h3 className="text-red-600 tracking-tight mb-4 font-medium">
-            Danger Zone
+            {PageTranslations[language].DangerZoneTitle}
           </h3>
 
           <DeleteAccountButton />

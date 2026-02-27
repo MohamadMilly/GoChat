@@ -6,6 +6,8 @@ import { usePatchPreferences } from "../../hooks/me/usePatchPreferences";
 import { toast } from "react-toastify";
 import { useState } from "react";
 import { ArrowDown, ArrowUp } from "lucide-react";
+import translations from "../../translations";
+import { useLanguage } from "../../contexts/LanguageContext";
 function PrefrenceSectionSelect({
   options,
   initialOption,
@@ -13,6 +15,7 @@ function PrefrenceSectionSelect({
   preferenceKey,
   isFetching,
 }) {
+  const { language } = useLanguage();
   const [isMenuVisible, setIsMenuVisible] = useState(false);
   const [fadeIsRunning, setFadeIsRunning] = useState(false);
   const { mutate: patch, error, isPending } = usePatchPreferences();
@@ -56,12 +59,15 @@ function PrefrenceSectionSelect({
                 : ""
             }
           >
-            {isFetching ? "" : initialOption}
+            {isFetching
+              ? ""
+              : translations.MyPreferences[language][initialOption] ||
+                initialOption}
           </span>
         </Button>
         {isMenuVisible && (
           <ul
-            className={`absolute bottom-0 right-0 translate-y-1/2 bg-white dark:bg-gray-700 shadow-xs px-2 py-3 rounded w-50 ${fadeIsRunning ? "animate-fade" : "animate-pop"}`}
+            className={`absolute bottom-0 ltr:right-0 rtl:left-0 translate-y-1/2 bg-white dark:bg-gray-700 shadow-xs px-2 py-3 rounded w-50 ${fadeIsRunning ? "animate-fade" : "animate-pop"}`}
           >
             {options.map((option) => {
               return (
@@ -71,7 +77,8 @@ function PrefrenceSectionSelect({
                     key={option.key}
                     onClick={() => handleSelect(option.value)}
                   >
-                    {option.value}
+                    {translations.MyPreferences[language][option.value] ||
+                      option.value}
                   </button>
                 </li>
               );
@@ -90,6 +97,7 @@ function PreferenceSectionToggle({
   isFetching,
 }) {
   const { mutate: patch, error, isPending } = usePatchPreferences();
+  const { language } = useLanguage();
   const handlePatch = (e) => {
     patch({ key: preferenceKey, value: e.target.checked });
   };
@@ -125,7 +133,9 @@ function PreferenceSectionToggle({
           ></div>
 
           <span className="ms-3 text-xs text-gray-600 dark:text-gray-300">
-            {value ? "Enabled" : "Disabled"}
+            {value
+              ? translations.Common[language].Enabled
+              : translations.Common[language].Disabled}
           </span>
         </label>
       ) : null}
@@ -135,6 +145,7 @@ function PreferenceSectionToggle({
 
 export function MyPreferences() {
   const { preferences, error, isFetching } = useMyPrefrences();
+  const { language } = useLanguage();
   const navigate = useNavigate();
 
   if (error) return <p>Error: {error.message}</p>;
@@ -146,53 +157,61 @@ export function MyPreferences() {
           onClick={() => navigate(-1)}
           className="text-gray-600 dark:text-gray-300"
         >
-          <p className="sr-only">Go Back</p>
+          <p className="sr-only">{translations.Common[language].GoBackSR}</p>
           <ArrowBigLeft size={20} />
         </Button>
       </div>
-      <section className="shadow-xs p-4 rounded-lg my-4 border border-gray-300/50 bg-gray-50 dark:bg-gray-800 dark:border-gray-700">
+      <section
+        dir={language === "Arabic" ? "rtl" : "ltr"}
+        className="shadow-xs p-4 rounded-lg my-4 border border-gray-300/50 bg-gray-50 dark:bg-gray-800 dark:border-gray-700"
+      >
         <h2 className="text-lg font-bold tracking-tight text-cyan-600 dark:text-cyan-400 mb-4">
-          Profile prefrences
+          {translations.MyPreferences[language].Title}
         </h2>
         <PreferenceSectionToggle
-          preferenceTitle={"Hide avatar"}
+          preferenceTitle={translations.MyPreferences[language].HideAvatar}
           value={preferences && preferences.isAvatarHidden}
           preferenceKey={"isAvatarHidden"}
           isFetching={isFetching}
         />
         <PreferenceSectionToggle
-          preferenceTitle={"Hide avatar background"}
+          preferenceTitle={
+            translations.MyPreferences[language].HideAvatarBackground
+          }
           value={preferences && preferences.isAvatarBackgroundHidden}
           preferenceKey={"isAvatarBackgroundHidden"}
           isFetching={isFetching}
         />
         <PreferenceSectionToggle
-          preferenceTitle={"Hide Bio"}
+          preferenceTitle={translations.MyPreferences[language].HideBio}
           value={preferences && preferences.isBioHidden}
           preferenceKey={"isBioHidden"}
           isFetching={isFetching}
         />
         <PreferenceSectionToggle
-          preferenceTitle={"Hide phone number"}
+          preferenceTitle={translations.MyPreferences[language].HidePhone}
           value={preferences && preferences.isPhoneNumberHidden}
           preferenceKey={"isPhoneNumberHidden"}
           isFetching={isFetching}
         />
         <PreferenceSectionToggle
-          preferenceTitle={"Hide email"}
+          preferenceTitle={translations.MyPreferences[language].HideEmail}
           value={preferences && preferences.isEmailHidden}
           preferenceKey={"isEmailHidden"}
           isFetching={isFetching}
         />
         <PreferenceSectionToggle
-          preferenceTitle={"Hide Birthday"}
+          preferenceTitle={translations.MyPreferences[language].HideBirthday}
           value={preferences && preferences.isBirthdayHidden}
           preferenceKey={"isBirthdayHidden"}
           isFetching={isFetching}
         />
       </section>
 
-      <section className="shadow-xs p-2 rounded-lg my-4 border border-gray-300/50 bg-gray-50 dark:bg-gray-800 dark:border-gray-700">
+      <section
+        dir={language === "Arabic" ? "rtl" : "ltr"}
+        className="shadow-xs p-2 rounded-lg my-4 border border-gray-300/50 bg-gray-50 dark:bg-gray-800 dark:border-gray-700"
+      >
         <PrefrenceSectionSelect
           options={[
             { value: "EMAIL", key: "email" },
@@ -200,7 +219,9 @@ export function MyPreferences() {
           ]}
           initialOption={preferences && preferences.preferredVerification}
           preferenceKey={"preferredVerification"}
-          preferenceTitle={"Verification method"}
+          preferenceTitle={
+            translations.MyPreferences[language].VerificationMethod
+          }
           isFetching={isFetching}
         />
       </section>

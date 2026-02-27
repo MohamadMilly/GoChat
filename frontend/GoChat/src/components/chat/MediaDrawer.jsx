@@ -1,6 +1,8 @@
 import { useRef } from "react";
 import { X, Image, File, Video } from "lucide-react";
 import { SlideUpMenu } from "../ui/SlideupMenu";
+import translations from "../../translations";
+import { useLanguage } from "../../contexts/LanguageContext";
 
 export function MediaDrawer({
   setMediaFileData,
@@ -9,6 +11,7 @@ export function MediaDrawer({
   setPreviewFileURl,
   setHasAttached,
 }) {
+  const { language } = useLanguage();
   const handleMediaSet = async (type, e) => {
     const mediaFile = e.target.files[0];
     setHasAttached(true);
@@ -28,10 +31,10 @@ export function MediaDrawer({
           onClick={() => imageFieldRef.current.click()}
         >
           <Image size={20} />
-          <span>Image</span>
+          <span>{translations.MediaDrawer[language].Image}</span>
         </button>
         <label className="sr-only" htmlFor="imageField">
-          Image
+          {translations.MediaDrawer[language].Image}
         </label>
         <input
           id="imageField"
@@ -50,10 +53,10 @@ export function MediaDrawer({
           onClick={() => fileFieldRef.current.click()}
         >
           <File size={20} />
-          <span>File</span>
+          <span>{translations.MediaDrawer[language].File}</span>
         </button>
         <label className="sr-only" htmlFor="fileField">
-          File
+          {translations.MediaDrawer[language].File}
         </label>
         <input
           id="fileField"
@@ -72,10 +75,10 @@ export function MediaDrawer({
           onClick={() => videoFieldRef.current.click()}
         >
           <Video size={20} />
-          <span>Video</span>
+          <span>{translations.MediaDrawer[language].Video}</span>
         </button>
         <label className="sr-only" htmlFor="videoField">
-          Video
+          {translations.MediaDrawer[language].Video}
         </label>
         <input
           id="videoField"

@@ -1,8 +1,12 @@
 import { Menu, PanelRight } from "lucide-react";
 import { useSocket } from "../../contexts/SocketContext";
+import translations from "../../translations";
+import { useLanguage } from "../../contexts/LanguageContext";
 import { Link } from "../ui/Link";
+
 export function ChatsListHeader() {
   const { isConnected } = useSocket();
+  const { language } = useLanguage();
   return (
     <header className="col-start-1 col-end-3 row-start-1 row-end-2 bg-gray-50 dark:bg-gray-900 shadow-xs">
       <nav className="flex items-center justify-between gap-x-4 px-4 h-16">
@@ -20,7 +24,9 @@ export function ChatsListHeader() {
               GoChat
             </h1>
             <div className="text-xs text-gray-400 dark:text-gray-200">
-              {isConnected ? "Online" : "Connecting..."}
+              {isConnected
+                ? translations.ChatHeader[language].Online
+                : translations.Common[language].Connecting}
             </div>
           </div>
         </div>

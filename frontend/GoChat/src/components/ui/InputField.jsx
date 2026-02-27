@@ -1,3 +1,6 @@
+import translations from "../../translations";
+import { useLanguage } from "../../contexts/LanguageContext";
+
 export function InputField({
   id,
   label,
@@ -9,12 +12,15 @@ export function InputField({
   name,
   isOptional = false,
 }) {
+  const { language } = useLanguage();
   return (
     <div className="flex flex-col px-4 py-1.5 my-4 gap-2">
       <label className={`text-sm ${labelClassName}`} htmlFor={id}>
         {label}{" "}
         {isOptional && (
-          <span className="text-xs text-gray-400 italic mx-1">(optional)</span>
+          <span className="text-xs text-gray-400 italic mx-1">
+            {translations.Common[language].Optional}
+          </span>
         )}
       </label>
       <input

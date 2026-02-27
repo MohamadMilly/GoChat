@@ -13,6 +13,7 @@ import { AuthProvider } from "./contexts/AuthContext.jsx";
 import { ConversationProvider } from "./contexts/ConversationContext.jsx";
 import { SocketProvider } from "./contexts/SocketContext.jsx";
 import { ThemeProvider } from "./contexts/ThemeContext.jsx";
+import { LanguageProvider } from "./contexts/LanguageContext.jsx";
 
 const router = createBrowserRouter(routes);
 
@@ -22,9 +23,11 @@ createRoot(document.getElementById("root")).render(
       <AuthProvider>
         <SocketProvider>
           <ConversationProvider>
-            <ThemeProvider>
-              <RouterProvider router={router} />
-            </ThemeProvider>
+            <LanguageProvider>
+              <ThemeProvider>
+                <RouterProvider router={router} />
+              </ThemeProvider>
+            </LanguageProvider>
           </ConversationProvider>
         </SocketProvider>
       </AuthProvider>

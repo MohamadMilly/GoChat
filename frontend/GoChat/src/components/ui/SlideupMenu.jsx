@@ -9,7 +9,7 @@ export function SlideUpMenu({
 }) {
   return (
     <div
-      className={`absolute left-6 bottom-2 -translate-y-1/2 p-4 w-[var(--width)] bg-white dark:bg-gray-800 rounded-lg ${isVisible ? "block animate-slideup" : "hidden animate-slidedown"}`}
+      className={`absolute ltr:left-6 bottom-2 rtl:right-6 -translate-y-1/2 p-4 w-[var(--width)] bg-white dark:bg-gray-800 rounded-lg ${isVisible ? "block animate-slideup" : "hidden animate-slidedown"}`}
       style={{ "--width": width }}
     >
       {istogglable && (

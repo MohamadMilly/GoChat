@@ -13,8 +13,11 @@ import Line from "./Line";
 import { useState } from "react";
 import { TransitionLink } from "./TransitionLink";
 import { IdentityLoading } from "../skeletonLoadingComponents/IdentityLoading";
+import translations from "../../translations";
+import { useLanguage } from "../../contexts/LanguageContext";
 export function SideDrawer() {
   const { user, isFetching, error } = useMe();
+  const { language } = useLanguage();
 
   const fullname = !isFetching && user && user.firstname + " " + user.lastname;
   const [transitionId, setTransitionId] = useState(null);
@@ -22,6 +25,7 @@ export function SideDrawer() {
   return (
     <el-dialog>
       <dialog
+        dir={language === "Arabic" ? "rtl" : "ltr"}
         id="drawer"
         aria-labelledby="drawer-title"
         className="fixed inset-0 size-auto max-h-none max-w-none overflow-hidden bg-transparent not-open:hidden backdrop:bg-transparent"
@@ -41,7 +45,9 @@ export function SideDrawer() {
                 className="relative rounded-md text-gray-200 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 cursor-pointer"
               >
                 <span className="absolute -inset-2.5"></span>
-                <span className="sr-only">Close panel</span>
+                <span className="sr-only">
+                  {translations.SideDrawer[language].ClosePanelSR}
+                </span>
                 <svg
                   viewBox="0 0 24 24"
                   fill="none"
@@ -85,53 +91,55 @@ export function SideDrawer() {
                   setDynamicTransitionId={setTransitionId}
                 >
                   <CircleUserRound size={20} />
-                  <span>My profile</span>
+                  <span>{translations.SideDrawer[language].MyProfile}</span>
                 </TransitionLink>
                 <Line />
                 <div className="flex flex-col gap-2">
                   <h3 className="text-lg font-bold tracking-tight text-cyan-600 dark:text-cyan-400">
-                    Account
+                    {translations.SideDrawer[language].AccountHeading}
                   </h3>
                   <Link
                     className="flex items-center gap-x-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800/90 py-2 px-3 rounded-md hover:scale-105 dark:bg-gray-800/70 shadow dark:shadow-white/5 dark:shadow-inner transition-all duration-300"
                     route={"/users/me/preferences"}
                   >
                     <Heart size={20} />
-                    <span> Account preferences</span>
+                    <span>
+                      {translations.SideDrawer[language].AccountPreferences}
+                    </span>
                   </Link>
                   <Link
                     className="flex items-center gap-x-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800/90 py-2 px-3 rounded-md hover:scale-105 dark:bg-gray-800/70 shadow dark:shadow-white/5 dark:shadow-inner transition-all duration-300"
                     route={"/users/me/settings"}
                   >
                     <Settings size={20} />
-                    <span>Settings</span>
+                    <span>{translations.SideDrawer[language].Settings}</span>
                   </Link>
                 </div>
                 <Line />
                 <div className="flex flex-col gap-2">
                   <h3 className="text-lg font-bold tracking-tight text-cyan-600 dark:text-cyan-400">
-                    Chats
+                    {translations.SideDrawer[language].ChatsHeading}
                   </h3>
                   <Link
                     className="flex items-center gap-x-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800/90 py-2 px-3 rounded-md hover:scale-105 dark:bg-gray-800/70 shadow dark:shadow-white/5 dark:shadow-inner transition-all duration-300"
                     route={"/chats/group/new"}
                   >
                     <UsersRound size={20} />
-                    <span>New group</span>
+                    <span>{translations.SideDrawer[language].NewGroup}</span>
                   </Link>
                   <Link
                     route={"/chats/direct/new"}
                     className="flex items-center gap-x-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800/90 py-2 px-3 rounded-md hover:scale-105 dark:bg-gray-800/70 shadow dark:shadow-white/5 dark:shadow-inner transition-all duration-300"
                   >
                     <Plus size={20} />
-                    <span>New chat</span>
+                    <span>{translations.SideDrawer[language].NewChat}</span>
                   </Link>
                   <Link
                     route={"/chats/groups"}
                     className="flex items-center gap-x-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800/90 py-2 px-3 rounded-md hover:scale-105 dark:bg-gray-800/70 shadow dark:shadow-white/5 dark:shadow-inner transition-all duration-300"
                   >
                     <MessageCircle size={20} />
-                    <span>Find a group</span>
+                    <span>{translations.SideDrawer[language].FindGroup}</span>
                   </Link>
                 </div>
               </div>

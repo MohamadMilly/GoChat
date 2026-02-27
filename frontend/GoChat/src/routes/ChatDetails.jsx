@@ -8,9 +8,12 @@ import { ArrowBigLeft } from "lucide-react";
 import { getGenertedTransitionId } from "../utils/transitionId";
 import { TransitionLink } from "../components/ui/TransitionLink";
 import { useState } from "react";
+import translations from "../translations";
+import { useLanguage } from "../contexts/LanguageContext";
 
 function ChatParticipant({ participant, isConnected }) {
   const [transitionId, setTransitionId] = useState(null);
+  const { language } = useLanguage();
   return (
     <li className="py-2">
       <TransitionLink
@@ -37,7 +40,8 @@ function ChatParticipant({ participant, isConnected }) {
             {participant.user.firstname + " " + participant.user.lastname}
           </p>
           <span className="text-xs text-gray-500 dark:text-gray-300">
-            joined at {new Date(participant.joinedAt).toLocaleString("en-GB")}
+            {translations.ChatDetails[language].JoinedAtPrefix || "joined at"}{" "}
+            {new Date(participant.joinedAt).toLocaleString("en-GB")}
           </span>
         </div>
       </TransitionLink>
@@ -50,8 +54,14 @@ export function ChatDetails() {
   const { conversation, membersCount, isFetching, error } = useConversation(id);
   const { connectedUsers } = useSocket();
   const navigate = useNavigate();
-  if (isFetching) return <p>Loading...</p>;
-  if (error) return <p>Error: {error.message}</p>;
+  const { language } = useLanguage();
+  if (isFetching) return <p>{translations.ChatDetails[language].Loading}</p>;
+  if (error)
+    return (
+      <p>
+        {translations.ChatDetails[language].ErrorPrefix} {error.message}
+      </p>
+    );
 
   const { title, avatar, description, participants, createdAt } = conversation;
   const thisChatConnectedUsers = getConnectedUsers(
@@ -68,7 +78,7 @@ export function ChatDetails() {
           onClick={() => navigate(-1)}
           className="text-gray-600 dark:text-gray-300"
         >
-          <p className="sr-only">Go Back</p>
+          <p className="sr-only">{translations.Common[language].GoBackSR}</p>
           <ArrowBigLeft size={20} />
         </Button>
       </div>
@@ -83,22 +93,25 @@ export function ChatDetails() {
       >
         <h2 className="text-xl text-gray-800 dark:text-gray-50">{title}</h2>
         <p className="text-sm text-gray-500 dark:text-gray-300">
-          {membersCount} members | {connectedUsersCount} online
+          {membersCount} {translations.ChatDetails[language].MembersLabel} |{" "}
+          {connectedUsersCount} {translations.ChatDetails[language].OnlineLabel}
         </p>
       </section>
       <section className="px-4 mt-4 py-2 bg-white dark:bg-gray-800 shadow-sm rounded-md">
         <article className="py-1.5 my-2">
           <p className="text-gray-900 dark:text-gray-100 flex items-center gap-2">
-            <span>{description || "No description"}</span>
+            <span>
+              {description || translations.ChatDetails[language].NoDescription}
+            </span>
           </p>
           <h2 className="text-sm text-cyan-600/80 dark:text-cyan-400/80 mt-1">
-            Description
+            {translations.ChatDetails[language].DescriptionHeading}
           </h2>
         </article>
       </section>
       <section className="p-4 mt-4 bg-white dark:bg-gray-800 shadow-sm rounded-md">
         <h3 className="text-lg font-bold tracking-tight text-cyan-600 dark:text-cyan-400">
-          Members
+          {translations.ChatDetails[language].MembersHeading}
         </h3>
         {
           <ul className="p-2 my-2 divide-y divide-gray-700">

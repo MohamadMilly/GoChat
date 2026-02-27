@@ -8,6 +8,8 @@ import { Avatar } from "../../components/chat/Avatar";
 import { useAuth } from "../../contexts/AuthContext";
 import { supabase } from "../../utils/supabase";
 import { toast } from "react-toastify";
+import translations from "../../translations";
+import { useLanguage } from "../../contexts/LanguageContext";
 
 function ProfileInputField({
   value,
@@ -18,6 +20,7 @@ function ProfileInputField({
   name,
   isFetchingProfile,
 }) {
+  const { language } = useLanguage();
   return (
     <div className="flex flex-col gap-1 px-4 py-2 my-4 rounded">
       <label
@@ -30,6 +33,7 @@ function ProfileInputField({
         <div className="h-8 rounded bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
       ) : (
         <input
+          dir="auto"
           onChange={onChange}
           className="outline-2 outline-gray-200/50 dark:outline-gray-600/50 rounded text-sm px-2 py-1 mt-2 focus:outline-cyan-600/50 dark:focus:outline-cyan-400/50 focus:outline-offset-2 transition-all text-gray-700 dark:text-gray-100 dark:bg-gray-800"
           id={id}
@@ -43,6 +47,7 @@ function ProfileInputField({
 }
 
 function BioTextAreaField({ value, onChange, isFetchingProfile }) {
+  const { language } = useLanguage();
   const textAreaRef = useRef(null);
   const bioLength = value ? value.length : 0;
   const handleInput = () => {
@@ -58,12 +63,13 @@ function BioTextAreaField({ value, onChange, isFetchingProfile }) {
         htmlFor={"bio"}
         className="text-sm text-cyan-600/80 dark:text-cyan-400"
       >
-        Your Bio
+        {translations.EditProfilePage[useLanguage().language].YourBio}
       </label>
       {isFetchingProfile ? (
         <div className="h-18 rounded bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
       ) : (
         <textarea
+          dir="auto"
           className="outline-2 outline-gray-200/50 dark:outline-gray-600/50 focus:outline-cyan-600/50 dark:focus:outline-cyan-400/50 focus:outline-offset-2 transition-all rounded mt-2 p-2 text-sm text-gray-700 dark:text-gray-100 dark:bg-gray-800 resize-none"
           name="bio"
           id="bio"
@@ -77,12 +83,15 @@ function BioTextAreaField({ value, onChange, isFetchingProfile }) {
         <div className="flex items-center gap-1 justify-end">
           <span className="inline-block py-1.5 w-5 bg-gray-200 dark:bg-gray-700 animate-pulse rounded"></span>
           <span className="text-xs text-gray-400 dark:text-gray-200 text-end">
-            characters
+            {translations.EditProfilePage[language].Characters}
           </span>
         </div>
       ) : (
         <span className="text-xs text-gray-400 dark:text-gray-200 text-end">
-          {bioLength} {bioLength > 1 ? "characters" : "character"}
+          {bioLength}{" "}
+          {bioLength > 1
+            ? translations.EditProfilePage[language].Characters
+            : translations.EditProfilePage[language].Character}
         </span>
       )}
     </div>
@@ -130,13 +139,14 @@ function AvatarFileField({
     setAvatarURL("");
     setPreviewURL("");
   };
+  const { language } = useLanguage();
   return (
     <div className="bg-gray-50/30 px-4 py-2 my-4 flex-0 shrink-0 h-full dark:bg-gray-800/30">
       <label
         className="text-sm text-cyan-600/80 dark:text-cyan-400/80"
         htmlFor="avatar"
       >
-        Your Avatar
+        {translations.EditProfilePage[language].Avatar}
       </label>
       <input
         type="file"
@@ -154,11 +164,8 @@ function AvatarFileField({
       ) : (
         <div className="relative">
           {isUploading && (
-            <span
-              className="absolute
-             left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 text-xs text-white"
-            >
-              Uploading...
+            <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 text-xs text-white">
+              {translations.EditProfilePage[language].Uploading}
             </span>
           )}
           <Avatar
@@ -178,7 +185,7 @@ function AvatarFileField({
           }
           onClick={() => avatarFieldRef.current.click()}
         >
-          Replace
+          {translations.EditProfilePage[language].Replace}
         </Button>
         <Button
           className={
@@ -187,7 +194,7 @@ function AvatarFileField({
           onClick={handleDeleteAvatar}
           disabled={isFetchingProfile}
         >
-          Delete
+          {translations.EditProfilePage[language].Delete}
         </Button>
       </div>
     </div>
@@ -237,6 +244,7 @@ function AvatarBackgroundFileField({
     setAvatarBackgroundURL("");
     setPreviewURL("");
   };
+  const { language } = useLanguage();
   return (
     <div
       className={`flex-1 basis-sm relative overflow-hidden h-48  ${(isFetchingProfile || isUploading) && "animate-pulse"}`}
@@ -252,7 +260,7 @@ function AvatarBackgroundFileField({
           className="text-2xl text-white text-shadow-sm"
           htmlFor="avatarBackgroundFile"
         >
-          Your Avatar Background
+          {translations.EditProfilePage[language].AvatarBackground}
         </label>
         <input
           hidden
@@ -263,7 +271,9 @@ function AvatarBackgroundFileField({
           onChange={handleAvatarbackgroundSelect}
         />
         {isUploading ? (
-          <p className="text-sm text-gray-50">Uploading...</p>
+          <p className="text-sm text-gray-50">
+            {translations.EditProfilePage[language].Uploading}
+          </p>
         ) : (
           <div className="flex items-center gap-2">
             <Button
@@ -273,7 +283,7 @@ function AvatarBackgroundFileField({
               }
               onClick={() => avatarBackgroundFieldRef.current.click()}
             >
-              Replace
+              {translations.EditProfilePage[language].Replace}
             </Button>
             <Button
               disabled={isFetchingProfile}
@@ -282,7 +292,7 @@ function AvatarBackgroundFileField({
               }
               onClick={handleDeleteAvatarbackground}
             >
-              Delete
+              {translations.EditProfilePage[language].Delete}
             </Button>
           </div>
         )}
@@ -292,6 +302,7 @@ function AvatarBackgroundFileField({
 }
 
 export function EditProfilePage() {
+  const { language } = useLanguage();
   const {
     mutate: put,
     isPending: areChangesPending,
@@ -342,7 +353,7 @@ export function EditProfilePage() {
           onClick={() => navigate(-1)}
           className="text-gray-600 dark:text-gray-300"
         >
-          <p className="sr-only">Go Back</p>
+          <p className="sr-only">{translations.Common[language].GoBackSR}</p>
           <ArrowBigLeft size={20} />
         </Button>
         <Button
@@ -350,11 +361,14 @@ export function EditProfilePage() {
           onClick={handleConfirmEdit}
           className={"text-gray-600 dark:text-gray-300"}
         >
-          <p className="sr-only">Confirm edits</p>
+          <p className="sr-only">
+            {translations.EditProfilePage[language].ConfirmEditsSR}
+          </p>
           <Check size={20} />
         </Button>
       </div>
       <form
+        dir={language === "Arabic" ? "rtl" : "ltr"}
         onSubmit={(e) => e.preventDefault()}
         action="
       "
@@ -385,7 +399,7 @@ export function EditProfilePage() {
           value={newProfileData.phoneNumber}
           onChange={(e) => onFieldChange(e.target.value, "phoneNumber")}
           id="phoneNumber"
-          label={"Your phone number"}
+          label={translations.Profile[language].Phone}
           type="phone"
           name={"phoneNumber"}
           isFetchingProfile={isFetchingProfile}
@@ -394,7 +408,7 @@ export function EditProfilePage() {
           value={newProfileData.email}
           onChange={(e) => onFieldChange(e.target.value, "email")}
           id="email"
-          label={"Your Email"}
+          label={translations.Profile[language].Email}
           type="email"
           name={"bio"}
           isFetchingProfile={isFetchingProfile}
@@ -403,7 +417,7 @@ export function EditProfilePage() {
           value={newProfileData.birthday}
           onChange={(e) => onFieldChange(e.target.value, "birthday")}
           id="birthday"
-          label={"Your Birthday"}
+          label={translations.Profile[language].Birthday}
           type="date"
           name={"birthday"}
           isFetchingProfile={isFetchingProfile}

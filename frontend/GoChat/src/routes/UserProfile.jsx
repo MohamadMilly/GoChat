@@ -9,8 +9,12 @@ import { ProfileSection } from "../components/profile/ProfileSection";
 import { ProfileIdentity } from "../components/profile/ProfileIdentity";
 import { AtSign } from "lucide-react";
 import { UserProfileLoading } from "../components/skeletonLoadingComponents/UserProfileLoading";
+import translations from "../translations";
+import { useLanguage } from "../contexts/LanguageContext";
 
 export function UserProfile() {
+  const { language } = useLanguage();
+  const PageTranslations = translations.Profile;
   const { userId } = useParams();
   const { connectedUsers } = useSocket();
   const { user, isFetching, error } = useUser(userId);
@@ -31,7 +35,7 @@ export function UserProfile() {
           onClick={() => navigate(-1)}
           className="text-gray-600 dark:text-gray-300"
         >
-          <p className="sr-only">Go Back</p>
+          <p className="sr-only">{translations.Common[language].GoBackSR}</p>
           <ArrowBigLeft size={20} />
         </Button>
       </div>
@@ -50,23 +54,29 @@ export function UserProfile() {
           />
           <section className="px-4 mt-4 py-2 bg-white dark:bg-gray-800 divide-y divide-gray-300 dark:divide-gray-700 shadow-sm rounded-md">
             <ProfileSection
-              title={"Username"}
+              title={PageTranslations[language].Username}
               value={user.username}
               icon={<AtSign size={20} />}
             />
-            <ProfileSection title={"Bio"} value={user.profile?.bio} />
+            <ProfileSection
+              title={PageTranslations[language].Bio}
+              value={user.profile?.bio}
+            />
             {user.profile?.phoneNumber && (
               <ProfileSection
-                title={"Phone number"}
+                title={PageTranslations[language].Phone}
                 value={user.profile?.phoneNumber}
               />
             )}
             {user.profile?.email && (
-              <ProfileSection title={"Email"} value={user.profile?.email} />
+              <ProfileSection
+                title={PageTranslations[language].Email}
+                value={user.profile?.email}
+              />
             )}
             {user.profile?.birthday && (
               <ProfileSection
-                title={"Birthday"}
+                title={PageTranslations[language].Birthday}
                 value={user.profile?.bidthday}
               />
             )}

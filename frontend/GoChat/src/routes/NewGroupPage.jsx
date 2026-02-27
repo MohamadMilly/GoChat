@@ -10,10 +10,13 @@ import { PlusCircle, Check, Trash } from "lucide-react";
 import { InputField } from "../components/ui/InputField";
 import { TextArea } from "../components/ui/TextArea";
 import { supabase } from "../utils/supabase";
+import translations from "../translations";
+import { useLanguage } from "../contexts/LanguageContext";
 
 export function NewGroupPage() {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
+  const { language } = useLanguage();
   const { users, isFetching, error } = useMyContacts();
   const [selectedMembers, setSelectedMembers] = useState([]);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
@@ -115,14 +118,28 @@ export function NewGroupPage() {
     <main className="max-w-200 mx-auto bg-white dark:bg-gray-900 font-rubik relative">
       <div className="flex justify-between items-center p-2 bg-gray-50/30 dark:bg-gray-800/80 rounded-lg my-2">
         <Button onClick={goBack} className="text-gray-600 dark:text-gray-300">
-          <p className="text-xs">{step === 1 ? "Home" : "Previous"}</p>
+          <p className="text-xs">
+            {step === 1
+              ? translations.NewGroupPage[language].Home
+              : translations.NewGroupPage[language].Previous}
+          </p>
         </Button>
         <Button onClick={goNext} className={"text-gray-600 dark:text-gray-300"}>
-          <p className="text-xs">{step === 2 ? <Check size={20} /> : "Next"}</p>
+          <p className="text-xs">
+            {step === 2 ? (
+              <Check size={20} />
+            ) : (
+              translations.NewGroupPage[language].Next
+            )}
+          </p>
         </Button>
       </div>
       {step === 1 && (
-        <SearchBar query={query} name="contact" label="Find User" />
+        <SearchBar
+          query={query}
+          name="contact"
+          label={translations.SearchBar[language].FindUser}
+        />
       )}
       <form
         onSubmit={(e) => e.preventDefault()}
@@ -135,7 +152,7 @@ export function NewGroupPage() {
             <ul className="w-full flex flex-col animate-slideup divide-y divide-gray-700">
               {isFetching ? (
                 <p className="text-xs text-gray-400 dark:text-gray-200 text-center">
-                  Loading...
+                  {translations.NewGroupPage[language].Loading}
                 </p>
               ) : queriedContacts.length > 0 ? (
                 queriedContacts.map((c) => {
@@ -157,7 +174,7 @@ export function NewGroupPage() {
                 })
               ) : (
                 <p className="text-xs text-center text-gray-400 dark:text-gray-200">
-                  No users are found
+                  {translations.NewGroupPage[language].NoUsersFound}
                 </p>
               )}
             </ul>
@@ -170,7 +187,7 @@ export function NewGroupPage() {
                 className="text-sm text-cyan-600 dark:text-cyan-400"
                 htmlFor="avatar"
               >
-                Avatar
+                {translations.EditProfilePage[language].Avatar}
               </label>
               <input
                 ref={avatarInputRef}
@@ -191,7 +208,9 @@ export function NewGroupPage() {
                   <div className="relative w-full h-full rounded">
                     {isUploadingAvatar ? (
                       <div className="absolute inset-0 rounded bg-gray-900/60 flex justify-center items-center ">
-                        <span className="text-xs text-white">Uploading...</span>
+                        <span className="text-xs text-white">
+                          {translations.NewGroupPage[language].Uploading}
+                        </span>
                       </div>
                     ) : (
                       <div className="absolute opacity-0 inset-0 rounded justify-center items-center flex bg-gray-900/60 group-hover:opacity-100 group-focus:opacity-100 transition-all duration-300">
@@ -214,7 +233,9 @@ export function NewGroupPage() {
                 ) : (
                   <div className="flex justify-between items-center flex-col gap-2 text-[#99a1af] dark:text-gray-200">
                     <PlusCircle size={24} />
-                    <span className="text-xs">Click to upload an image</span>
+                    <span className="text-xs">
+                      {translations.NewGroupPage[language].ClickToUploadImage}
+                    </span>
                   </div>
                 )}
               </button>
@@ -222,7 +243,7 @@ export function NewGroupPage() {
 
             <InputField
               id="title"
-              label={"Title"}
+              label={translations.NewGroupPage[language].Title}
               onChange={(e) => onFieldChange(e, "title")}
               value={groupMetaData.title}
               name={"title"}
@@ -231,7 +252,7 @@ export function NewGroupPage() {
             />
             <TextArea
               id={"description"}
-              label={"Describtion"}
+              label={translations.NewGroupPage[language].Description}
               onChange={(e) => onFieldChange(e, "description")}
               name={"description"}
               value={groupMetaData.description}

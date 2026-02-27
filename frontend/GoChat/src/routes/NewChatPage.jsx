@@ -6,8 +6,11 @@ import { useSocket } from "../contexts/SocketContext";
 import { Contact } from "../components/users/Contact";
 import Button from "../components/ui/Button";
 import { ArrowBigLeft } from "lucide-react";
+import translations from "../translations";
+import { useLanguage } from "../contexts/LanguageContext";
 
 export function NewChatPage() {
+  const { language } = useLanguage();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const query = searchParams.get("query");
@@ -40,26 +43,29 @@ export function NewChatPage() {
           onClick={() => navigate(-1)}
           className="text-gray-600 dark:text-gray-300"
         >
-          <p className="sr-only">Go Back</p>
+          <p className="sr-only">{translations.Common[language].GoBackSR}</p>
           <ArrowBigLeft size={20} />
         </Button>
       </div>
-      <SearchBar query={query} label={"Find User"} />
+      <SearchBar
+        query={query}
+        label={translations.SearchBar[language].FindUser}
+      />
 
       <section className="p-2 mt-4">
         {usersError ? (
-          <p>Error: {usersError.message}</p>
+          <p>{"Error: " + usersError.message}</p>
         ) : isFetchingUsers ? (
           <p className="text-xs text-gray-400 dark:text-gray-200 text-center">
-            isLoading
+            {translations.NewChatPage[language].Loading}
           </p>
         ) : !query ? (
           <p className="text-xs text-gray-400 dark:text-gray-200 text-center">
-            Search for users
+            {translations.NewChatPage[language].SearchForUsers}
           </p>
         ) : users && users.length === 0 ? (
           <p className="text-xs text-gray-400 dark:text-gray-200 text-center">
-            No users are found
+            {translations.NewChatPage[language].NoUsersFound}
           </p>
         ) : (
           <ul className="w-full flex flex-col animate-slideup divide-y divide-gray-700">

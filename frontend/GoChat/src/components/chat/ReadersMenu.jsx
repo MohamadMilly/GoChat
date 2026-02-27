@@ -4,6 +4,8 @@ import { memo, useContext, useMemo } from "react";
 import { ChatPageContext } from "../../routes/ChatPage";
 import { ChatBubbleContext } from "./ChatBubble";
 import { useAuth } from "../../contexts/AuthContext";
+import translations from "../../translations";
+import { useLanguage } from "../../contexts/LanguageContext";
 
 export const ReadersMenu = memo(() => {
   const { conversationId, isInPreview } = useContext(ChatPageContext);
@@ -14,6 +16,7 @@ export const ReadersMenu = memo(() => {
     messageId,
     conversationId,
   );
+  const { language } = useLanguage();
   const readersWithOutMe = useMemo(() => {
     return readers && !isFetching
       ? readers.filter(
@@ -33,16 +36,24 @@ export const ReadersMenu = memo(() => {
       }}
     >
       {isInPreview ? (
-        <p className="text-xs">Join or go to the chat to see the readers</p>
+        <p className="text-xs">
+          {translations.ReadersMenu[language].JoinPreview}
+        </p>
       ) : isFetching ? (
-        <p>Loading...</p>
+        <p>{translations.ReadersMenu[language].Loading}</p>
       ) : error ? (
-        <p>Error: {error.message}</p>
+        <p>
+          {translations.ReadersMenu[language].ErrorPrefix} {error.message}
+        </p>
       ) : readersWithOutMe.length === 0 ? (
-        <p className="text-sm text-gray-400">No Readers yet</p>
+        <p className="text-sm text-gray-400">
+          {translations.ReadersMenu[language].NoReaders}
+        </p>
       ) : (
         <>
-          <h4 className="text-sm text-gray-700 mb-2">Seen by</h4>
+          <h4 className="text-sm text-gray-700 mb-2">
+            {translations.ReadersMenu[language].SeenBy}
+          </h4>
           <ul className="divide-y divide-gray-200">
             {readersWithOutMe.map((readerOnMessage) => {
               const fullname =
@@ -62,7 +73,7 @@ export const ReadersMenu = memo(() => {
                   <div className="text-xs flex flex-col items-start">
                     <span>{fullname}</span>
                     <span className="text-gray-400">
-                      seen at{" "}
+                      {translations.ReadersMenu[language].SeenAtPrefix}{" "}
                       {new Date(readerOnMessage.seenAt).toLocaleString("en-US")}
                     </span>
                   </div>

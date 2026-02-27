@@ -12,9 +12,12 @@ import { TransitionLink } from "../ui/TransitionLink";
 import Button from "../ui/Button";
 import { ArrowBigLeft } from "lucide-react";
 import { ChatHeaderLoading } from "../skeletonLoadingComponents/ChatHeaderLoading";
+import translations from "../../translations";
+import { useLanguage } from "../../contexts/LanguageContext";
 
 export const ChatHeader = memo(({ id }) => {
   const navigate = useNavigate();
+  const { language } = useLanguage();
   const { connectedUsers, typingUsers } = useSocket();
   const { user } = useAuth();
   const { conversationId } = useContext(ChatPageContext);
@@ -62,7 +65,7 @@ export const ChatHeader = memo(({ id }) => {
         onClick={() => navigate("/chats", { viewTransition: true })}
         className={"text-gray-600 md:hidden"}
       >
-        <p className="sr-only">Go Back</p>
+        <p className="sr-only">{translations.Common[language].GoBackSR}</p>
         <ArrowBigLeft size={18} />
       </Button>
       <TransitionLink
@@ -82,31 +85,39 @@ export const ChatHeader = memo(({ id }) => {
         />
         <div className="flex flex-col justify-center items-start">
           <p className="text-sm text-gray-900 dark:text-gray-50">{chatTitle}</p>
-          <span className="text-xs text-gray-700 dark:text-gray-100">
+          <span
+            dir={language === "Arabic" ? "rtl" : "ltr"}
+            className="text-xs text-gray-700 dark:text-gray-100"
+          >
             {isGroup ? (
               thisChatTypingUsers.length > 0 ? (
                 thisChatTypingUsers.map((userData) => {
                   return (
-                    <span>{userData.user.firstname + " is typing..."}</span>
+                    <span>
+                      {userData.user.firstname +
+                        translations.ChatHeader[language].TypingSuffix}
+                    </span>
                   );
                 })
               ) : (
                 membersCount +
-                " members" +
+                " " +
+                translations.ChatHeader[language].MembersLabel +
                 " | " +
                 connectedUsersCount +
-                " online"
+                " " +
+                translations.ChatHeader[language].OnlineLabel
               )
             ) : thisChatTypingUsers.length > 0 ? (
-              "typing..."
+              translations.ChatHeader[language].TypingStandalone
             ) : isOneToOneChatPartnerConnected ? (
-              <span className="text-cyan-600">Online</span>
+              <span className="text-cyan-600">
+                {translations.ChatHeader[language].Online}
+              </span>
             ) : (
               <span>
-                last seen at{" "}
-                {new Date(
-                  chatPartner.profile.lastSeen,
-                ).toLocaleTimeString()}{" "}
+                {translations.ChatHeader[language].LastSeenPrefix}{" "}
+                {new Date(chatPartner.profile.lastSeen).toLocaleTimeString()}
               </span>
             )}
           </span>

@@ -6,8 +6,12 @@ import Button from "../components/ui/Button";
 import { useSignUp } from "../hooks/auth/useSignUp";
 import { Navigate } from "react-router";
 import { useAuth } from "../contexts/AuthContext";
+import translations from "../translations";
+import { useLanguage } from "../contexts/LanguageContext";
 
 export function SignUpPage() {
+  const { language } = useLanguage();
+  const PageTranslations = translations.SignUpPage;
   const [signupData, setSignupData] = useState({
     firstname: "",
     lastname: "",
@@ -53,26 +57,25 @@ export function SignUpPage() {
         <div className="inset-0 z-1 absolute bg-gray-800/60 backdrop-blur-xs"></div>
         <article className="z-10 relative top-1/3">
           <h2 className="text-5xl font-bold tracking-tight text-cyan-200 text-shadow-cyan-100 text-shadow-xs mb-6">
-            Join GoChat
+            {PageTranslations[language].JoinTitle}
           </h2>
           <p className="max-w-120 text-sm text-gray-200">
-            Create an account to start chatting with your friends. Choose a
-            username and preferred verification method.
+            {PageTranslations[language].Description}
           </p>
           <p className="text-xs text-gray-300 mt-6">
-            Already have an account?{" "}
+            {PageTranslations[language].AlreadyHaveAccount}{" "}
             <Link
               className="text-xs text-cyan-200 border-2 border-cyan-200 rounded"
               route={"/auth/login"}
             >
-              Log in
+              {PageTranslations[language].LogIn}
             </Link>
           </p>
         </article>
       </section>
       <section className="basis-xl px-4 flex flex-1 flex-col items-center">
         <h2 className="font-rubik text-4xl font-bold text-center my-10 tracking-tight text-cyan-800 ">
-          Sign up
+          {PageTranslations[language].SignUpButton}
         </h2>
         <form
           onSubmit={handleSignUp}
@@ -82,7 +85,7 @@ export function SignUpPage() {
           {step === 1 && (
             <section>
               <InputField
-                label={"Firstname"}
+                label={PageTranslations[language].Firstname}
                 id="firstname"
                 name="firstname"
                 type="text"
@@ -90,7 +93,7 @@ export function SignUpPage() {
                 onChange={(e) => onFieldChange("firstname", e)}
               />
               <InputField
-                label={"Lastname"}
+                label={PageTranslations[language].Lastname}
                 id="lastname"
                 name="lastname"
                 type="text"
@@ -98,7 +101,7 @@ export function SignUpPage() {
                 onChange={(e) => onFieldChange("lastname", e)}
               />
               <InputField
-                label={"Username"}
+                label={PageTranslations[language].Username}
                 id="username"
                 name="username"
                 type="text"
@@ -106,7 +109,7 @@ export function SignUpPage() {
                 onChange={(e) => onFieldChange("username", e)}
               />
               <InputField
-                label={"Password"}
+                label={PageTranslations[language].Password}
                 id="password"
                 name="password"
                 type="password"
@@ -114,7 +117,7 @@ export function SignUpPage() {
                 onChange={(e) => onFieldChange("password", e)}
               />
               <InputField
-                label={"Confirm Password"}
+                label={PageTranslations[language].ConfirmPassword}
                 id="passwordConfirmation"
                 name="passwordConfirmation"
                 type="password"
@@ -126,7 +129,7 @@ export function SignUpPage() {
                   onClick={goNext}
                   className={"border border-cyan-600 text-xs text-cyan-600"}
                 >
-                  Next
+                  {PageTranslations[language].Next}
                 </Button>
               </div>
             </section>
@@ -135,7 +138,7 @@ export function SignUpPage() {
           {step === 2 && preferredVerification === "email" && (
             <section>
               <InputField
-                label={"Email"}
+                label={PageTranslations[language].Email}
                 id="email"
                 name="email"
                 type="email"
@@ -147,19 +150,19 @@ export function SignUpPage() {
                   onClick={goBack}
                   className={"border border-cyan-600 text-xs text-cyan-600"}
                 >
-                  Go back
+                  {translations.Common[language].GoBack}
                 </Button>
                 <Button
                   onClick={() => setPreferredVerification("phoneNumber")}
                   className={"text-xs bg-cyan-600 text-white"}
                 >
-                  Continue with phone number
+                  {PageTranslations[language].ContinueWithPhone}
                 </Button>
                 <Button
                   onClick={goNext}
                   className={"text-xs border border-cyan-600 text-cyan-600"}
                 >
-                  Next
+                  {PageTranslations[language].Next}
                 </Button>
               </div>
             </section>
@@ -168,7 +171,7 @@ export function SignUpPage() {
           {step === 2 && preferredVerification === "phoneNumber" && (
             <section>
               <InputField
-                label={"Phone Number"}
+                label={PageTranslations[language].PhoneNumber}
                 id="phoneNumber"
                 name="phoneNumber"
                 type="tel"
@@ -180,19 +183,19 @@ export function SignUpPage() {
                   onClick={goBack}
                   className={"border border-cyan-600 text-xs text-cyan-600"}
                 >
-                  Go back
+                  {translations.Common[language].GoBack}
                 </Button>
                 <Button
                   onClick={() => setPreferredVerification("email")}
                   className={"text-xs bg-cyan-600 text-white"}
                 >
-                  Continue with email
+                  {PageTranslations[language].ContinueWithEmail}
                 </Button>
                 <Button
                   onClick={goNext}
                   className={"text-xs border border-cyan-600 text-cyan-600"}
                 >
-                  Next
+                  {PageTranslations[language].Next}
                 </Button>
               </div>
             </section>
@@ -202,13 +205,13 @@ export function SignUpPage() {
             <section>
               <div className="text-center">
                 <p className="text-sm text-gray-800 mb-6">
-                  You made it ! , submit your account creation .
+                  {PageTranslations[language].YouMadeIt}
                 </p>
                 <Button
                   type="submit"
                   className={"text-xs bg-cyan-600 text-white"}
                 >
-                  Create account
+                  {PageTranslations[language].CreateAccountButton}
                 </Button>
               </div>
             </section>
