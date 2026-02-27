@@ -13,9 +13,9 @@ export function Contact({
 }) {
   const fullname = `${firstname} ${lastname}`;
   return (
-    <li className="pb-2 flex items-center border-b border-gray-100 my-1">
+    <li className="py-2 flex items-center dark:hover:bg-gray-800/50">
       <button
-        className="flex items-center gap-2 cursor-pointer relative"
+        className="flex w-full items-center gap-2 cursor-pointer relative"
         type="button"
         onClick={onClick}
       >
@@ -29,11 +29,11 @@ export function Contact({
 
           {isSelectable ? (
             isSelected ? (
-              <span className="text-green-600 bg-gray-200/90 rounded-full absolute bottom-0 right-0">
+              <span className="text-green-600 dark:text-green-400 bg-gray-200/90 dark:bg-gray-600/90 rounded-full absolute bottom-0 right-0">
                 <CircleCheckBig size={15} />
               </span>
             ) : (
-              <span className="text-gray-400 bg-gray-200/90 rounded-full absolute bottom-0 right-0">
+              <span className="text-gray-400 bg-gray-200/90 dark:text-gray-600 dark:bg-gray-400/90 rounded-full absolute bottom-0 right-0">
                 <Circle size={15} />
               </span>
             )
@@ -41,7 +41,7 @@ export function Contact({
         </div>
 
         <div className="flex flex-col">
-          <p className="text-sm text-gray-700">{fullname}</p>
+          <p className="text-sm text-gray-700 dark:text-gray-200">{fullname}</p>
         </div>
       </button>
     </li>

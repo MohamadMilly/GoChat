@@ -38,7 +38,7 @@ export function MessagesList({ convId = null }) {
     >
       {messages && messages.length === 0 ? (
         <p
-          className="text-center text-lg h-full flex justify-center items-center text-gray-800 z-10
+          className="text-center text-lg h-full flex justify-center items-center text-gray-800 dark:text-gray-100 p-1 bg-gray-50/20 dark:bg-gray-700/20 z-10
             "
         >
           No messages yet.
@@ -67,7 +67,7 @@ export function MessagesList({ convId = null }) {
               {isNewDayMessage && (
                 <span
                   dir="rtl"
-                  className="text-xs text-gray-500 bg-gray-50/40 mx-auto my-2 block w-fit p-0.5 rounded"
+                  className="text-xs text-gray-500 dark:text-gray-200 bg-gray-50/40 dark:bg-gray-600/40 mx-auto my-2 block w-fit p-0.5 rounded"
                 >
                   {new Date(message.createdAt).toLocaleDateString()}
                 </span>

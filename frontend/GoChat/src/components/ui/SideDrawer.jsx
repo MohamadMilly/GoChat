@@ -26,7 +26,7 @@ export function SideDrawer() {
         aria-labelledby="drawer-title"
         className="fixed inset-0 size-auto max-h-none max-w-none overflow-hidden bg-transparent not-open:hidden backdrop:bg-transparent"
       >
-        <el-dialog-backdrop className="absolute inset-0 bg-gray-500/75 transition-opacity duration-500 ease-in-out data-closed:opacity-0" />
+        <el-dialog-backdrop className="absolute inset-0 bg-gray-500/75 dark:bg-gray-800/75 transition-opacity duration-500 ease-in-out data-closed:opacity-0" />
 
         <div
           tabIndex={0}
@@ -58,7 +58,7 @@ export function SideDrawer() {
                 </svg>
               </button>
             </div>
-            <div className="relative flex h-full flex-col overflow-y-auto bg-white py-6 shadow-xl">
+            <div className="relative flex h-full flex-col overflow-y-auto bg-white dark:bg-gray-900 py-6 shadow-xl">
               <div className="px-4 sm:px-6">
                 {isFetching ? (
                   <IdentityLoading isCurrentUserIdentity={true} />
@@ -70,7 +70,7 @@ export function SideDrawer() {
                       color={user?.accountColor || null}
                       dynamicTransitionId={transitionId}
                     />
-                    <strong className="text-sm text-gray-700">
+                    <strong className="text-sm text-gray-700 dark:text-gray-200">
                       {fullname}
                     </strong>
                   </div>
@@ -80,7 +80,7 @@ export function SideDrawer() {
               </div>
               <div className="relative mt-6 flex-1 px-4 sm:px-6">
                 <TransitionLink
-                  className="flex w-full items-center gap-x-2 text-gray-500 hover:text-gray-900 hover:text-bg-gray-50 py-2 text-sm px-3 rounded-md hover:scale-105 shadow transition-all duration-300"
+                  className="flex w-full items-center gap-x-2 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800/90 py-2 text-sm px-3 rounded-md hover:scale-105 dark:bg-gray-800/70 shadow dark:shadow-white/5 dark:shadow-inner transition-all duration-300"
                   route={"/users/me/profile"}
                   setDynamicTransitionId={setTransitionId}
                 >
@@ -89,18 +89,18 @@ export function SideDrawer() {
                 </TransitionLink>
                 <Line />
                 <div className="flex flex-col gap-2">
-                  <h3 className="text-lg font-bold tracking-tight text-cyan-600">
+                  <h3 className="text-lg font-bold tracking-tight text-cyan-600 dark:text-cyan-400">
                     Account
                   </h3>
                   <Link
-                    className="flex items-center gap-x-2 text-sm text-gray-500 hover:text-gray-900 hover:text-bg-gray-50 py-2 rounded-md"
+                    className="flex items-center gap-x-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800/90 py-2 px-3 rounded-md hover:scale-105 dark:bg-gray-800/70 shadow dark:shadow-white/5 dark:shadow-inner transition-all duration-300"
                     route={"/users/me/preferences"}
                   >
                     <Heart size={20} />
                     <span> Account preferences</span>
                   </Link>
                   <Link
-                    className="flex items-center gap-x-2 text-sm text-gray-500 hover:text-gray-900 hover:text-bg-gray-50 py-2 rounded-md"
+                    className="flex items-center gap-x-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800/90 py-2 px-3 rounded-md hover:scale-105 dark:bg-gray-800/70 shadow dark:shadow-white/5 dark:shadow-inner transition-all duration-300"
                     route={"/users/me/settings"}
                   >
                     <Settings size={20} />
@@ -109,11 +109,11 @@ export function SideDrawer() {
                 </div>
                 <Line />
                 <div className="flex flex-col gap-2">
-                  <h3 className="text-lg font-bold tracking-tight text-cyan-600">
+                  <h3 className="text-lg font-bold tracking-tight text-cyan-600 dark:text-cyan-400">
                     Chats
                   </h3>
                   <Link
-                    className="flex items-center gap-x-2 text-sm text-gray-500 hover:text-gray-900 hover:text-bg-gray-50 py-2 rounded-md"
+                    className="flex items-center gap-x-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800/90 py-2 px-3 rounded-md hover:scale-105 dark:bg-gray-800/70 shadow dark:shadow-white/5 dark:shadow-inner transition-all duration-300"
                     route={"/chats/group/new"}
                   >
                     <UsersRound size={20} />
@@ -121,14 +121,14 @@ export function SideDrawer() {
                   </Link>
                   <Link
                     route={"/chats/direct/new"}
-                    className="flex items-center gap-x-2 text-sm text-gray-500 hover:text-gray-900 hover:text-bg-gray-50 py-2 rounded-md"
+                    className="flex items-center gap-x-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800/90 py-2 px-3 rounded-md hover:scale-105 dark:bg-gray-800/70 shadow dark:shadow-white/5 dark:shadow-inner transition-all duration-300"
                   >
                     <Plus size={20} />
                     <span>New chat</span>
                   </Link>
                   <Link
                     route={"/chats/groups"}
-                    className="flex items-center gap-x-2 text-sm text-gray-500 hover:text-gray-900 hover:text-bg-gray-50 py-2 rounded-md"
+                    className="flex items-center gap-x-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800/90 py-2 px-3 rounded-md hover:scale-105 dark:bg-gray-800/70 shadow dark:shadow-white/5 dark:shadow-inner transition-all duration-300"
                   >
                     <MessageCircle size={20} />
                     <span>Find a group</span>

@@ -12,7 +12,7 @@ import { useState } from "react";
 function ChatParticipant({ participant, isConnected }) {
   const [transitionId, setTransitionId] = useState(null);
   return (
-    <li className="border-b border-gray-300 pb-2 my-2">
+    <li className="py-2">
       <TransitionLink
         setDynamicTransitionId={setTransitionId}
         className={"flex items-center gap-x-2"}
@@ -28,15 +28,15 @@ function ChatParticipant({ participant, isConnected }) {
             color={participant.user?.accountColor || null}
           />
           <span
-            className={`absolute w-3 h-3 bottom-0 right-0 rounded-full ${isConnected ? "bg-cyan-600" : "bg-gray-400"}`}
+            className={`absolute w-3 h-3 bottom-0 right-0 rounded-full ${isConnected ? "bg-cyan-600 dark:bg-cyan-400" : "bg-gray-400 dark:bg-gray-300"}`}
           ></span>
         </div>
 
         <div className="flex flex-col items-start">
-          <p className="text-sm text-gray-800">
+          <p className="text-sm text-gray-800 dark:text-gray-100">
             {participant.user.firstname + " " + participant.user.lastname}
           </p>
-          <span className="text-xs text-gray-500">
+          <span className="text-xs text-gray-500 dark:text-gray-300">
             joined at {new Date(participant.joinedAt).toLocaleString("en-GB")}
           </span>
         </div>
@@ -62,9 +62,12 @@ export function ChatDetails() {
   const transitionId = getGenertedTransitionId();
   const dynamicTransitionName = `${title.replaceAll(" ", "-")}-${transitionId}`;
   return (
-    <main className="max-w-200 mx-auto bg-white font-rubik relative">
-      <div className="flex justify-start items-center p-2 bg-gray-50/30 rounded-lg my-2">
-        <Button onClick={() => navigate(-1)} className="text-gray-600">
+    <main className="max-w-200 mx-auto bg-white dark:bg-gray-900 font-rubik relative">
+      <div className="flex justify-start items-center p-2 bg-gray-50/30 dark:bg-gray-800/80 rounded-lg my-2">
+        <Button
+          onClick={() => navigate(-1)}
+          className="text-gray-600 dark:text-gray-300"
+        >
           <p className="sr-only">Go Back</p>
           <ArrowBigLeft size={20} />
         </Button>
@@ -76,27 +79,29 @@ export function ChatDetails() {
           backgroundPosition: "center",
           backgroundSize: "cover",
         }}
-        className="bg-gray-50 p-4 min-h-70 flex flex-col justify-end items-start"
+        className="bg-gray-100 dark:bg-gray-800 p-4 min-h-70 flex flex-col justify-end items-start"
       >
-        <h2 className="text-xl text-gray-800">{title}</h2>
-        <p className="text-sm text-gray-500">
+        <h2 className="text-xl text-gray-800 dark:text-gray-50">{title}</h2>
+        <p className="text-sm text-gray-500 dark:text-gray-300">
           {membersCount} members | {connectedUsersCount} online
         </p>
       </section>
-      <section className="px-4 mt-4 py-2 bg-white shadow-sm rounded-md">
-        <article className="pb-2 border-b-2 my-2 border-gray-100">
-          <p className="text-gray-900 flex items-center gap-2">
+      <section className="px-4 mt-4 py-2 bg-white dark:bg-gray-800 shadow-sm rounded-md">
+        <article className="py-1.5 my-2">
+          <p className="text-gray-900 dark:text-gray-100 flex items-center gap-2">
             <span>{description || "No description"}</span>
           </p>
-          <h2 className="text-sm text-cyan-600/80 mt-1">Description</h2>
+          <h2 className="text-sm text-cyan-600/80 dark:text-cyan-400/80 mt-1">
+            Description
+          </h2>
         </article>
       </section>
-      <section className="px-4 mt-4 py-2 bg-white shadow-sm rounded-md">
-        <h3 className="text-lg font-bold tracking-tight text-cyan-600">
+      <section className="p-4 mt-4 bg-white dark:bg-gray-800 shadow-sm rounded-md">
+        <h3 className="text-lg font-bold tracking-tight text-cyan-600 dark:text-cyan-400">
           Members
         </h3>
         {
-          <ul className="p-2 my-2">
+          <ul className="p-2 my-2 divide-y divide-gray-700">
             {participants.map((participant) => {
               const isConnected = connectedUsers.some(
                 (id) => id == participant.user.id,

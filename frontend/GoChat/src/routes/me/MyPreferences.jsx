@@ -37,11 +37,11 @@ function PrefrenceSectionSelect({
   return (
     <section className="flex items-center justify-between px-2 py-1 my-2">
       {isFetching ? (
-        <span className="w-20 inline-block py-2.5 rounded bg-gray-200 animate-pulse"></span>
+        <span className="w-20 inline-block py-2.5 rounded bg-gray-200 dark:bg-gray-600 animate-pulse"></span>
       ) : (
-        <h3 className="text-sm">{preferenceTitle}</h3>
+        <h3 className="text-sm dark:text-gray-100">{preferenceTitle}</h3>
       )}
-      <div className="text-gray-700">
+      <div className="text-gray-700 dark:text-gray-300">
         <Button
           onClick={toggleMenuVisibility}
           className={
@@ -51,7 +51,9 @@ function PrefrenceSectionSelect({
           {isMenuVisible ? <ArrowUp size={15} /> : <ArrowDown size={15} />}
           <span
             className={
-              isFetching ? "inline-block w-10 py-1.5 rounded bg-gray-200" : ""
+              isFetching
+                ? "inline-block w-10 py-1.5 rounded bg-gray-200 dark:bg-gray-600"
+                : ""
             }
           >
             {isFetching ? "" : initialOption}
@@ -59,13 +61,13 @@ function PrefrenceSectionSelect({
         </Button>
         {isMenuVisible && (
           <ul
-            className={`absolute bottom-0 right-0 translate-y-1/3 bg-white dark:bg-gray-800 shadow-xs p-2 rounded w-50 ${fadeIsRunning ? "animate-fade" : "animate-pop"}`}
+            className={`absolute bottom-0 right-0 translate-y-1/2 bg-white dark:bg-gray-700 shadow-xs px-2 py-3 rounded w-50 ${fadeIsRunning ? "animate-fade" : "animate-pop"}`}
           >
             {options.map((option) => {
               return (
                 <li>
                   <button
-                    className="w-full flex justify-start items-center text-xs text-gray-500 dark:text-gray-200 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700 py-0.5 px-1 rounded cursor-pointer"
+                    className="w-full flex justify-start items-center text-xs text-gray-500 dark:text-gray-200 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-600/50 p-1 rounded cursor-pointer"
                     key={option.key}
                     onClick={() => handleSelect(option.value)}
                   >
@@ -100,8 +102,8 @@ function PreferenceSectionToggle({
 
       {isFetching ? (
         <div className="flex items-center">
-          <div className="w-9 h-5 bg-gray-300 rounded-full animate-pulse"></div>
-          <span className="w-10 ml-3 block py-1.5 rounded bg-gray-200 animate-pulse"></span>
+          <div className="w-9 h-5 bg-gray-300 dark:bg-gray-600 rounded-full animate-pulse"></div>
+          <span className="w-10 ml-3 block py-1.5 rounded bg-gray-200 dark:bg-gray-600 animate-pulse"></span>
         </div>
       ) : typeof value === "boolean" ? (
         <label className="inline-flex items-center cursor-pointer">
@@ -119,7 +121,7 @@ function PreferenceSectionToggle({
               peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full
               peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-0.5
               after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all
-              peer-checked:bg-cyan-600 dark:peer-checked:bg-cyan-600"
+              peer-checked:bg-cyan-600 dark:peer-checked:bg-cyan-400"
           ></div>
 
           <span className="ms-3 text-xs text-gray-600 dark:text-gray-300">
@@ -149,7 +151,7 @@ export function MyPreferences() {
         </Button>
       </div>
       <section className="shadow-xs p-4 rounded-lg my-4 border border-gray-300/50 bg-gray-50 dark:bg-gray-800 dark:border-gray-700">
-        <h2 className="text-lg font-bold tracking-tight text-cyan-600 mb-4">
+        <h2 className="text-lg font-bold tracking-tight text-cyan-600 dark:text-cyan-400 mb-4">
           Profile prefrences
         </h2>
         <PreferenceSectionToggle

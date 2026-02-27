@@ -115,14 +115,10 @@ export function NewGroupPage() {
     <main className="max-w-200 mx-auto bg-white dark:bg-gray-900 font-rubik relative">
       <div className="flex justify-between items-center p-2 bg-gray-50/30 dark:bg-gray-800/80 rounded-lg my-2">
         <Button onClick={goBack} className="text-gray-600 dark:text-gray-300">
-          <p className="text-xs text-gray-500">
-            {step === 1 ? "Home" : "Previous"}
-          </p>
+          <p className="text-xs">{step === 1 ? "Home" : "Previous"}</p>
         </Button>
         <Button onClick={goNext} className={"text-gray-600 dark:text-gray-300"}>
-          <p className="text-xs text-gray-500">
-            {step === 2 ? <Check size={20} /> : "Next"}
-          </p>
+          <p className="text-xs">{step === 2 ? <Check size={20} /> : "Next"}</p>
         </Button>
       </div>
       {step === 1 && (
@@ -136,7 +132,7 @@ export function NewGroupPage() {
       >
         {step === 1 && (
           <section className="p-2 mt-4">
-            <ul className="w-full flex flex-col animate-slideup">
+            <ul className="w-full flex flex-col animate-slideup divide-y divide-gray-700">
               {isFetching ? (
                 <p className="text-xs text-gray-400 dark:text-gray-200 text-center">
                   Loading...

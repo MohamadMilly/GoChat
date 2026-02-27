@@ -11,6 +11,7 @@ import { supabase } from "../../utils/supabase";
 import EmojiPicker from "emoji-picker-react";
 import { useSearchParams } from "react-router";
 import Button from "../ui/Button";
+import { useTheme } from "../../contexts/ThemeContext";
 
 let counter = 0;
 
@@ -20,6 +21,7 @@ export function SendMessageForm() {
   const messagesQueueRef = useRef([]);
   const [hasAttached, setHasAttached] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const { theme } = useTheme();
   const messageTextAreaRef = useRef(null);
   const [mediaFileData, setMediaFileData] = useState({
     file: null,
@@ -167,11 +169,14 @@ export function SendMessageForm() {
     const el = messageTextAreaRef.current;
     if (!el) return;
     el.style.height = "auto";
-    el.style.height = Math.min(el.scrollHeight, 240) + "px";
+    el.style.height = Math.min(el.scrollHeight, 150) + "px";
 
     setMessage(e.target.value);
   };
-
+  const handleUnAttach = () => {
+    setMediaFileData({ file: null, mimeType: null });
+    setHasAttached(false);
+  };
   return (
     <div className="z-20">
       {repliedMessage && (
@@ -193,8 +198,27 @@ export function SendMessageForm() {
           </button>
         </div>
       )}
+      {hasAttached && (
+        <div className="dark:bg-gray-800 dark:text-gray-300 p-2 rounded flex items-center justify-between">
+          <div className="flex items-center gap-1">
+            <Paperclip size={18} />
+            <p className="text-xs">File Attached</p>
+          </div>
+          <Button
+            onClick={handleUnAttach}
+            className={"w-7 h-7 flex items-center justify-center"}
+          >
+            {" "}
+            <span className="sr-only">UnAttach file</span>
+            <X size={10} className="shrink-0" />
+          </Button>
+        </div>
+      )}
       <form method="POST" onSubmit={onSend}>
         <EmojiPicker
+          style={{ backgroundColor: theme === "light" ? "white" : "#1e2939" }}
+          previewConfig={{ showPreview: false }}
+          theme={theme === "light" ? "light" : "dark"}
           onEmojiClick={handlePickEmoji}
           open={showEmojiPicker}
           width={"100%"}
@@ -225,7 +249,7 @@ export function SendMessageForm() {
           <textarea
             id="chat"
             rows="1"
-            className="block max-h-60 resize-none min-h-15 mx-4 p-2.5 w-full text-sm text-gray-900 bg-white dark:bg-gray-200 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 "
+            className="block max-h-37.5 resize-none min-h-15 mx-4 p-2.5 w-full text-sm text-gray-900 bg-white dark:bg-gray-900 dark:text-gray-50 outline-2 outline-gray-400/20 dark:outline-gray-200/20 focus:outline-offset-2 focus:outline-cyan-600/80 dark:focus:outline-cyan-400/80 rounded-lg"
             placeholder="Your message..."
             onChange={onMessageChange}
             value={message}

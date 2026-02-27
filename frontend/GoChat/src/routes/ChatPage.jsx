@@ -58,7 +58,7 @@ export function ChatPage() {
             backgroundSize: "cover",
           }}
         >
-          <div className="inset-0 absolute bg-gray-600/20 dark:bg-gray-800/60 backdrop-contrast-150"></div>
+          <div className="inset-0 absolute bg-gray-600/20 dark:bg-gray-800/60"></div>
           <MessagesList />
           <SendMessageForm />
         </section>

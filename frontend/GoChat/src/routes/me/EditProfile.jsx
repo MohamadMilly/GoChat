@@ -133,7 +133,7 @@ function AvatarFileField({
   return (
     <div className="bg-gray-50/30 px-4 py-2 my-4 flex-0 shrink-0 h-full dark:bg-gray-800/30">
       <label
-        className="text-sm text-cyan-600/80 dark:text-cyan-400/50"
+        className="text-sm text-cyan-600/80 dark:text-cyan-400/80"
         htmlFor="avatar"
       >
         Your Avatar
@@ -278,7 +278,7 @@ function AvatarBackgroundFileField({
             <Button
               disabled={isFetchingProfile}
               className={
-                "bg-red-200 text-red-500/80 text-xs disabled:opacity-50"
+                "bg-red-200 text-red-500/80 dark:text-red-400/80 text-xs disabled:opacity-50"
               }
               onClick={handleDeleteAvatarbackground}
             >

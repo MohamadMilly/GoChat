@@ -21,7 +21,7 @@ export function MediaDrawer({
   const videoFieldRef = useRef(null);
   return (
     <SlideUpMenu isVisible={isVisible} setIsVisible={setIsVisible}>
-      <div className="p-1 hover:bg-gray-100 text-gray-500 text-sm hover:text-gray-900 rounded mt-2 mb-1">
+      <div className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700/10 text-gray-500 dark:text-gray-300 text-sm hover:text-gray-900 dark:hover:text-gray-100 rounded mt-2 mb-1">
         <button
           className="flex items-center gap-2 w-full cursor-pointer "
           type="button"
@@ -43,7 +43,7 @@ export function MediaDrawer({
           ref={imageFieldRef}
         />
       </div>
-      <div className="p-1 hover:bg-gray-100 text-gray-500 text-sm hover:text-gray-900 rounded my-1">
+      <div className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700/10 text-gray-500 dark:text-gray-300 text-sm hover:text-gray-900 dark:hover:text-gray-100 rounded my-1">
         <button
           className="flex items-center gap-2 w-full cursor-pointer"
           type="button"
@@ -65,7 +65,7 @@ export function MediaDrawer({
           ref={fileFieldRef}
         />
       </div>
-      <div className="p-1 hover:bg-gray-100 text-gray-500 text-sm hover:text-gray-900 rounded mt-1">
+      <div className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700/10 text-gray-500 dark:text-gray-300 text-sm hover:text-gray-900 dark:hover:text-gray-100 rounded mt-1">
         <button
           className="flex items-center gap-2 w-full cursor-pointer"
           type="button"

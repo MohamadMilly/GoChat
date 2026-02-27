@@ -1,17 +1,15 @@
 import { useNavigate, useParams } from "react-router";
 import { useMyConversations } from "../../hooks/me/useMyConversations";
-import { useConversation } from "../../hooks/useConversation";
 import { useAuth } from "../../contexts/AuthContext";
 import Button from "../ui/Button";
 import { Link } from "../ui/Link";
 import { ChatHeader } from "./ChatHeader";
 import chatBackground from "../../assets/chat_background.png";
-import { useMessages } from "../../hooks/useMessages";
+import darkChatBackground from "../../assets/chat_background_dark.png";
 import { MessagesList } from "./MessagesList";
 import { ArrowBigLeft } from "lucide-react";
 import { useJoinGroup } from "../../hooks/me/useJoinGroup";
-import { useContext } from "react";
-import { ChatPageContext } from "../../routes/ChatPage";
+import { useTheme } from "../../contexts/ThemeContext";
 
 function GroupPreviewFooter() {
   const { id } = useParams();
@@ -41,14 +39,17 @@ function GroupPreviewFooter() {
     navigate(`/chats/group/${id}`);
   }
   return (
-    <div className="px-4 py-2 flex flex-col items-center gap-2 bg-white">
+    <div className="px-4 py-2 flex flex-col items-center gap-2 bg-white dark:bg-gray-800">
       {isLoggedIn ? (
         isJoined ? (
           <>
-            <p className="text-sm text-gray-400">
+            <p className="text-sm text-gray-400 dark:text-gray-200">
               You are already in this group
             </p>
-            <Link route={`/chats/group/${id}`} className="text-xs rounded-md">
+            <Link
+              route={`/chats/group/${id}`}
+              className="text-xs rounded-md dark:text-gray-200 dark:bg-gray-700"
+            >
               Go to the chat
             </Link>{" "}
           </>
@@ -75,11 +76,11 @@ function GroupPreviewFooter() {
 export function GroupPreview() {
   const { id } = useParams();
   const naviagte = useNavigate();
-
+  const { theme } = useTheme();
   return (
     <>
       <div className="inset-0 bg-gray-600/20 backdrop-blur-xs absolute"></div>
-      <section className="absolute top-[50vh] left-[50vw] -translate-x-1/2 -translate-y-1/2 z-20  max-w-200 min-w-80">
+      <section className="absolute top-[50vh] left-[50vw] -translate-x-1/2 -translate-y-1/2 z-20  max-w-80 sm:max-w-120 md:max-w-200 min-w-80">
         <Button
           onClick={() => naviagte(-1)}
           className={"bg-white my-2 text-gray-600"}
@@ -90,7 +91,7 @@ export function GroupPreview() {
         <div
           className="flex flex-col flex-1 relative h-[70vh]"
           style={{
-            backgroundImage: `url(${chatBackground})`,
+            backgroundImage: `url(${theme === "light" ? chatBackground : darkChatBackground})`,
             backgroundAttachment: "fixed",
             backgroundRepeat: "repeat",
             backgroundPosition: "center",

@@ -1,4 +1,4 @@
-import { Menu } from "lucide-react";
+import { Menu, PanelRight } from "lucide-react";
 import { useSocket } from "../../contexts/SocketContext";
 import { Link } from "../ui/Link";
 export function ChatsListHeader() {
@@ -27,9 +27,9 @@ export function ChatsListHeader() {
         <button
           command="show-modal"
           commandfor="drawer"
-          className="rounded-md bg-white/10 px-2.5 py-1.5 text-sm font-semibold text-cyan-600 inset-ring inset-ring-cyan-600/20 hover:bg-white/20 cursor-pointer"
+          className="rounded-md dark:hover:bg-gray-800/50 p-2 text-sm font-semibold text-cyan-600 dark:text-cyan-400 hover:bg-gray-100 cursor-pointer"
         >
-          <Menu />
+          <PanelRight />
         </button>
       </nav>
     </header>
