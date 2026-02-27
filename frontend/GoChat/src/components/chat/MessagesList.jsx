@@ -33,8 +33,9 @@ export function MessagesList({ convId = null }) {
   if (messagesError) return <p>Error: {messagesError.message}</p>;
   return (
     <ul
+      dir="ltr"
       ref={messagesListRef}
-      className="flex-1 px-3 py-1 h-full overflow-visible overflow-y-auto overflow-x-hidden z-10 scrollbar-custom"
+      className="flex-1 px-1 sm:px-3 py-1 h-full overflow-visible overflow-y-auto overflow-x-hidden z-10 scrollbar-custom"
     >
       {messages && messages.length === 0 ? (
         <p

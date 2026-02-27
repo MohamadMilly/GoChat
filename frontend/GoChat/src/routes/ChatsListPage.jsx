@@ -14,25 +14,23 @@ export const ChatsListContext = createContext(null);
 
 export function ChatsListPage() {
   const [isChatsPanelCollapsed, setIsChatsPanelCollapsed] = useState(
-    storedChatsPanelStatus,
+    storedChatsPanelStatus ?? false,
   );
   const { language } = useLanguage();
   const handleChatsPanelCollapse = (value) => {
     setIsChatsPanelCollapsed(value);
     localStorage.setItem("isChatsPanelCollapsed", value);
   };
+
   return (
     <ChatsListContext
       value={{ isChatsPanelCollapsed, handleChatsPanelCollapse }}
     >
-      <div
-        dir={language === "Arabic" ? "rtl" : "ltr"}
-        className="flex flex-col h-screen"
-      >
+      <div className="flex flex-col h-screen">
         <SideDrawer />
         <ChatsListHeader />
         <main
-          className={`flex-1 md:grid  ${isChatsPanelCollapsed ? "md:grid-cols-[1fr]" : "md:grid-cols-[350px_1fr]"} h-[calc(100vh-64px)]`}
+          className={`flex-1 w-full md:grid  ${isChatsPanelCollapsed ? "md:grid-cols-[1fr]" : language === "Arabic" ? "md:grid-cols-[1fr_350px]" : "md:grid-cols-[350px_1fr]"} h-[calc(100vh-64px)]`}
         >
           <ChatsPanel />
           <Outlet />

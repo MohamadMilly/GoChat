@@ -34,10 +34,10 @@ export function SideDrawer() {
 
         <div
           tabIndex={0}
-          className="absolute inset-0 pl-10 focus:outline-none sm:pl-16"
+          className="absolute inset-0 ltr:pl-10 rtl:pr-10 focus:outline-none ltr:sm:pl-16 rtl:sm:pr-16 "
         >
-          <el-dialog-panel className="group/dialog-panel relative ml-auto block size-full max-w-md transform transition duration-500 ease-in-out data-closed:translate-x-full sm:duration-700">
-            <div className="absolute top-0 left-0 -ml-8 flex pt-4 pr-2 duration-500 ease-in-out group-data-closed/dialog-panel:opacity-0 sm:-ml-10 sm:pr-4">
+          <el-dialog-panel className="group/dialog-panel relative ltr:ml-auto rtl:mr-auto block size-full max-w-md transform transition duration-500 ease-in-out data-closed:translate-x-full rtl:data-closed:-translate-x-full sm:duration-700">
+            <div className="absolute top-0 ltr:left-0 rtl:right-0 ltr:-ml-8 rtl:-mr-8  flex pt-4 pr-2 rtl:pl-2 duration-500 ease-in-out group-data-closed/dialog-panel:opacity-0 ltr:sm:-ml-10 rtl:sm:-mr-10 ltr:sm:pr-4 rtl:sm:pl-4">
               <button
                 command="close"
                 commandfor="drawer"

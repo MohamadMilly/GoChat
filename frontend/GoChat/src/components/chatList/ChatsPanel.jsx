@@ -39,10 +39,10 @@ export function ChatsPanel() {
   return (
     <aside
       dir={language === "Arabic" ? "rtl" : "ltr"}
-      className={`md:z-100 bg-white dark:bg-gray-900 group ${isChatsPanelCollapsed ? "absolute top-0 bottom-0 ltr:left-0 rtl:right-0 ltr:-translate-x-full rtl:translate-x-full" : "md:col-start-1 md:col-end-2 relative"}`}
+      className={`md:z-100 bg-white dark:bg-gray-900 group ${isChatsPanelCollapsed ? "absolute top-0 bottom-0 ltr:left-0 rtl:right-0 ltr:-translate-x-full rtl:translate-x-full " : language === "Arabic" ? "md:col-start-2 md:col-end-3 relative" : "md:col-start-1 md:col-end-2 relative"}`}
     >
       <Button
-        className={`absolute z-2 hidden md:flex ${isChatsPanelCollapsed ? "opacity-100" : "opacity-0"} text-gray-600 dark:text-gray-100 border border-gray-200 dark:border-gray-600 dark:bg-gray-800 top-1/2 ltr:right-0 rtl:left-0  -translate-y-1/2 transition-all duration-300 group-hover:opacity-100 ltr:translate-x-3/4 rtl:-translate-x-3/4 w-11 h-11 justify-center items-center rounded-full!`}
+        className={`absolute z-2 hidden md:flex ${isChatsPanelCollapsed ? "opacity-100 ltr:translate-x-full rtl:-translate-x-full" : "opacity-0"} text-gray-600 dark:text-gray-100 border border-gray-200 dark:border-gray-600 dark:bg-gray-800 top-1/2 ltr:right-0 rtl:left-0  -translate-y-1/2 transition-all duration-300 group-hover:opacity-100 ltr:translate-x-3/4 rtl:-translate-x-3/4 w-11 h-11 justify-center items-center rounded-full!`}
         onClick={() => handleChatsPanelCollapse(!isChatsPanelCollapsed)}
       >
         {isChatsPanelCollapsed ? (
@@ -58,7 +58,7 @@ export function ChatsPanel() {
         )}
       </Button>
       <div
-        className={`ltr:border-r-2 rtl:border-l-2 h-full border-gray-200 dark:border-gray-700 flex flex-col max-h-full ${isChatsPanelCollapsed ? "animate-fade" : "animate-slideup"} `}
+        className={`border-r-2 h-full border-gray-200 dark:border-gray-700 flex flex-col max-h-full ${isChatsPanelCollapsed ? "animate-fade hidden" : "animate-slideup"} `}
       >
         <SearchBar
           name="name"

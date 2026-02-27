@@ -183,8 +183,15 @@ export function SendMessageForm() {
   return (
     <div dir={language === "Arabic" ? "rtl" : "ltr"} className="z-20">
       {repliedMessage && (
-        <div className="relative px-4 py-3 bg-gray-50/50 dark:bg-gray-50/70 backdrop-blur-xs border-2 border-gray-100/50 shadow-gray-100 shadow-inner m-2 rounded-lg animate-slideup ">
-          <strong className="text-gray-800">
+        <div
+          style={{ "--color": repliedMessage.sender?.accountColor }}
+          dir={"ltr"}
+          className="relative border-l-6 border-[var(--color)] px-4 py-3 bg-gray-50/50 dark:bg-gray-50/70 backdrop-blur-xs shadow-gray-100 shadow-inner m-2 rounded-lg animate-slideup "
+        >
+          <strong
+            style={{ "--color": repliedMessage.sender?.accountColor }}
+            className="text-[var(--color)]"
+          >
             {repliedMessage.sender.firstname +
               " " +
               repliedMessage.sender.lastname}

@@ -83,6 +83,7 @@ export function ChatDetails() {
         </Button>
       </div>
       <section
+        dir={language === "Arabic" ? "rtl" : "ltr"}
         style={{
           backgroundImage: `url('${avatar}')`,
           viewTransitionName: dynamicTransitionName,
@@ -97,7 +98,10 @@ export function ChatDetails() {
           {connectedUsersCount} {translations.ChatDetails[language].OnlineLabel}
         </p>
       </section>
-      <section className="px-4 mt-4 py-2 bg-white dark:bg-gray-800 shadow-sm rounded-md">
+      <section
+        dir={language === "Arabic" ? "rtl" : "ltr"}
+        className="px-4 mt-4 py-2 bg-white dark:bg-gray-800 shadow-sm rounded-md"
+      >
         <article className="py-1.5 my-2">
           <p className="text-gray-900 dark:text-gray-100 flex items-center gap-2">
             <span>
@@ -109,7 +113,10 @@ export function ChatDetails() {
           </h2>
         </article>
       </section>
-      <section className="p-4 mt-4 bg-white dark:bg-gray-800 shadow-sm rounded-md">
+      <section
+        dir={language === "Arabic" ? "rtl" : "ltr"}
+        className="p-4 mt-4 bg-white dark:bg-gray-800 shadow-sm rounded-md"
+      >
         <h3 className="text-lg font-bold tracking-tight text-cyan-600 dark:text-cyan-400">
           {translations.ChatDetails[language].MembersHeading}
         </h3>

@@ -1,18 +1,23 @@
 import { useLocation, useNavigate } from "react-router";
 import Button from "../ui/Button";
 import { ArrowBigLeft } from "lucide-react";
-
+import { useLanguage } from "../../contexts/LanguageContext";
+import translations from "../../translations";
 export function ChatHeaderLoading() {
   const navigate = useNavigate();
   const location = useLocation();
   const isGroup = location.pathname.includes("group");
+  const { language } = useLanguage();
   return (
-    <header className="sticky top-0 z-20 border-b-2 dark:border-gray-700 border-gray-100 px-4 py-2 shadow-lg bg-white dark:bg-gray-800 flex items-center gap-2">
+    <header
+      dir={language === "Arabic" ? "rtl" : "ltr"}
+      className="sticky top-0 z-20 border-b-2 dark:border-gray-700 border-gray-100 px-4 py-2 shadow-lg bg-white dark:bg-gray-800 flex items-center gap-2"
+    >
       <Button
         onClick={() => navigate("/chats", { viewTransition: true })}
         className={"text-gray-600 md:hidden"}
       >
-        <p className="sr-only">Go Back</p>
+        <p className="sr-only">{translations.Common[language].GoBackSR}</p>
         <ArrowBigLeft size={18} />
       </Button>
       <div className={"flex items-center gap-x-2"}>
@@ -23,7 +28,7 @@ export function ChatHeaderLoading() {
             <div className="flex items-center text-xs text-gray-700 dark:text-gray-100">
               <div className="flex items-center">
                 <span className="inline-block p-1.5 rounded bg-gray-200 dark:bg-gray-600 animate-pulse mr-1"></span>
-                <span>members</span>
+                <span>{translations.ChatHeader[language].MembersLabel}</span>
               </div>
               <span className="mx-1">|</span>
               <div className="flex items-center">
@@ -31,7 +36,7 @@ export function ChatHeaderLoading() {
                   className="
                 inline-block p-1.5 rounded bg-gray-200 dark:bg-gray-600 animate-pulse mr-1"
                 ></span>
-                <span>Online</span>
+                <span>{translations.ChatHeader[language].OnlineLabel}</span>
               </div>
             </div>
           ) : (

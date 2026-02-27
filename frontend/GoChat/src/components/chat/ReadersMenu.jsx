@@ -30,7 +30,7 @@ export const ReadersMenu = memo(() => {
   if (!isReadersVisible) return;
   return (
     <div
-      className={`w-60 text-gray-700 ${isReadersVisible && "animate-pop"} ${isFadeRunning && "animate-fade"} bg-white p-2 rounded-lg absolute md:-left-2 left-3/4 top-[var(--top)] -translate-x-full`}
+      className={`w-60 text-gray-700 dark:text-gray-100 ${isReadersVisible && "animate-pop"} ${isFadeRunning && "animate-fade"} bg-white dark:bg-gray-700 p-2 rounded-lg absolute md:-left-2 left-3/4 top-[var(--top)] -translate-x-full shadow-lg z-20`}
       style={{
         "--top": Math.floor(clickYCoords - 80) + "px",
       }}
@@ -46,15 +46,15 @@ export const ReadersMenu = memo(() => {
           {translations.ReadersMenu[language].ErrorPrefix} {error.message}
         </p>
       ) : readersWithOutMe.length === 0 ? (
-        <p className="text-sm text-gray-400">
+        <p className="text-sm text-gray-400 dark:text-gray-300">
           {translations.ReadersMenu[language].NoReaders}
         </p>
       ) : (
         <>
-          <h4 className="text-sm text-gray-700 mb-2">
+          <h4 className="text-sm text-gray-700 dark:text-gray-100 mb-2">
             {translations.ReadersMenu[language].SeenBy}
           </h4>
-          <ul className="divide-y divide-gray-200">
+          <ul className="divide-y divide-gray-200 dark:divide-gray-600">
             {readersWithOutMe.map((readerOnMessage) => {
               const fullname =
                 readerOnMessage.reader.firstname +
@@ -72,7 +72,7 @@ export const ReadersMenu = memo(() => {
                   />
                   <div className="text-xs flex flex-col items-start">
                     <span>{fullname}</span>
-                    <span className="text-gray-400">
+                    <span className="text-gray-400 dark:text-gray-300">
                       {translations.ReadersMenu[language].SeenAtPrefix}{" "}
                       {new Date(readerOnMessage.seenAt).toLocaleString("en-US")}
                     </span>

@@ -12,6 +12,7 @@ import Button from "../components/ui/Button";
 import { X } from "lucide-react";
 import { ChatsListContext } from "./ChatsListPage";
 import { useTheme } from "../contexts/ThemeContext";
+import { useLanguage } from "../contexts/LanguageContext";
 
 export const ChatPageContext = createContext({
   conversationId: null,
@@ -26,6 +27,7 @@ export function ChatPage() {
   const [previewImageURL, setPreviewImageURL] = useState(null);
   const { isChatsPanelCollapsed } = useContext(ChatsListContext);
   const [repliedMessage, setRepliedMessage] = useState(null);
+  const { language } = useLanguage();
   const { theme } = useTheme();
   useEffect(() => {
     if (!isConnected) return;
@@ -45,7 +47,7 @@ export function ChatPage() {
       }}
     >
       <section
-        className={`flex flex-col ${isChatsPanelCollapsed ? "md:col-start-1 md:col-end-2" : " md:col-start-2 md:col-end-3"} md:row-start-1 md:row-end-2 absolute inset-0 h-screen w-screen md:w-full md:h-full md:static scrollbar-custom overflow-hidden `}
+        className={`flex flex-col ${isChatsPanelCollapsed ? "md:col-start-1 md:col-end-2" : language === "Arabic" ? "md:col-start-1 md:col-end-2" : "md:col-start-2 md:col-end-3"} md:row-start-1 md:row-end-2 absolute inset-0 h-screen w-screen md:w-full md:h-full md:static scrollbar-custom overflow-hidden `}
       >
         <ChatHeader />
         <section

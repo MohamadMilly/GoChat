@@ -60,7 +60,10 @@ export const ChatHeader = memo(({ id }) => {
   );
 
   return (
-    <header className="z-20 border-b-2 border-gray-100 dark:border-gray-700 px-4 py-2 shadow-lg bg-white dark:bg-gray-800 flex items-center gap-2">
+    <header
+      dir={language === "Arabic" ? "rtl" : "ltr"}
+      className="z-20 border-b-2 border-gray-100 dark:border-gray-700 px-4 py-2 shadow-lg bg-white dark:bg-gray-800 flex items-center gap-2"
+    >
       <Button
         onClick={() => navigate("/chats", { viewTransition: true })}
         className={"text-gray-600 md:hidden"}
