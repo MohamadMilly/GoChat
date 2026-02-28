@@ -142,6 +142,7 @@ const translations = {
       NoPrefix: "لا",
       OnlyVisibleToYou: "(مرئي لك فقط)",
       OnlineLabel: "متصل",
+      LastSeenPrefix: "آخر ظهور",
     },
     English: {
       Bio: "Bio",
@@ -153,6 +154,7 @@ const translations = {
       NoPrefix: "No",
       OnlyVisibleToYou: "(Only visible to you)",
       OnlineLabel: "Online",
+      LastSeenPrefix: "last seen at",
     },
   },
   EditProfilePage: {
@@ -321,6 +323,22 @@ const translations = {
       SearchChat: "Search Chat",
     },
   },
+  FindGroupPage: {
+    Arabic: {
+      Loading: "جارٍ التحميل...",
+      ErrorPrefix: "خطأ:",
+      NoGroupsFound: "لم يتم العثور على مجموعات.",
+      CreatedAtLabel: "تاريخ الإنشاء:",
+      Preview: "معاينة",
+    },
+    English: {
+      Loading: "Loading...",
+      ErrorPrefix: "Error:",
+      NoGroupsFound: "No groups are found.",
+      CreatedAtLabel: "Created At:",
+      Preview: "Preview",
+    },
+  },
   NewGroupPage: {
     Arabic: {
       Home: "الرئيسية",
@@ -333,6 +351,7 @@ const translations = {
       ClickToUploadImage: "انقر لرفع صورة",
       Title: "العنوان",
       Description: "الوصف",
+      Optional: "(اختياري)",
     },
     English: {
       Home: "Home",
@@ -345,6 +364,7 @@ const translations = {
       ClickToUploadImage: "Click to upload an image",
       Title: "Title",
       Description: "Description",
+      Optional: "(optional)",
     },
   },
   NewChatPage: {

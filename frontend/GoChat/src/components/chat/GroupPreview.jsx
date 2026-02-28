@@ -87,7 +87,7 @@ export function GroupPreview() {
   return (
     <>
       <div className="inset-0 bg-gray-600/20 backdrop-blur-xs absolute"></div>
-      <section className="absolute top-[50vh] left-[50vw] -translate-x-1/2 -translate-y-1/2 z-20  max-w-80 sm:max-w-120 md:max-w-200 min-w-80">
+      <section className="absolute top-[50vh] left-[50vw] -translate-x-1/2 -translate-y-1/2 z-20  max-w-11/12 sm:max-w-120 md:max-w-200 min-w-80">
         <Button
           onClick={() => naviagte(-1)}
           className={"bg-white my-2 text-gray-600"}

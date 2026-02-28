@@ -58,7 +58,7 @@ export function ChatsPanel() {
         )}
       </Button>
       <div
-        className={`border-r-2 h-full border-gray-200 dark:border-gray-700 flex flex-col max-h-full ${isChatsPanelCollapsed ? "animate-fade hidden" : "animate-slideup"} `}
+        className={`ltr:border-r-2 rtl:border-l-2 h-full border-gray-200 dark:border-gray-700 flex flex-col max-h-full ${isChatsPanelCollapsed ? "animate-fade hidden" : "animate-slideup"} `}
       >
         <SearchBar
           name="name"

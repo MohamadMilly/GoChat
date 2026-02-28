@@ -9,9 +9,16 @@ export function ProfileIdentity({ fullname, isConnected, lastSeen }) {
       <p
         className={`text-sm ${isConnected ? "text-cyan-600 dark:text-cyan-400" : "text-gray-500 dark:text-gray-200"}  `}
       >
-        {isConnected
-          ? translations.Profile[language].OnlineLabel
-          : `lastseen at ${new Date(lastSeen).toLocaleTimeString()}`}
+        {isConnected ? (
+          translations.Profile[language].OnlineLabel
+        ) : (
+          <>
+            {translations.Profile[language].LastSeenPrefix}{" "}
+            {new Date(lastSeen).toLocaleTimeString(
+              language === "Arabic" ? "ar-EG" : "en-GB",
+            )}
+          </>
+        )}
       </p>
     </section>
   );

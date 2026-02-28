@@ -57,4 +57,13 @@ conversationsRouter.post(
   conversationsController.joinConversationPost,
 );
 
+conversationsRouter.delete(
+  "/:conversationId/messages/:messageId",
+  messagesCountroller.deleteMessageDelete,
+);
+
+conversationsRouter.put(
+  "/:conversationId/messages/:messageId",
+  messagesCountroller.editMessagePut,
+);
 module.exports = conversationsRouter;

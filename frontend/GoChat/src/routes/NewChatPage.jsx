@@ -68,7 +68,7 @@ export function NewChatPage() {
             {translations.NewChatPage[language].NoUsersFound}
           </p>
         ) : (
-          <ul className="w-full flex flex-col animate-slideup divide-y divide-gray-700">
+          <ul className="w-full flex flex-col animate-slideup divide-y dark:divide-gray-700 divide-gray-200">
             {users.map((user) => {
               const isThereAvatar = !!user.profile?.avatar;
               const avatar = isThereAvatar ? user.profile.avatar : null;

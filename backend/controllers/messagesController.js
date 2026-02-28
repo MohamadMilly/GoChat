@@ -174,8 +174,88 @@ const getMessageReaders = async (req, res) => {
   }
 };
 
+const deleteMessageDelete = async (req, res) => {
+  const currentUser = req.currentUser;
+  const { messageId } = req.params;
+  try {
+    const message = await prisma.message.findUnique({
+      where: {
+        id: parseInt(messageId),
+      },
+    });
+    if (!message) {
+      return res.status(403).json({
+        message: "Message is not found.",
+      });
+    }
+    if (message.senderId !== currentUser.id) {
+      return res.status(401).json({
+        message: "Deleting others's message is forbidden.",
+      });
+    }
+    await prisma.message.delete({
+      where: {
+        id: parseInt(messageId),
+        senderId: currentUser.id,
+      },
+    });
+    return res.json({
+      message: "Message is deleted successfully.",
+    });
+  } catch (err) {
+    return res.status(500).json({
+      message: "unexpected error happened while deleting this message.",
+    });
+  }
+};
+
+const editMessagePut = async (req, res) => {
+  const currentUser = req.currentUser;
+  const { messageId } = req.params;
+  const { content, mimeType, fileURL, type } = req.body;
+  try {
+    const message = await prisma.message.findUnique({
+      where: {
+        id: parseInt(messageId),
+      },
+    });
+    if (!message) {
+      return res.status(404).json({
+        message: "Message is not found.",
+      });
+    }
+    if (message.senderId !== currentUser.id) {
+      return res.status(401).json({
+        message: "Editing others's message is forbidden.",
+      });
+    }
+    const updatedMessage = await prisma.message.update({
+      where: {
+        id: parseInt(messageId),
+      },
+      data: {
+        edit: true,
+        content,
+        mimeType,
+        fileURL,
+        type,
+      },
+    });
+    return res.json({
+      message: "Message is updated sucessfully.",
+      updatedMessage: updatedMessage,
+    });
+  } catch (err) {
+    return res.status(500).json({
+      message: "Unexpected error happened while editing message.",
+    });
+  }
+};
+
 module.exports = {
   sendMessagePost,
   getConversationMessagesGet,
   getMessageReaders,
+  deleteMessageDelete,
+  editMessagePut,
 };

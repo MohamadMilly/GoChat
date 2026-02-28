@@ -1,3 +1,6 @@
+import translations from "../../translations";
+import { useLanguage } from "../../contexts/LanguageContext";
+
 export function TextArea({
   onChange,
   label,
@@ -7,15 +10,24 @@ export function TextArea({
   textAreasClassName,
   value,
   isOptional = false,
+  optionalLabel = null,
 }) {
+  const { language } = useLanguage();
   const contentLength = typeof value === "string" && value ? value.length : 0;
+  const optionalText =
+    optionalLabel ||
+    (translations.NewGroupPage &&
+      translations.NewGroupPage[language]?.Optional) ||
+    (translations.Common && translations.Common[language]?.Optional) ||
+    "(optional)";
+
   return (
     <div className="flex flex-col gap-1 px-4 py-2 my-4 bg-gray-50/30 dark:bg-gray-800/30">
       <label className={`text-sm mb-2 ${labelClassName}`} htmlFor={id}>
         {label}{" "}
         {isOptional && (
           <span className="text-xs text-gray-400 dark:text-gray-300 italic mx-1">
-            (optional)
+            {optionalText}
           </span>
         )}
       </label>

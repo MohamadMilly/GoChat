@@ -9,6 +9,7 @@ import { useLanguage } from "../contexts/LanguageContext";
 
 function GroupPreviewCard(props) {
   const navigate = useNavigate();
+  const { language } = useLanguage();
   return (
     <li className="flex grow-0 items-center gap-2 py-2">
       <Avatar avatar={props.avatar} chatTitle={props.title} />
@@ -17,7 +18,10 @@ function GroupPreviewCard(props) {
           {props.title}
         </strong>
         <p className="text-xs text-gray-400 dark:text-gray-300">
-          Created At : {new Date(props.createdAt).toLocaleDateString("en-GB")}
+          {translations.FindGroupPage[language].CreatedAtLabel}{" "}
+          {new Date(props.createdAt).toLocaleDateString(
+            language === "Arabic" ? "ar-EG" : "en-GB",
+          )}
         </p>
       </div>
       <div className="flex justify-center items-center ">
@@ -29,7 +33,7 @@ function GroupPreviewCard(props) {
           }
           className={"text-xs dark:text-gray-200"}
         >
-          Preview
+          {translations.FindGroupPage[language].Preview}
         </Button>
       </div>
     </li>
@@ -38,10 +42,18 @@ function GroupPreviewCard(props) {
 
 function GroupsList({ query }) {
   const { groups, error, isFetching } = useGroups(query);
+  const { language } = useLanguage();
 
   if (isFetching) return <p>Loading...</p>;
-  if (error) return <p>Error: {error.message}</p>;
-  if (query && groups.length <= 0) return <p>No groups are found.</p>;
+  if (isFetching) return <p>{translations.FindGroupPage[language].Loading}</p>;
+  if (error)
+    return (
+      <p>
+        {translations.FindGroupPage[language].ErrorPrefix} {error.message}
+      </p>
+    );
+  if (query && groups.length <= 0)
+    return <p>{translations.FindGroupPage[language].NoGroupsFound}</p>;
   return (
     <ul className="w-full flex flex-col animate-slideup divide-gray-100 dark:divide-gray-700 divide-y">
       {groups.map((group) => {
@@ -81,7 +93,10 @@ export function FindGroupPage() {
           label={translations.SearchBar[language].SearchGroup}
           query={query}
         />
-        <section className="p-2 mt-4">
+        <section
+          dir={language === "Arabic" ? "rtl" : "ltr"}
+          className="p-2 mt-4"
+        >
           <GroupsList query={query} />
         </section>
       </main>

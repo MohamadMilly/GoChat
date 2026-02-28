@@ -142,6 +142,7 @@ export function NewGroupPage() {
         />
       )}
       <form
+        dir={language === "Arabic" ? "rtl" : "ltr"}
         onSubmit={(e) => e.preventDefault()}
         action="POST
         
@@ -149,7 +150,7 @@ export function NewGroupPage() {
       >
         {step === 1 && (
           <section className="p-2 mt-4">
-            <ul className="w-full flex flex-col animate-slideup divide-y divide-gray-700">
+            <ul className="w-full flex flex-col animate-slideup divide-y dark:divide-gray-700 divide-gray-200">
               {isFetching ? (
                 <p className="text-xs text-gray-400 dark:text-gray-200 text-center">
                   {translations.NewGroupPage[language].Loading}
@@ -258,6 +259,7 @@ export function NewGroupPage() {
               value={groupMetaData.description}
               labelClassName="text-cyan-600/80 dark:text-cyan-400/80"
               isOptional={true}
+              optionalLabel={translations.NewGroupPage[language].Optional}
             />
           </section>
         )}
