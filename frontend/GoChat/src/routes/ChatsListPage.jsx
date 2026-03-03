@@ -14,7 +14,7 @@ export const ChatsListContext = createContext(null);
 
 export function ChatsListPage() {
   const [isChatsPanelCollapsed, setIsChatsPanelCollapsed] = useState(
-    storedChatsPanelStatus ?? false,
+    storedChatsPanelStatus || false,
   );
   const { language } = useLanguage();
   const handleChatsPanelCollapse = (value) => {

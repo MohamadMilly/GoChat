@@ -121,7 +121,7 @@ export function ChatDetails() {
           {translations.ChatDetails[language].MembersHeading}
         </h3>
         {
-          <ul className="p-2 my-2 divide-y divide-gray-700">
+          <ul className="p-2 my-2 divide-y dark:divide-gray-700 divide-gray-200 ">
             {participants.map((participant) => {
               const isConnected = connectedUsers.some(
                 (id) => id == participant.user.id,

@@ -103,7 +103,73 @@ export function SocketProvider({ children }) {
         [conversationId]: serverOffset,
       };
     }
+    function onDeleteMessage(messageId, conversationId) {
+      let newMessages;
+      queryClient.setQueryData(
+        ["conversation", "messages", conversationId],
+        (old) => {
+          if (!old.messages) return old;
+          newMessages = old.messages.filter(
+            (message) => message.id !== messageId,
+          );
+          return {
+            ...old,
+            messages: newMessages,
+          };
+        },
+      );
+      queryClient.setQueryData(["conversations"], (old) => {
+        if (!old.conversations) return old;
 
+        return {
+          ...old,
+          conversations: old.conversations.map((c) => {
+            if (c.id == conversationId && c.messages[0].id === messageId) {
+              return { ...c, messages: [newMessages[newMessages.length - 1]] };
+            } else {
+              return c;
+            }
+          }),
+        };
+      });
+    }
+
+    function onEditMessage(editedMessage, conversationId) {
+      let newMessages = [];
+      queryClient.setQueryData(
+        ["conversation", "messages", conversationId],
+        (old) => {
+          if (!old.messages) return old;
+          newMessages = old.messages.map((message) => {
+            if (message.id === editedMessage.id) {
+              return editedMessage;
+            }
+            return message;
+          });
+          return {
+            ...old,
+            messages: newMessages,
+          };
+        },
+      );
+      queryClient.setQueryData(["conversations"], (old) => {
+        if (!old.conversations) return old;
+
+        return {
+          ...old,
+          conversations: old.conversations.map((c) => {
+            if (
+              c.id == conversationId &&
+              c.messages[0].id === editedMessage.id
+            ) {
+              return { ...c, messages: [newMessages[newMessages.length - 1]] };
+            } else {
+              return c;
+            }
+          }),
+        };
+      });
+    }
     socket.on("chat message", onReceiveMessage);
     socket.on("connect", onConnect);
     socket.on("disconnect", onDisconnect);
@@ -111,14 +177,18 @@ export function SocketProvider({ children }) {
     socket.on("user disconnected", onUserDisconnect);
     socket.on("typing", onUserTyping);
     socket.on("stopped typing", onUserStoppedTyping);
+    socket.on("delete message", onDeleteMessage);
+    socket.on("edit message", onEditMessage);
     return () => {
+      socket.off("chat message", onReceiveMessage);
       socket.off("connect", onConnect);
       socket.off("disconnect", onDisconnect);
       socket.off("user connected", onUserConnect);
       socket.off("user disconnected", onUserDisconnect);
       socket.off("typing", onUserTyping);
       socket.off("stopped typing", onUserStoppedTyping);
-      socket.off("chat message", onReceiveMessage);
+      socket.off("delete message", onDeleteMessage);
+      socket.off("edit message", onEditMessage);
     };
   }, [queryClient, user]);
   return (

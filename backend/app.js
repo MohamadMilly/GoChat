@@ -187,6 +187,7 @@ io.on("connection", async (socket) => {
   });
 
   socket.on("read message", async (messageId, readerId) => {
+    if (!messageId || !readerId) return;
     await prisma.messageOnReader.upsert({
       where: {
         messageId_readerId: {
@@ -210,6 +211,87 @@ io.on("connection", async (socket) => {
     });
     io.emit("read message", messageId, readerId);
   });
+
+  socket.on("delete message", async (messageId, conversationId, callback) => {
+    const userId = socket.handshake.auth.userId;
+    const message = await prisma.message.findUnique({
+      where: {
+        id: messageId,
+      },
+    });
+    if (!message) {
+      callback({
+        status: 404,
+      });
+      return;
+    }
+    if (message.senderId !== userId) {
+      callback({
+        status: 401,
+      });
+      return;
+    }
+    const deletedReadersPromise = prisma.messageOnReader.deleteMany({
+      where: {
+        messageId: messageId,
+      },
+    });
+    const deletedMessagePromise = prisma.message.delete({
+      where: {
+        id: messageId,
+        senderId: userId,
+      },
+    });
+    await prisma.$transaction([deletedReadersPromise, deletedMessagePromise]);
+    callback({
+      status: "ok",
+    });
+    io.emit("delete message", messageId, conversationId);
+  });
+  socket.on("edit message", async (message, conversationId, callback) => {
+    if (!message || !conversationId) return;
+    const userId = socket.handshake.auth.userId;
+
+    const dbMessage = await prisma.message.findUnique({
+      where: {
+        id: message.id,
+      },
+    });
+    if (!message) {
+      callback({
+        status: 404,
+      });
+      return;
+    }
+    if (userId !== dbMessage.senderId) {
+      callback({
+        status: 401,
+      });
+    }
+
+    const updatedMessage = await prisma.message.update({
+      where: {
+        id: message.id,
+      },
+      data: {
+        content: message.content,
+        mimeType: message.mimeType,
+        type: message.type,
+        fileURL: message?.fileURL || "",
+        edit: true,
+      },
+      include: {
+        sender: true,
+      },
+    });
+    callback({
+      status: "ok",
+    });
+
+    socket.broadcast
+      .to(conversationId)
+      .emit("edit message", updatedMessage, conversationId);
+  });
 });
 
 app.use(
@@ -225,8 +307,6 @@ const authRouter = require("./routes/authRouter");
 const usersRouter = require("./routes/usersRouter");
 const conversationsRouter = require("./routes/conversationsRouter");
 const filterProfile = require("./utils/filterProfile");
-const { connect } = require("node:http2");
-const { read } = require("node:fs");
 
 app.use(express.json());
 app.use(

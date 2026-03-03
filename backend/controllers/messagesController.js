@@ -107,6 +107,9 @@ const getConversationMessagesGet = async (req, res) => {
           },
         },
       },
+      orderBy: {
+        createdAt: "asc",
+      },
     });
     const filteredMessages = messages.map((message) => {
       return {

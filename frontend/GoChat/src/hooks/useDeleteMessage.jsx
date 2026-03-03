@@ -28,3 +28,5 @@ function useDeleteMessage() {
     },
   });
 }
+
+// i recognized that i am going to do the message deletion logic using socket events/listeners not by normal HTTP

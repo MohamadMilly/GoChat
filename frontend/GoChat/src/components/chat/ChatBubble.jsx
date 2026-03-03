@@ -19,6 +19,8 @@ import Button from "../ui/Button";
 import { useSearchParams } from "react-router";
 import translations from "../../translations";
 import { useLanguage } from "../../contexts/LanguageContext";
+import { useQueryClient } from "@tanstack/react-query";
+import { EditMessageDialog } from "./EditMessageDialog";
 
 function VideoFile({ link }) {
   const { language } = useLanguage();
@@ -56,10 +58,11 @@ function FileItem({ icon, link, colors = {}, label = "File" }) {
   );
 }
 
-function ImageFile({ mimeType, fileURL }) {
+function ImageFile({ mimeType, fileURL, editMode = false }) {
   const { setIsInPreviewMode, setPreviewImageURL } =
     useContext(ChatPageContext);
   const handlePreview = (fileURL) => {
+    if (editMode) return;
     setIsInPreviewMode(true);
     setPreviewImageURL(fileURL);
   };
@@ -69,16 +72,18 @@ function ImageFile({ mimeType, fileURL }) {
       <span className="absolute top-3 left-3 text-xs text-gray-400 bg-gray-50/10 backdrop-blur-xs rounded z-10">
         {mimeType.split("/")[1].toUpperCase()}
       </span>
-      <div className="group-hover:opacity-100 opacity-0 z-10 absolute rounded-xl inset-0.5 bg-gray-900/30 backdrop-blur-xs transition-all duration-300">
-        <button
-          onClick={() => handlePreview(fileURL)}
-          className="w-full h-full text-2xl text-gray-50 cursor-pointer tracking-tight"
-        >
-          {translations.ChatBubble[language].ClickToPreview}
-        </button>
-      </div>
+      {!editMode && (
+        <div className="group-hover:opacity-100 opacity-0 z-10 absolute rounded-xl inset-0.5 bg-gray-900/30 backdrop-blur-xs transition-all duration-300">
+          <button
+            onClick={() => handlePreview(fileURL)}
+            className="w-full h-full text-2xl text-gray-50 cursor-pointer tracking-tight"
+          >
+            {translations.ChatBubble[language].ClickToPreview}
+          </button>
+        </div>
+      )}
       <img
-        className="h-auto rounded-xl object-cover block cursor-pointer w-full"
+        className={`${editMode ? "w-100 h-40" : "w-full h-auto"} rounded-xl object-cover block cursor-pointer `}
         src={fileURL}
         alt="Sended Message image"
         loading="lazy"
@@ -87,11 +92,13 @@ function ImageFile({ mimeType, fileURL }) {
   );
 }
 
-function MediaFilePreview({ fileURL, mimeType }) {
+export function MediaFilePreview({ fileURL, mimeType, editMode }) {
   const { language } = useLanguage();
   if (!fileURL) return null;
   if (mimeType.includes("image")) {
-    return <ImageFile fileURL={fileURL} mimeType={mimeType} />;
+    return (
+      <ImageFile editMode={editMode} fileURL={fileURL} mimeType={mimeType} />
+    );
   }
   if (mimeType.includes("application")) {
     if (mimeType.includes("json")) {
@@ -145,6 +152,106 @@ export const ChatBubbleContext = createContext({
   clickYCoords: null,
   isFadeRunning: false,
 });
+
+function ChatBubbleToolsMenu({ message }) {
+  const { messageId, isInPreview } = useContext(ChatBubbleContext);
+  const { setEditedMessage } = useContext(ChatPageContext);
+  const queryClient = useQueryClient();
+  const { conversationId } = useContext(ChatPageContext);
+  const handleDeleteMessage = (messageId, conversationId) => {
+    if (!messageId || !conversationId) return;
+    let newMessages = [];
+    let previousMessages = queryClient.getQueryData([
+      "conversation",
+      "messages",
+      conversationId,
+    ]).messages;
+
+    queryClient.setQueryData(
+      ["conversation", "messages", conversationId],
+      (old) => {
+        if (!old.messages) return old;
+        newMessages = old.messages.filter(
+          (message) => message.id !== messageId,
+        );
+        return {
+          ...old,
+          messages: newMessages,
+        };
+      },
+    );
+    queryClient.setQueryData(["conversations"], (old) => {
+      if (!old.conversations) return old;
+
+      return {
+        ...old,
+        conversations: old.conversations.map((c) => {
+          if (c.id == conversationId && c.messages[0].id === messageId) {
+            return { ...c, messages: [newMessages[newMessages.length - 1]] };
+          } else {
+            return c;
+          }
+        }),
+      };
+    });
+    socket
+      .timeout(5000)
+      .emit("delete message", messageId, conversationId, (err, response) => {
+        if (err || response.status !== "ok") {
+          console.error(
+            "An error happened while deleting the message:",
+            messageId,
+            "status:",
+            response.status,
+          );
+          queryClient.setQueryData(
+            ["conversation", "messages", conversationId],
+            (old) => {
+              if (!old.messages) return old;
+
+              return {
+                ...old,
+                messages: previousMessages,
+              };
+            },
+          );
+          queryClient.setQueryData(["conversations"], (old) => {
+            if (!old.conversations) return old;
+            return {
+              ...old,
+              conversations: old.conversations.map((c) => {
+                if (c.id == conversationId) {
+                  return {
+                    ...c,
+                    messages: [previousMessages[previousMessages.length - 1]],
+                  };
+                }
+                return c;
+              }),
+            };
+          });
+          return;
+        }
+      });
+  };
+  if (isInPreview) return null;
+  return (
+    <div className="opacity-0 group-hover:opacity-100 transition-all delay-300 duration-300 absolute -left-2 bottom-2 -translate-x-full w-30 dark:bg-gray-700 bg-gray-100 rounded-md overflow-hidden">
+      <button
+        className="text-sm dark:text-gray-200 text-gray-600 cursor-pointer w-full p-2 hover:bg-gray-200 hover:text-gray-700"
+        onClick={() => handleDeleteMessage(messageId, conversationId)}
+      >
+        Delete
+      </button>
+      <button
+        onClick={() => setEditedMessage(message)}
+        className="text-sm dark:text-gray-200 text-gray-600 cursor-pointer w-full p-2 hover:bg-gray-200 hover:text-gray-700"
+      >
+        Edit
+      </button>
+    </div>
+  );
+}
 
 export const ChatBubble = memo(
   ({
@@ -336,7 +443,7 @@ export const ChatBubble = memo(
             <div
               onClick={handleShowReaders}
               ref={messageContentContainerRef}
-              className={`relative w-full px-2 py-1 font-rubik rounded-t-xl ${isMyMessage ? "bg-cyan-700 dark:bg-cyan-600 rounded-br-none rounded-bl-xl text-gray-100" : "bg-gray-100 text-gray-600 dark:bg-gray-700 rounded-bl-none rounded-br-xl"} cursor-grab`}
+              className={`group relative w-full px-2 py-1 font-rubik rounded-t-xl ${isMyMessage ? "bg-cyan-700 dark:bg-cyan-600 rounded-br-none rounded-bl-xl text-gray-100" : "bg-gray-100 text-gray-600 dark:bg-gray-700 rounded-bl-none rounded-br-xl"} cursor-grab`}
             >
               <div className="min-w-0 w-full">
                 {isGroupMessage && !isMyMessage && !hideName && (
@@ -376,13 +483,7 @@ export const ChatBubble = memo(
                   </p>
                 )}
               </div>
-              {message.edit && (
-                <span
-                  className={`text-xs block ${isMyMessage ? "text-white text-right" : "text-gray-500"}`}
-                >
-                  {translations.ChatBubble[language].Edited}
-                </span>
-              )}
+
               <div className="flex items-center gap-2">
                 <ChatBubbleStatus
                   readers={readers}
@@ -395,12 +496,20 @@ export const ChatBubble = memo(
                 >
                   {new Date(message.createdAt).toLocaleTimeString()}
                 </span>
+                {message.edit && (
+                  <span
+                    className={`text-xs block ${isMyMessage ? "text-white text-right" : "text-gray-500"}`}
+                  >
+                    {translations.ChatBubble[language].Edited}
+                  </span>
+                )}
               </div>
               {user.id === message.senderId && (
                 <>
                   <ReadersMenu />
                 </>
               )}
+              {isMyMessage && <ChatBubbleToolsMenu message={message} />}
             </div>
           </div>
         </li>

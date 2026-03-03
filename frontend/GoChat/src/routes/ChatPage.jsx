@@ -13,6 +13,7 @@ import { X } from "lucide-react";
 import { ChatsListContext } from "./ChatsListPage";
 import { useTheme } from "../contexts/ThemeContext";
 import { useLanguage } from "../contexts/LanguageContext";
+import { EditMessageDialog } from "../components/chat/EditMessageDialog";
 
 export const ChatPageContext = createContext({
   conversationId: null,
@@ -27,6 +28,7 @@ export function ChatPage() {
   const [previewImageURL, setPreviewImageURL] = useState(null);
   const { isChatsPanelCollapsed } = useContext(ChatsListContext);
   const [repliedMessage, setRepliedMessage] = useState(null);
+  const [editedMessage, setEditedMessage] = useState(null);
   const { language } = useLanguage();
   const { theme } = useTheme();
   useEffect(() => {
@@ -44,6 +46,8 @@ export function ChatPage() {
         setPreviewImageURL,
         setRepliedMessage,
         repliedMessage,
+        editedMessage,
+        setEditedMessage,
       }}
     >
       <section
@@ -63,6 +67,7 @@ export function ChatPage() {
           <div className="inset-0 absolute bg-gray-600/20 dark:bg-gray-800/60"></div>
           <MessagesList />
           <SendMessageForm />
+          {editedMessage && <EditMessageDialog message={editedMessage} />}
         </section>
 
         {isInPreviewMode && (
