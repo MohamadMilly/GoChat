@@ -47,8 +47,10 @@ const getSpecificConversationGet = async (req, res) => {
             },
           },
         },
+        admins: true,
       },
     });
+
     if (!conversation) {
       return res.status(404).json({
         message: "Conversation is not found.",
@@ -61,9 +63,15 @@ const getSpecificConversationGet = async (req, res) => {
     });
     conversation = {
       ...conversation,
-      participants: conversation.participants.map((particiant) => ({
-        ...particiant,
-        user: filterProfile(particiant.user, participantsPreferences),
+      participants: conversation.participants.map((participant) => ({
+        ...participant,
+        isAdmin: conversation.admins.some(
+          (admin) => admin.userId === participant.userId,
+        ),
+        isOwner: conversation.admins.some(
+          (admin) => admin.userId === participant.userId && admin.isOwner,
+        ),
+        user: filterProfile(participant.user, participantsPreferences),
       })),
     };
 
@@ -169,6 +177,16 @@ const createNewConversationPost = async (req, res) => {
               },
             },
           })),
+        },
+        admins: {
+          create: {
+            isOwner: true,
+            user: {
+              connect: {
+                id: currentUser.id,
+              },
+            },
+          },
         },
       },
       include: {

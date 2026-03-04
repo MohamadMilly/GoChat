@@ -8,6 +8,7 @@ import { ChatDetails } from "./routes/ChatDetails";
 import { ChatPageWrapper } from "./routes/ChatPageWrapper";
 import { ChatsListLanding } from "./routes/ChatsListLanding";
 import { ChatsListPage } from "./routes/ChatsListPage";
+import { EditGroupPage } from "./routes/EditGroupPage";
 import { FindGroupPage } from "./routes/FindGroupPage";
 import { LogInPage } from "./routes/LogInPage";
 import { EditProfilePage } from "./routes/me/EditProfile";
@@ -97,5 +98,9 @@ export const routes = [
   {
     path: "/chats/:id/details",
     element: <ChatDetails />,
+  },
+  {
+    path: "/chats/groups/:id/edit",
+    element: <EditGroupPage />,
   },
 ];

@@ -12,7 +12,7 @@ generator client {
 datasource db {
   provider = "postgresql"
   url = env("DATABASE_URL")
- directUrl = env("DIRECT_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 /* 
@@ -36,6 +36,7 @@ datasource db {
   password String
   profile Profile?
   conversations ConversationParticipant[]
+  adminConversations ConversationAdmin[] 
   messages Message[]
   deleted Boolean @default(false)
   createdAt DateTime @default(now())
@@ -43,6 +44,7 @@ datasource db {
   verificationCodes VerificationCode[]
   accountColor String?
   readMessages MessageOnReader[]
+  
   @@map("users")
   }
 
@@ -86,11 +88,12 @@ title String?
 avatar String?
 description String?
 type ConversationType @default(DIRECT)
-participants ConversationParticipant[]
+participants ConversationParticipant[] 
 messages Message[]
 createdAt DateTime @default(now())
 updatedAt DateTime @updatedAt
-
+admins ConversationAdmin[]
+permissions Permissions?
 }
 
 
@@ -102,10 +105,24 @@ Each converstion participant should have
 - userId
 */
 
+model ConversationAdmin {
+  id Int @id @default(autoincrement())
+  conversation Conversation @relation(fields: [conversationId],references: [id])
+  conversationId Int
+  isOwner Boolean @default(false)
+  user User @relation(fields: [userId],references: [id])
+  userId Int
+  assignedAt DateTime @default(now())
+  assignedBy ConversationAdmin? @relation("admins assigned",fields: [assigningUserId],references: [id])
+  assigningUserId Int?
+  assignedAdmins ConversationAdmin[] @relation("admins assigned")
+}
+
 model ConversationParticipant {
 id Int @id @default(autoincrement())
 conversation Conversation @relation(fields: [conversationId],references: [id])
 conversationId Int
+
 user User @relation(fields: [userId],references: [id])
 userId Int
 joinedAt DateTime @default(now())
@@ -186,6 +203,18 @@ model VerificationCode {
   used Boolean @default(false)
    
   @@unique([code,userId])
+}
+
+model Permissions {
+id Int @id @default(autoincrement())
+conversation Conversation @relation(fields: [conversationId],references: [id])
+conversationId Int @unique
+sendingMessages Boolean @default(true)
+sendingMedia Boolean @default(true)
+onlineMembers Boolean @default(true)
+hideUsersForVisitors Boolean @default(false)
+messageReaders Boolean @default(true)
+viewMembers Boolean @default(true)
 }
 
 enum VerificationType {

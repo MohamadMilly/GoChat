@@ -4,12 +4,13 @@ import { useSocket } from "../contexts/SocketContext";
 import { getConnectedUsers } from "../utils/getConnectedUsers";
 import { Avatar } from "../components/chat/Avatar";
 import Button from "../components/ui/Button";
-import { ArrowBigLeft } from "lucide-react";
+import { ArrowBigLeft, Pen } from "lucide-react";
 import { getGenertedTransitionId } from "../utils/transitionId";
 import { TransitionLink } from "../components/ui/TransitionLink";
 import { useState } from "react";
 import translations from "../translations";
 import { useLanguage } from "../contexts/LanguageContext";
+import { useAuth } from "../contexts/AuthContext";
 
 function ChatParticipant({ participant, isConnected }) {
   const [transitionId, setTransitionId] = useState(null);
@@ -18,7 +19,7 @@ function ChatParticipant({ participant, isConnected }) {
     <li className="py-2">
       <TransitionLink
         setDynamicTransitionId={setTransitionId}
-        className={"flex items-center gap-x-2"}
+        className={"flex items-center gap-x-2 w-full"}
         route={`/users/${participant.user.id}`}
       >
         <div className="shrink-0 relative">
@@ -35,10 +36,20 @@ function ChatParticipant({ participant, isConnected }) {
           ></span>
         </div>
 
-        <div className="flex flex-col items-start">
-          <p className="text-sm text-gray-800 dark:text-gray-100">
-            {participant.user.firstname + " " + participant.user.lastname}
-          </p>
+        <div className="flex flex-col items-start w-full">
+          <div className="flex items-center justify-between w-full">
+            <p className="text-sm text-gray-800 dark:text-gray-100">
+              {participant.user.firstname + " " + participant.user.lastname}
+            </p>
+            {participant.isOwner ? (
+              <span className="text-xs dark:text-gray-200 dark:bg-purple-600/50 border dark:border-purple-500/50 text-purple-800 bg-purple-200 px-1 py-0.5 rounded-full">
+                Owner
+              </span>
+            ) : participant.isAdmin ? (
+              <span>Admin</span>
+            ) : null}
+          </div>
+
           <span className="text-xs text-gray-500 dark:text-gray-300">
             {translations.ChatDetails[language].JoinedAtPrefix || "joined at"}{" "}
             {new Date(participant.joinedAt).toLocaleString("en-GB")}
@@ -53,6 +64,7 @@ export function ChatDetails() {
   const { id } = useParams();
   const { conversation, membersCount, isFetching, error } = useConversation(id);
   const { connectedUsers } = useSocket();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const { language } = useLanguage();
   if (isFetching) return <p>{translations.ChatDetails[language].Loading}</p>;
@@ -63,7 +75,8 @@ export function ChatDetails() {
       </p>
     );
 
-  const { title, avatar, description, participants, createdAt } = conversation;
+  const { title, avatar, description, participants, createdAt, admins } =
+    conversation;
   const thisChatConnectedUsers = getConnectedUsers(
     participants,
     connectedUsers,
@@ -73,7 +86,7 @@ export function ChatDetails() {
   const dynamicTransitionName = `${title.replaceAll(" ", "-")}-${transitionId}`;
   return (
     <main className="max-w-200 mx-auto bg-white dark:bg-gray-900 font-rubik relative">
-      <div className="flex justify-start items-center p-2 bg-gray-50/30 dark:bg-gray-800/80 rounded-lg my-2">
+      <div className="flex justify-between items-center p-2 bg-gray-50/30 dark:bg-gray-800/80 rounded-lg my-2">
         <Button
           onClick={() => navigate(-1)}
           className="text-gray-600 dark:text-gray-300"
@@ -81,6 +94,15 @@ export function ChatDetails() {
           <p className="sr-only">{translations.Common[language].GoBackSR}</p>
           <ArrowBigLeft size={20} />
         </Button>
+        {conversation.admins.some((admin) => admin.userId === user.id) && (
+          <Button
+            onClick={() => navigate(`/chats/groups/${conversation.id}/edit`)}
+            className="text-gray-600 dark:text-gray-300"
+          >
+            <p className="sr-only">Edit</p>
+            <Pen size={20} />
+          </Button>
+        )}
       </div>
       <section
         dir={language === "Arabic" ? "rtl" : "ltr"}
