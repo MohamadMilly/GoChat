@@ -3,6 +3,7 @@ import { useConversation } from "../hooks/useConversation";
 import { useSocket } from "../contexts/SocketContext";
 import { getConnectedUsers } from "../utils/getConnectedUsers";
 import { Avatar } from "../components/chat/Avatar";
+import { Tag } from "../components/ui/Tag";
 import Button from "../components/ui/Button";
 import { ArrowBigLeft, Pen } from "lucide-react";
 import { getGenertedTransitionId } from "../utils/transitionId";
@@ -42,13 +43,21 @@ function ChatParticipant({ participant, isConnected }) {
               {participant.user.firstname + " " + participant.user.lastname}
             </p>
             {participant.isOwner ? (
-              <span className="text-xs dark:text-gray-200 dark:bg-purple-600/50 border dark:border-purple-500/50 text-purple-800 bg-purple-200 px-1 py-0.5 rounded-full">
-                Owner
-              </span>
+              <Tag
+                tagContent={"Owner"}
+                bgColor={"bg-purple-200"}
+                textColor={"text-purple-800"}
+                darkModeBgColor={"dark:bg-purple-600/50"}
+                darkModeTextColor={"dark:text-gray-200"}
+              />
             ) : participant.isAdmin ? (
-              <span className="text-xs dark:text-gray-200 dark:bg-green-400/50 border dark:border-green-400/50 text-green-800 bg-gray-200 px-1 py-0.5 rounded-full">
-                Admin
-              </span>
+              <Tag
+                tagContent={"Admin"}
+                bgColor={"bg-gray-200"}
+                textColor={"text-green-800"}
+                darkModeBgColor={"dark:bg-green-400/50"}
+                darkModeTextColor={"dark:text-gray-200"}
+              />
             ) : null}
           </div>
 

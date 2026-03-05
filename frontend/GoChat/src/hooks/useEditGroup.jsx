@@ -22,6 +22,7 @@ export function useEditGroup() {
         if (!old?.conversation) return old;
         return {
           ...old,
+          membersCount: data.participants?.length || 0,
           conversation: {
             ...old.conversation,
             ...data,

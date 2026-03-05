@@ -29,6 +29,11 @@ conversationsRouter.get(
   messagesCountroller.getMessageReaders,
 );
 
+conversationsRouter.get(
+  "/:conversationId/persmissions",
+  conversationsController.conversationPermissionsGet,
+);
+
 conversationsRouter.use(verifyToken, (req, res, next) => {
   const token = req.token;
   try {
@@ -71,4 +76,5 @@ conversationsRouter.put(
   "/:conversationId/messages/:messageId",
   messagesCountroller.editMessagePut,
 );
+
 module.exports = conversationsRouter;

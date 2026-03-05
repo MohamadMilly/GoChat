@@ -1,6 +1,6 @@
-import { abbreviateText } from "../../utils/abbreviateText";
 import { Avatar } from "../chat/Avatar";
 import { Circle, CircleCheckBig } from "lucide-react";
+import Tag from "../ui/Tag";
 
 export function Contact({
   firstname,
@@ -10,6 +10,7 @@ export function Contact({
   isSelected = false,
   isSelectable = false,
   color,
+  tag = null,
 }) {
   const fullname = `${firstname} ${lastname}`;
   return (
@@ -40,8 +41,17 @@ export function Contact({
           ) : null}
         </div>
 
-        <div className="flex flex-col">
+        <div className="flex items-center justify-between w-full">
           <p className="text-sm text-gray-700 dark:text-gray-200">{fullname}</p>
+          {tag && (
+            <Tag
+              tagContent={tag}
+              bgColor={"bg-gray-200"}
+              textColor={"text-green-800"}
+              darkModeBgColor={"dark:bg-green-400/50"}
+              darkModeTextColor={"dark:text-gray-200"}
+            />
+          )}
         </div>
       </button>
     </li>

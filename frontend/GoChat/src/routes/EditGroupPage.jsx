@@ -1,9 +1,14 @@
 import { useNavigate, useParams } from "react-router";
 import { useConversation } from "../hooks/useConversation";
+import { Link } from "../components/ui/Link";
 import Button from "../components/ui/Button";
-import { ArrowBigLeft, Check } from "lucide-react";
+import { ArrowBigLeft, Check, KeyRound, UserRoundPlus } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
+import { useMyContacts } from "../hooks/me/useMyContacts";
+import { filterUsers } from "../utils/filterUsers";
+import { Contact } from "../components/users/Contact";
 import { Avatar } from "../components/chat/Avatar";
+import { Tag } from "../components/ui/Tag";
 import { supabase } from "../utils/supabase";
 import { toast } from "react-toastify";
 import translations from "../translations";
@@ -213,13 +218,21 @@ function ParticipantCard({
               {participant.user.firstname + " " + participant.user.lastname}
             </p>
             {participant.isOwner ? (
-              <span className="text-xs dark:text-gray-200 dark:bg-purple-600/50 border dark:border-purple-500/50 text-purple-800 bg-purple-200 px-1 py-0.5 rounded-full">
-                Owner
-              </span>
+              <Tag
+                tagContent={"Owner"}
+                bgColor={"bg-purple-200"}
+                textColor={"text-purple-800"}
+                darkModeBgColor={"dark:bg-purple-600/50"}
+                darkModeTextColor={"dark:text-gray-200"}
+              />
             ) : participant.isAdmin ? (
-              <span className="text-xs dark:text-gray-200 dark:bg-green-400/50 border dark:border-green-400/50 text-green-800 bg-gray-200 px-1 py-0.5 rounded-full">
-                Admin
-              </span>
+              <Tag
+                tagContent={"Admin"}
+                bgColor={"bg-gray-200"}
+                textColor={"text-green-800"}
+                darkModeBgColor={"dark:bg-green-400/50"}
+                darkModeTextColor={"dark:text-gray-200"}
+              />
             ) : null}
           </div>
         </div>
@@ -253,6 +266,12 @@ function ParticipantCard({
 }
 
 function ParticipantsList({ participants, setParticipants, language }) {
+  const [isAddingParticipant, setIsAddingParticipant] = useState(false);
+  const { users, isFetching: isContactsFetching } = useMyContacts();
+  const [selectedMembers, setSelectedMembers] = useState([]);
+  const [query, setQuery] = useState("");
+  const queriedContacts =
+    !isContactsFetching && filterUsers(users, query || "");
   const handleRemoveParticipant = (participantUserId) => {
     setParticipants((prev) => {
       return prev.filter((p) => p.userId !== participantUserId);
@@ -267,28 +286,128 @@ function ParticipantsList({ participants, setParticipants, language }) {
       }),
     );
   };
+  const toggleSelectedContact = (user) => {
+    const exists = selectedMembers.find((m) => m.id === user.id);
+    if (exists)
+      setSelectedMembers((prev) => prev.filter((m) => m.id !== user.id));
+    else setSelectedMembers((prev) => [...prev, user]);
+  };
+
+  const handleConfirmAdd = () => {
+    const existingIds = participants.map((p) => p.userId);
+    const toAdd = selectedMembers
+      .filter((u) => !existingIds.includes(u.id))
+      .map((u) => ({ userId: u.id, isAdmin: false, isOwner: false, user: u }));
+    if (toAdd.length > 0) {
+      setParticipants((prev) => [...prev, ...toAdd]);
+    }
+    setSelectedMembers([]);
+    setQuery("");
+    setIsAddingParticipant(false);
+  };
 
   return (
     <section
       dir={language === "Arabic" ? "rtl" : "ltr"}
       className="p-4 mt-4 bg-white dark:bg-gray-800/30 shadow-sm rounded-md"
     >
-      <h3 className="text-lg font-bold tracking-tight text-cyan-600 dark:text-cyan-400">
-        {translations.ChatDetails[language].MembersHeading}
-      </h3>
+      <div className="flex items-center gap-2">
+        <h3 className="text-lg font-bold tracking-tight text-cyan-600 dark:text-cyan-400">
+          {translations.ChatDetails[language].MembersHeading}
+        </h3>
+        <Button
+          onClick={() => setIsAddingParticipant(!isAddingParticipant)}
+          className={"relative group"}
+        >
+          <span className="text-xs absolute -top-8 -right-8 bg-gray-700/20 p-1 rounded w-30 group-hover:opacity-100 transition-all duration-300 opacity-0">
+            {translations.Common[language]?.Add || "Add"}
+          </span>
+          <UserRoundPlus size={20} />
+        </Button>
+      </div>
 
-      <ul className="p-2 my-2 divide-y dark:divide-gray-700 divide-gray-200 ">
-        {participants.map((participant) => {
-          return (
-            <ParticipantCard
-              participant={participant}
-              handleRemoveParticipant={handleRemoveParticipant}
-              handleToggleAdminStatus={handleToggleAdminStatus}
-              key={participant.id}
+      {isAddingParticipant ? (
+        <div className="p-2 mt-4">
+          <div className="w-full p-2 flex flex-col gap-2">
+            <label
+              className="tracking-tight text-cyan-600/80 dark:text-cyan-400/80"
+              htmlFor="search"
+            >
+              {translations.SearchBar[language].FindUser}
+            </label>
+            <input
+              dir="auto"
+              id="search"
+              className="px-4 py-1.5 outline-2 outline-gray-200/50 dark:outline-gray-400/30 focus:outline-cyan-600/50 dark:focus:outline-cyan-400/80 focus:outline-offset-2 focus:bg-gray-200/20 dark:focus:bg-gray-700/20 transition-all rounded-full text-sm text-gray-800 dark:text-gray-100"
+              type="search"
+              name="contact"
+              value={query || ""}
+              onChange={(e) => setQuery(e.target.value)}
             />
-          );
-        })}
-      </ul>
+          </div>
+
+          <ul className="w-full flex flex-col animate-slideup divide-y dark:divide-gray-700 divide-gray-200 mt-2">
+            {isContactsFetching ? (
+              <p className="text-xs text-gray-400 dark:text-gray-200 text-center">
+                {translations.NewGroupPage[language].Loading}
+              </p>
+            ) : queriedContacts && queriedContacts.length > 0 ? (
+              queriedContacts.map((c) => {
+                const alreadyParticipant = participants.some(
+                  (p) => p.userId === c.id,
+                );
+                const isSelected = !!selectedMembers.find((m) => m.id === c.id);
+                return (
+                  <Contact
+                    isSelected={isSelected}
+                    firstname={c.firstname}
+                    isSelectable={!alreadyParticipant}
+                    lastname={c.lastname}
+                    tag={alreadyParticipant && "Selected"}
+                    onClick={() => toggleSelectedContact(c)}
+                    avatar={c.profile?.avatar || null}
+                    color={c?.accountColor || null}
+                    key={c.id}
+                  />
+                );
+              })
+            ) : (
+              <p className="text-xs text-center text-gray-400 dark:text-gray-200">
+                {translations.NewGroupPage[language].NoUsersFound}
+              </p>
+            )}
+          </ul>
+
+          <div className="flex gap-2 mt-3">
+            <Button onClick={handleConfirmAdd} className="text-sm">
+              {translations.Common[language]?.Confirm || "Add Selected"}
+            </Button>
+            <Button
+              onClick={() => {
+                setIsAddingParticipant(false);
+                setSelectedMembers([]);
+                setQuery("");
+              }}
+              className="text-sm bg-gray-200"
+            >
+              {translations.Common[language]?.Cancel || "Cancel"}
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <ul className="p-2 my-2 divide-y dark:divide-gray-700 divide-gray-200 ">
+          {participants.map((participant) => {
+            return (
+              <ParticipantCard
+                participant={participant}
+                handleRemoveParticipant={handleRemoveParticipant}
+                handleToggleAdminStatus={handleToggleAdminStatus}
+                key={participant.id}
+              />
+            );
+          })}
+        </ul>
+      )}
     </section>
   );
 }
@@ -337,7 +456,7 @@ export function EditGroupPage() {
   if (error) return <p>Error: {error.message}</p>;
 
   return (
-    <main className="max-w-200 mx-auto bg-white dark:bg-gray-900 font-rubik relative">
+    <main className="max-w-200 pb-4 mx-auto bg-white dark:bg-gray-900 font-rubik relative">
       <div className="flex justify-between items-center p-2 bg-gray-50/30 dark:bg-gray-800/80 rounded-lg my-2">
         <Button
           onClick={() => navigate(-1)}
@@ -355,46 +474,60 @@ export function EditGroupPage() {
           <Check size={20} />
         </Button>
       </div>
-
-      <form
-        dir={language === "Arabic" ? "rtl" : "ltr"}
-        onSubmit={(e) => e.preventDefault()}
-      >
-        <AvatarFileField
-          setAvatarURL={(value) => onFieldChange(value, "avatar")}
-          avatarURL={groupMetaData.avatar}
-          title={
-            groupMetaData.title || translations.NewGroupPage[language].Title
-          }
-          isFetching={isFetching}
-        />
-        <GroupInputField
-          value={groupMetaData.title}
-          onChange={(e) => onFieldChange(e.target.value, "title")}
-          id="groupTitle"
-          label={translations.NewGroupPage[language].Title}
-          name="title"
-          isFetching={isFetching}
-        />
-        <DescriptionTextArea
-          value={groupMetaData.description}
-          onChange={(e) => onFieldChange(e.target.value, "description")}
-          isFetching={isFetching}
-        />
-        <ParticipantsList
-          language={language}
-          participants={groupMetaData.participants}
-          setParticipants={(updater) => {
-            setGroupMetaData((prev) => {
-              const next =
-                typeof updater === "function"
-                  ? updater(prev.participants)
-                  : (updater ?? []);
-              return { ...prev, participants: next };
-            });
-          }}
-        />
-      </form>
+      <section>
+        <form
+          dir={language === "Arabic" ? "rtl" : "ltr"}
+          onSubmit={(e) => e.preventDefault()}
+        >
+          <AvatarFileField
+            setAvatarURL={(value) => onFieldChange(value, "avatar")}
+            avatarURL={groupMetaData.avatar}
+            title={
+              groupMetaData.title || translations.NewGroupPage[language].Title
+            }
+            isFetching={isFetching}
+          />
+          <GroupInputField
+            value={groupMetaData.title}
+            onChange={(e) => onFieldChange(e.target.value, "title")}
+            id="groupTitle"
+            label={translations.NewGroupPage[language].Title}
+            name="title"
+            isFetching={isFetching}
+          />
+          <DescriptionTextArea
+            value={groupMetaData.description}
+            onChange={(e) => onFieldChange(e.target.value, "description")}
+            isFetching={isFetching}
+          />
+          <ParticipantsList
+            language={language}
+            participants={groupMetaData.participants}
+            setParticipants={(updater) => {
+              setGroupMetaData((prev) => {
+                const next =
+                  typeof updater === "function"
+                    ? updater(prev.participants)
+                    : (updater ?? []);
+                return { ...prev, participants: next };
+              });
+            }}
+          />
+        </form>
+      </section>
+      <section className="p-4 mt-4 bg-white dark:bg-gray-800/30 shadow-sm rounded-md">
+        <div className="flex flex-col gap-1">
+          <Link
+            route={`/chats/groups/${conversationId}/permissions`}
+            className={
+              "w-full py-3 text-start flex items-center gap-2 rounded-md"
+            }
+          >
+            <KeyRound size={20} />
+            <span>Permissions</span>
+          </Link>
+        </div>
+      </section>
     </main>
   );
 }

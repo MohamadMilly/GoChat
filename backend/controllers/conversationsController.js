@@ -188,6 +188,7 @@ const createNewConversationPost = async (req, res) => {
             },
           },
         },
+        permissions: {},
       },
       include: {
         participants: {
@@ -383,10 +384,42 @@ const editGroupPut = async (req, res) => {
   }
 };
 
+const conversationPermissionsGet = async (req, res) => {
+  const { conversationId } = req.params;
+  try {
+    const group = await prisma.conversation.findUnique({
+      where: {
+        conversationId: parseInt(conversationId),
+      },
+    });
+    if (!group) {
+      return res.status(404).json({
+        message: "There is no conversation has this id.",
+      });
+    }
+    const groupPermissions = await prisma.permissions.findUnique({
+      where: {
+        conversationId: parseInt(conversationId),
+      },
+    });
+    if (groupPermissions) {
+      return res.json({
+        permissions: groupPermissions,
+      });
+    }
+  } catch (err) {
+    return res.status(500).json({
+      message:
+        "Unexpected error happened while getting this conversation permissions.",
+    });
+  }
+};
+
 module.exports = {
   createNewConversationPost,
   getSpecificConversationGet,
   queryGroupsGet,
   joinConversationPost,
   editGroupPut,
+  conversationPermissionsGet,
 };
