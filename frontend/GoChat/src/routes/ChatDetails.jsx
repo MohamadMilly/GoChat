@@ -46,7 +46,9 @@ function ChatParticipant({ participant, isConnected }) {
                 Owner
               </span>
             ) : participant.isAdmin ? (
-              <span>Admin</span>
+              <span className="text-xs dark:text-gray-200 dark:bg-green-400/50 border dark:border-green-400/50 text-green-800 bg-gray-200 px-1 py-0.5 rounded-full">
+                Admin
+              </span>
             ) : null}
           </div>
 
@@ -57,6 +59,36 @@ function ChatParticipant({ participant, isConnected }) {
         </div>
       </TransitionLink>
     </li>
+  );
+}
+
+export function ParticipantsSection({ language, participants }) {
+  const { connectedUsers } = useSocket();
+  return (
+    <section
+      dir={language === "Arabic" ? "rtl" : "ltr"}
+      className="p-4 mt-4 bg-white dark:bg-gray-800 shadow-sm rounded-md"
+    >
+      <h3 className="text-lg font-bold tracking-tight text-cyan-600 dark:text-cyan-400">
+        {translations.ChatDetails[language].MembersHeading}
+      </h3>
+
+      <ul className="p-2 my-2 divide-y dark:divide-gray-700 divide-gray-200 ">
+        {participants.map((participant) => {
+          const isConnected = connectedUsers.some(
+            (id) => id == participant.user.id,
+          );
+          return (
+            <ChatParticipant
+              participant={participant}
+              avatar={participant.user?.profile?.avatar}
+              isConnected={isConnected}
+              key={participant.user.id}
+            />
+          );
+        })}
+      </ul>
+    </section>
   );
 }
 
@@ -135,31 +167,7 @@ export function ChatDetails() {
           </h2>
         </article>
       </section>
-      <section
-        dir={language === "Arabic" ? "rtl" : "ltr"}
-        className="p-4 mt-4 bg-white dark:bg-gray-800 shadow-sm rounded-md"
-      >
-        <h3 className="text-lg font-bold tracking-tight text-cyan-600 dark:text-cyan-400">
-          {translations.ChatDetails[language].MembersHeading}
-        </h3>
-        {
-          <ul className="p-2 my-2 divide-y dark:divide-gray-700 divide-gray-200 ">
-            {participants.map((participant) => {
-              const isConnected = connectedUsers.some(
-                (id) => id == participant.user.id,
-              );
-              return (
-                <ChatParticipant
-                  participant={participant}
-                  avatar={avatar}
-                  isConnected={isConnected}
-                  key={participant.user.id}
-                />
-              );
-            })}
-          </ul>
-        }
-      </section>
+      <ParticipantsSection language={language} participants={participants} />
     </main>
   );
 }

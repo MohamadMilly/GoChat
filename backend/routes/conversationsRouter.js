@@ -63,6 +63,11 @@ conversationsRouter.delete(
 );
 
 conversationsRouter.put(
+  "/:conversationId",
+  conversationsController.editGroupPut,
+);
+
+conversationsRouter.put(
   "/:conversationId/messages/:messageId",
   messagesCountroller.editMessagePut,
 );

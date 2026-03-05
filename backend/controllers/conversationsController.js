@@ -288,9 +288,105 @@ const joinConversationPost = async (req, res) => {
   }
 };
 
+const editGroupPut = async (req, res) => {
+  const currentUser = req.currentUser;
+  const { conversationId } = req.params;
+  const { title, description, participants, avatar } = req.body;
+  try {
+    const groupAdmins = await prisma.conversationAdmin.findMany({
+      where: {
+        conversationId: parseInt(conversationId),
+      },
+    });
+    const newGroupAdmins = participants.filter((p) => p.isAdmin);
+    const groupParticipantsIds = participants.map((p) => p.userId);
+    const currentUserAdminObj = groupAdmins.find(
+      (admin) => admin.userId === currentUser.id,
+    );
+    if (!currentUserAdminObj) {
+      return res.status(401).json({
+        message: "editing the group is only permissible by admins ",
+      });
+    }
+    const updatedGroup = await prisma.conversation.update({
+      where: {
+        id: parseInt(conversationId),
+      },
+      data: {
+        title,
+        avatar,
+        description,
+        participants: {
+          deleteMany: {
+            NOT: {
+              userId: {
+                in: groupParticipantsIds,
+              },
+            },
+          },
+          upsert: participants.map((p) => ({
+            where: {
+              conversationId_userId: {
+                conversationId: parseInt(conversationId),
+                userId: p.userId,
+              },
+            },
+            update: {},
+            create: { user: { connect: { id: p.userId } } },
+          })),
+        },
+        admins: {
+          deleteMany: {
+            NOT: {
+              userId: {
+                in: newGroupAdmins.map((p) => p.userId),
+              },
+            },
+          },
+          upsert: newGroupAdmins.map((p) => {
+            return {
+              where: {
+                conversationId_userId: {
+                  userId: p.userId,
+                  conversationId: parseInt(conversationId),
+                },
+              },
+              create: {
+                user: { connect: { id: p.userId } },
+                assignedBy: {
+                  connect: {
+                    id: currentUserAdminObj.id,
+                  },
+                },
+              },
+              update: {
+                isOwner: p.isOwner,
+                assignedBy: {
+                  connect: {
+                    id: currentUserAdminObj.id,
+                  },
+                },
+              },
+            };
+          }),
+        },
+      },
+    });
+    return res.json({
+      conversation: updatedGroup,
+    });
+  } catch (err) {
+    return res.status(500).json({
+      message: "Unexpected error happened while editing the group",
+      error: err.message,
+    });
+  }
+};
+
 module.exports = {
   createNewConversationPost,
   getSpecificConversationGet,
   queryGroupsGet,
   joinConversationPost,
+  editGroupPut,
 };

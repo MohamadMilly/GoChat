@@ -8,6 +8,8 @@ import { supabase } from "../utils/supabase";
 import { toast } from "react-toastify";
 import translations from "../translations";
 import { useLanguage } from "../contexts/LanguageContext";
+import { useEditGroup } from "../hooks/useEditGroup";
+import { useAuth } from "../contexts/AuthContext";
 
 function GroupInputField({
   value,
@@ -171,8 +173,134 @@ function AvatarFileField({ avatarURL, setAvatarURL, title, isFetching }) {
   );
 }
 
+function ParticipantCard({
+  participant,
+  handleRemoveParticipant,
+  handleToggleAdminStatus,
+}) {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const { user } = useAuth();
+  const cardRef = useRef(null);
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (cardRef.current && menuOpen && !cardRef.current.contains(e.target)) {
+        setMenuOpen(false);
+      }
+    }
+    window.addEventListener("mousedown", handleClickOutside);
+
+    return () => window.removeEventListener("mousedown", handleClickOutside);
+  }, [menuOpen]);
+  return (
+    <li ref={cardRef}>
+      <button
+        onClick={() => setMenuOpen(!menuOpen)}
+        className="py-2 flex items-center gap-2 dark:hover:bg-gray-600/20 relative w-full"
+      >
+        <div className="shrink-0 relative">
+          <Avatar
+            chatAvatar={participant?.user.profile?.avatar || ""}
+            chatTitle={
+              participant.user.firstname + " " + participant.user.lastname
+            }
+            color={participant.user?.accountColor || null}
+          />
+        </div>
+
+        <div className="flex flex-col items-start w-full">
+          <div className="flex items-center justify-between w-full">
+            <p className="text-sm text-gray-800 dark:text-gray-100">
+              {participant.user.firstname + " " + participant.user.lastname}
+            </p>
+            {participant.isOwner ? (
+              <span className="text-xs dark:text-gray-200 dark:bg-purple-600/50 border dark:border-purple-500/50 text-purple-800 bg-purple-200 px-1 py-0.5 rounded-full">
+                Owner
+              </span>
+            ) : participant.isAdmin ? (
+              <span className="text-xs dark:text-gray-200 dark:bg-green-400/50 border dark:border-green-400/50 text-green-800 bg-gray-200 px-1 py-0.5 rounded-full">
+                Admin
+              </span>
+            ) : null}
+          </div>
+        </div>
+        {menuOpen && (
+          <div className="absolute flex flex-col right-12 bottom-4 p-2 rounded bg-gray-700 animate-pop">
+            {user.id !== participant.userId && (
+              <>
+                <Button
+                  onClick={() => handleRemoveParticipant(participant.userId)}
+                >
+                  Remove
+                </Button>
+
+                <Button
+                  onClick={() =>
+                    handleToggleAdminStatus(
+                      participant.userId,
+                      !participant.isAdmin,
+                    )
+                  }
+                >
+                  {participant.isAdmin ? "Remove Admin" : "Promote"}
+                </Button>
+              </>
+            )}
+          </div>
+        )}
+      </button>
+    </li>
+  );
+}
+
+function ParticipantsList({ participants, setParticipants, language }) {
+  const handleRemoveParticipant = (participantUserId) => {
+    setParticipants((prev) => {
+      return prev.filter((p) => p.userId !== participantUserId);
+    });
+  };
+  const handleToggleAdminStatus = (participantUserId, isAdmin) => {
+    setParticipants((prev) =>
+      prev.map((p) => {
+        if (p.userId === participantUserId) {
+          return { ...p, isAdmin: isAdmin };
+        } else return p;
+      }),
+    );
+  };
+
+  return (
+    <section
+      dir={language === "Arabic" ? "rtl" : "ltr"}
+      className="p-4 mt-4 bg-white dark:bg-gray-800/30 shadow-sm rounded-md"
+    >
+      <h3 className="text-lg font-bold tracking-tight text-cyan-600 dark:text-cyan-400">
+        {translations.ChatDetails[language].MembersHeading}
+      </h3>
+
+      <ul className="p-2 my-2 divide-y dark:divide-gray-700 divide-gray-200 ">
+        {participants.map((participant) => {
+          return (
+            <ParticipantCard
+              participant={participant}
+              handleRemoveParticipant={handleRemoveParticipant}
+              handleToggleAdminStatus={handleToggleAdminStatus}
+              key={participant.id}
+            />
+          );
+        })}
+      </ul>
+    </section>
+  );
+}
+
 export function EditGroupPage() {
   const { id: conversationId } = useParams();
+  const {
+    mutate: update,
+    error: editingError,
+    isPending,
+    isSuccess,
+  } = useEditGroup();
   const { conversation, isFetching, error } = useConversation(conversationId);
   const [groupMetaData, setGroupMetaData] = useState({
     title: "",
@@ -201,11 +329,11 @@ export function EditGroupPage() {
   };
 
   const handleConfirm = () => {
-    // No update endpoint currently exists for editing conversations in backend.
-    // For now, just navigate back. Future: call API to update conversation.
-    navigate(-1);
+    update({ conversationId, data: groupMetaData });
   };
-
+  if (isSuccess) {
+    navigate(-1);
+  }
   if (error) return <p>Error: {error.message}</p>;
 
   return (
@@ -252,6 +380,19 @@ export function EditGroupPage() {
           value={groupMetaData.description}
           onChange={(e) => onFieldChange(e.target.value, "description")}
           isFetching={isFetching}
+        />
+        <ParticipantsList
+          language={language}
+          participants={groupMetaData.participants}
+          setParticipants={(updater) => {
+            setGroupMetaData((prev) => {
+              const next =
+                typeof updater === "function"
+                  ? updater(prev.participants)
+                  : (updater ?? []);
+              return { ...prev, participants: next };
+            });
+          }}
         />
       </form>
     </main>
