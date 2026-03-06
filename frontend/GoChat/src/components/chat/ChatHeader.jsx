@@ -21,12 +21,8 @@ export const ChatHeader = memo(({ id }) => {
   const { language } = useLanguage();
   const { connectedUsers, typingUsers } = useSocket();
   const { user } = useAuth();
-  const { conversationId } = useContext(ChatPageContext);
-  const {
-    permissions,
-    error: fetchingPermissionsError,
-    isFetching: isFetchingPermissions,
-  } = usePermissions(conversationId);
+  const { conversationId, permissions } = useContext(ChatPageContext);
+
   const {
     conversation,
     membersCount,

@@ -14,6 +14,7 @@ import { ChatsListContext } from "./ChatsListPage";
 import { useTheme } from "../contexts/ThemeContext";
 import { useLanguage } from "../contexts/LanguageContext";
 import { EditMessageDialog } from "../components/chat/EditMessageDialog";
+import { usePermissions } from "../hooks/usePermissions";
 
 export const ChatPageContext = createContext({
   conversationId: null,
@@ -23,6 +24,7 @@ export const ChatPageContext = createContext({
 export function ChatPage() {
   const pendingMessagesRef = useRef([]);
   const { id } = useParams();
+  const { permissions, isFetching, error } = usePermissions(id);
   const { isConnected } = useSocket();
   const [isInPreviewMode, setIsInPreviewMode] = useState(false);
   const [previewImageURL, setPreviewImageURL] = useState(null);
@@ -48,6 +50,7 @@ export function ChatPage() {
         repliedMessage,
         editedMessage,
         setEditedMessage,
+        permissions,
       }}
     >
       <section

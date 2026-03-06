@@ -30,7 +30,8 @@ export function SendMessageForm() {
     file: null,
     mimeType: null,
   });
-  const { setRepliedMessage, repliedMessage } = useContext(ChatPageContext);
+  const { setRepliedMessage, repliedMessage, permissions } =
+    useContext(ChatPageContext);
   const [searchParams] = useSearchParams();
   useEffect(() => {
     let ignore = false;
@@ -181,7 +182,10 @@ export function SendMessageForm() {
     setHasAttached(false);
   };
   return (
-    <div dir={language === "Arabic" ? "rtl" : "ltr"} className="z-20">
+    <div
+      dir={language === "Arabic" ? "rtl" : "ltr"}
+      className="z-20 shrink-0 relative"
+    >
       {repliedMessage && (
         <div
           style={{ "--color": repliedMessage.sender?.accountColor }}
@@ -230,73 +234,88 @@ export function SendMessageForm() {
           </Button>
         </div>
       )}
-      <form method="POST" onSubmit={onSend}>
-        <EmojiPicker
-          style={{ backgroundColor: theme === "light" ? "white" : "#1e2939" }}
-          previewConfig={{ showPreview: false }}
-          theme={theme === "light" ? "light" : "dark"}
-          onEmojiClick={handlePickEmoji}
-          open={showEmojiPicker}
-          width={"100%"}
-        />
+      {permissions?.sendingMessages ? (
+        <form method="POST" onSubmit={onSend}>
+          <EmojiPicker
+            style={{ backgroundColor: theme === "light" ? "white" : "#1e2939" }}
+            previewConfig={{ showPreview: false }}
+            theme={theme === "light" ? "light" : "dark"}
+            onEmojiClick={handlePickEmoji}
+            open={showEmojiPicker}
+            width={"100%"}
+          />
 
-        <label htmlFor="chat" className="sr-only">
-          {translations.SendMessageForm[language].YourMessageSR}
-        </label>
-        <div className="flex items-center px-3 py-2 rounded-t-lg bg-white dark:bg-gray-800 shadow">
-          <button
-            onClick={() => setIsDrawerVisible((prev) => !prev)}
-            type="button"
-            className="p-2 text-gray-500 dark:text-gray-300 dark:hover:text-gray-100 rounded-lg cursor-pointer hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-700"
-          >
-            <Paperclip />
-            <span className="sr-only">
-              {translations.SendMessageForm[language].AttachFileSR}
+          <label htmlFor="chat" className="sr-only">
+            {translations.SendMessageForm[language].YourMessageSR}
+          </label>
+          <div className="flex items-center px-3 py-2 rounded-t-lg bg-white dark:bg-gray-800 shadow">
+            <button
+              onClick={() => setIsDrawerVisible((prev) => !prev)}
+              type="button"
+              className="p-2 text-gray-500 dark:text-gray-300 dark:hover:text-gray-100 rounded-lg cursor-pointer hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-700"
+            >
+              <Paperclip />
+              <span className="sr-only">
+                {translations.SendMessageForm[language].AttachFileSR}
+              </span>
+            </button>
+
+            <button
+              type="button"
+              className="p-2 text-gray-500 dark:text-gray-300 dark:hover:text-gray-100 rounded-lg cursor-pointer hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-700"
+              onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+            >
+              <Smile />
+              <span className="sr-only">
+                {translations.SendMessageForm[language].EmojiSR}
+              </span>
+            </button>
+
+            <textarea
+              dir="auto"
+              id="chat"
+              rows="1"
+              className="block max-h-37.5 resize-none min-h-15 mx-4 p-2.5 w-full text-sm text-gray-900 bg-white dark:bg-gray-900 dark:text-gray-50 outline-2 outline-gray-400/20 dark:outline-gray-200/20 focus:outline-offset-2 focus:outline-cyan-600/80 dark:focus:outline-cyan-400/80 rounded-lg"
+              placeholder={translations.SendMessageForm[language].Placeholder}
+              onChange={onMessageChange}
+              value={message}
+              ref={messageTextAreaRef}
+              required
+            ></textarea>
+
+            <button
+              type="submit"
+              className="inline-flex justify-center p-2 text-blue-600 dark:text-blue-400 rounded-full cursor-pointer hover:bg-blue-100 dark:hover:bg-cyan-600/10 "
+            >
+              <Send />
+              <span className="sr-only">
+                {translations.SendMessageForm[language].SendMessageSR}
+              </span>
+            </button>
+          </div>
+          {permissions.sendingMedia && (
+            <MediaDrawer
+              isVisible={isDrawerVisible}
+              setMediaFileData={setMediaFileData}
+              mediaFileData={mediaFileData}
+              setIsVisible={setIsDrawerVisible}
+              setPreviewFileURl={setPreviewFileURL}
+              setHasAttached={setHasAttached}
+            />
+          )}
+        </form>
+      ) : (
+        <div className="dark:bg-gray-800 bg-white ">
+          <div className="flex flex-col items-center justify-center p-3">
+            <p className="dark:text-gray-100 font-medium text-sm text-gray-800">
+              Sending messages is not allowed in this conversation
+            </p>
+            <span className="dark:text-gray-600 text-xs text-gray-400">
+              Restrication is due to permissions
             </span>
-          </button>
-
-          <button
-            type="button"
-            className="p-2 text-gray-500 dark:text-gray-300 dark:hover:text-gray-100 rounded-lg cursor-pointer hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-700"
-            onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-          >
-            <Smile />
-            <span className="sr-only">
-              {translations.SendMessageForm[language].EmojiSR}
-            </span>
-          </button>
-
-          <textarea
-            dir="auto"
-            id="chat"
-            rows="1"
-            className="block max-h-37.5 resize-none min-h-15 mx-4 p-2.5 w-full text-sm text-gray-900 bg-white dark:bg-gray-900 dark:text-gray-50 outline-2 outline-gray-400/20 dark:outline-gray-200/20 focus:outline-offset-2 focus:outline-cyan-600/80 dark:focus:outline-cyan-400/80 rounded-lg"
-            placeholder={translations.SendMessageForm[language].Placeholder}
-            onChange={onMessageChange}
-            value={message}
-            ref={messageTextAreaRef}
-            required
-          ></textarea>
-
-          <button
-            type="submit"
-            className="inline-flex justify-center p-2 text-blue-600 dark:text-blue-400 rounded-full cursor-pointer hover:bg-blue-100 dark:hover:bg-cyan-600/10 "
-          >
-            <Send />
-            <span className="sr-only">
-              {translations.SendMessageForm[language].SendMessageSR}
-            </span>
-          </button>
+          </div>
         </div>
-        <MediaDrawer
-          isVisible={isDrawerVisible}
-          setMediaFileData={setMediaFileData}
-          mediaFileData={mediaFileData}
-          setIsVisible={setIsDrawerVisible}
-          setPreviewFileURl={setPreviewFileURL}
-          setHasAttached={setHasAttached}
-        />
-      </form>
+      )}
     </div>
   );
 }
