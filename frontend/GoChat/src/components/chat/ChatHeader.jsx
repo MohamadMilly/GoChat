@@ -14,6 +14,7 @@ import { ArrowBigLeft } from "lucide-react";
 import { ChatHeaderLoading } from "../skeletonLoadingComponents/ChatHeaderLoading";
 import translations from "../../translations";
 import { useLanguage } from "../../contexts/LanguageContext";
+import { usePermissions } from "../../hooks/usePermissions";
 
 export const ChatHeader = memo(({ id }) => {
   const navigate = useNavigate();
@@ -21,6 +22,11 @@ export const ChatHeader = memo(({ id }) => {
   const { connectedUsers, typingUsers } = useSocket();
   const { user } = useAuth();
   const { conversationId } = useContext(ChatPageContext);
+  const {
+    permissions,
+    error: fetchingPermissionsError,
+    isFetching: isFetchingPermissions,
+  } = usePermissions(conversationId);
   const {
     conversation,
     membersCount,
@@ -103,13 +109,32 @@ export const ChatHeader = memo(({ id }) => {
                   );
                 })
               ) : (
-                membersCount +
-                " " +
-                translations.ChatHeader[language].MembersLabel +
-                " | " +
-                connectedUsersCount +
-                " " +
-                translations.ChatHeader[language].OnlineLabel
+                <div className="flex items-center text-xs text-gray-700 dark:text-gray-100">
+                  <div className="flex items-center">
+                    <span className="inline-block ltr:mr-1 rtl:ml-1">
+                      {membersCount}
+                    </span>
+                    <span>
+                      {translations.ChatHeader[language].MembersLabel}
+                    </span>
+                  </div>
+                  {permissions?.onlineMembers && (
+                    <>
+                      <span className="mx-1">|</span>
+                      <div className="flex items-center">
+                        <span
+                          className="
+                              ltr:mr-1 rtl:ml-1"
+                        >
+                          {connectedUsersCount}
+                        </span>
+                        <span>
+                          {translations.ChatHeader[language].OnlineLabel}
+                        </span>
+                      </div>
+                    </>
+                  )}
+                </div>
               )
             ) : thisChatTypingUsers.length > 0 ? (
               translations.ChatHeader[language].TypingStandalone

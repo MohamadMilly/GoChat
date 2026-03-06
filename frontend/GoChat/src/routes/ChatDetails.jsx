@@ -12,8 +12,13 @@ import { useState } from "react";
 import translations from "../translations";
 import { useLanguage } from "../contexts/LanguageContext";
 import { useAuth } from "../contexts/AuthContext";
+import { usePermissions } from "../hooks/usePermissions";
 
-function ChatParticipant({ participant, isConnected }) {
+function ChatParticipant({
+  participant,
+  isConnected,
+  hideOnlineStatus = false,
+}) {
   const [transitionId, setTransitionId] = useState(null);
   const { language } = useLanguage();
   return (
@@ -32,9 +37,11 @@ function ChatParticipant({ participant, isConnected }) {
             }
             color={participant.user?.accountColor || null}
           />
-          <span
-            className={`absolute w-3 h-3 bottom-0 right-0 rounded-full ${isConnected ? "bg-cyan-600 dark:bg-cyan-400" : "bg-gray-400 dark:bg-gray-300"}`}
-          ></span>
+          {!hideOnlineStatus && (
+            <span
+              className={`absolute w-3 h-3 bottom-0 right-0 rounded-full ${isConnected ? "bg-cyan-600 dark:bg-cyan-400" : "bg-gray-400 dark:bg-gray-300"}`}
+            ></span>
+          )}
         </div>
 
         <div className="flex flex-col items-start w-full">
@@ -71,7 +78,11 @@ function ChatParticipant({ participant, isConnected }) {
   );
 }
 
-export function ParticipantsSection({ language, participants }) {
+export function ParticipantsSection({
+  language,
+  participants,
+  hideOnlineStatus,
+}) {
   const { connectedUsers } = useSocket();
   return (
     <section
@@ -90,7 +101,7 @@ export function ParticipantsSection({ language, participants }) {
           return (
             <ChatParticipant
               participant={participant}
-              avatar={participant.user?.profile?.avatar}
+              hideOnlineStatus={hideOnlineStatus}
               isConnected={isConnected}
               key={participant.user.id}
             />
@@ -108,6 +119,11 @@ export function ChatDetails() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { language } = useLanguage();
+  const {
+    permissions,
+    isFetching: isFetchingPermissions,
+    error: permissionsFetchingError,
+  } = usePermissions(id);
   if (isFetching) return <p>{translations.ChatDetails[language].Loading}</p>;
   if (error)
     return (
@@ -157,8 +173,12 @@ export function ChatDetails() {
       >
         <h2 className="text-xl text-gray-800 dark:text-gray-50">{title}</h2>
         <p className="text-sm text-gray-500 dark:text-gray-300">
-          {membersCount} {translations.ChatDetails[language].MembersLabel} |{" "}
-          {connectedUsersCount} {translations.ChatDetails[language].OnlineLabel}
+          {membersCount} {translations.ChatDetails[language].MembersLabel}{" "}
+          {permissions?.onlineMembers &&
+            "| " +
+              connectedUsersCount +
+              " " +
+              translations.ChatDetails[language].OnlineLabel}
         </p>
       </section>
       <section
@@ -176,7 +196,11 @@ export function ChatDetails() {
           </h2>
         </article>
       </section>
-      <ParticipantsSection language={language} participants={participants} />
+      <ParticipantsSection
+        language={language}
+        participants={participants}
+        hideOnlineStatus={!permissions?.onlineMembers}
+      />
     </main>
   );
 }

@@ -105,6 +105,34 @@ io.on("connection", async (socket) => {
       });
       let createdMessage;
       try {
+        const permissions = await prisma.permissions.findUnique({
+          where: {
+            conversationId: parseInt(conversationId),
+          },
+        });
+        const admin = await prisma.conversationAdmin.findUnique({
+          where: {
+            conversationId_userId: {
+              conversationId: parseInt(conversationId),
+              userId: parseInt(userId),
+            },
+          },
+        });
+        if (!permissions.sendingMessages && !admin) {
+          throw new Error(
+            "Sending messages is not allowed due to permissions restrictions.",
+          );
+        }
+        if (
+          !permissions.sendingMedia &&
+          !admin &&
+          !message.mimeType.includes("text") &&
+          !(message.type === "TEXT")
+        ) {
+          throw new Error(
+            "Sending media messages is not allowed due to permissions restrictions.",
+          );
+        }
         createdMessage = await prisma.message.create({
           data: {
             sender: {
@@ -156,23 +184,16 @@ io.on("connection", async (socket) => {
         console.error("socket error: ", err);
         if (err.code === "P2002") {
         }
+        return;
       }
 
-      io.to(convId)
-        .timeout(5000)
-        .emit(
-          "chat message",
-          createdMessage,
-          convId,
-          createdMessage.id,
-          message.createdAt,
-          (response, err) => {
-            if (err) {
-              console.error("socket error:", err);
-              return;
-            }
-          },
-        );
+      io.to(convId).emit(
+        "chat message",
+        createdMessage,
+        convId,
+        createdMessage.id,
+        message.createdAt,
+      );
     },
   );
 

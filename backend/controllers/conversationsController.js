@@ -48,6 +48,7 @@ const getSpecificConversationGet = async (req, res) => {
           },
         },
         admins: true,
+        permissions: true,
       },
     });
 
@@ -188,7 +189,9 @@ const createNewConversationPost = async (req, res) => {
             },
           },
         },
-        permissions: {},
+        permissions: {
+          create: {},
+        },
       },
       include: {
         participants: {
@@ -389,7 +392,7 @@ const conversationPermissionsGet = async (req, res) => {
   try {
     const group = await prisma.conversation.findUnique({
       where: {
-        conversationId: parseInt(conversationId),
+        id: parseInt(conversationId),
       },
     });
     if (!group) {
@@ -407,10 +410,70 @@ const conversationPermissionsGet = async (req, res) => {
         permissions: groupPermissions,
       });
     }
+    return res.status(404).json({
+      message: "No Permissions for this group yet.",
+    });
   } catch (err) {
     return res.status(500).json({
       message:
         "Unexpected error happened while getting this conversation permissions.",
+      error: err.message,
+    });
+  }
+};
+
+const conversationPermissionsPut = async (req, res) => {
+  const currentUser = req.currentUser;
+  const { conversationId } = req.params;
+  const {
+    sendingMessages,
+    sendingMedia,
+    onlineMembers,
+    hideUsersForVisitors,
+    messageReaders,
+    viewMembers,
+  } = req.body;
+  try {
+    const group = await prisma.conversation.findUnique({
+      where: {
+        id: parseInt(conversationId),
+      },
+      include: {
+        admins: true,
+      },
+    });
+    if (!group) {
+      return res.status(404).json({
+        message: "Conversation is not found.",
+      });
+    }
+    const isTheCurrentUserAnAdmin = group.admins.some(
+      (admin) => admin.userId === currentUser.id,
+    );
+    if (!isTheCurrentUserAnAdmin) {
+      return res.status(401).json({
+        message: "Admins are only allowed to change permissions.",
+      });
+    }
+    const updatedPermissions = await prisma.permissions.update({
+      where: {
+        conversationId: parseInt(conversationId),
+      },
+      data: {
+        sendingMessages,
+        sendingMedia,
+        onlineMembers,
+        hideUsersForVisitors,
+        messageReaders,
+        viewMembers,
+      },
+    });
+    return res.json({
+      permissions: updatedPermissions,
+    });
+  } catch (err) {
+    return res.status(500).json({
+      message: "Unexpected error happened while updating this conversation.",
     });
   }
 };
@@ -422,4 +485,5 @@ module.exports = {
   joinConversationPost,
   editGroupPut,
   conversationPermissionsGet,
+  conversationPermissionsPut,
 };

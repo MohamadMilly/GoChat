@@ -1,15 +1,14 @@
 // pages
-
 import App from "./App";
 import { GroupPreview } from "./components/chat/GroupPreview";
 import { About } from "./routes/About";
 import { ChatDetails } from "./routes/ChatDetails";
-
 import { ChatPageWrapper } from "./routes/ChatPageWrapper";
 import { ChatsListLanding } from "./routes/ChatsListLanding";
 import { ChatsListPage } from "./routes/ChatsListPage";
 import { EditGroupPage } from "./routes/EditGroupPage";
 import { FindGroupPage } from "./routes/FindGroupPage";
+import { GroupPermisstionsPage } from "./routes/GroupPermissionsPage";
 import { LogInPage } from "./routes/LogInPage";
 import { EditProfilePage } from "./routes/me/EditProfile";
 import { MyPreferences } from "./routes/me/MyPreferences";
@@ -102,5 +101,9 @@ export const routes = [
   {
     path: "/chats/groups/:id/edit",
     element: <EditGroupPage />,
+  },
+  {
+    path: "/chats/groups/:id/permissions",
+    element: <GroupPermisstionsPage />,
   },
 ];

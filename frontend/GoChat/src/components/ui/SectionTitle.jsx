@@ -1,1 +1,1 @@
-/* function SectionTitle({ size = "md" }) {} */
+function SectionTitle({ size = "md", color }) {}

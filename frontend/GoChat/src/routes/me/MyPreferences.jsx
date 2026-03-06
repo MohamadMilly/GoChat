@@ -8,6 +8,7 @@ import { useState } from "react";
 import { ArrowDown, ArrowUp } from "lucide-react";
 import translations from "../../translations";
 import { useLanguage } from "../../contexts/LanguageContext";
+import { ToggleInput } from "../../components/ui/ToggleInput";
 function PrefrenceSectionSelect({
   options,
   initialOption,
@@ -114,30 +115,11 @@ function PreferenceSectionToggle({
           <span className="w-10 ml-3 block py-1.5 rounded bg-gray-200 dark:bg-gray-600 animate-pulse"></span>
         </div>
       ) : typeof value === "boolean" ? (
-        <label className="inline-flex items-center cursor-pointer">
-          <input
-            type="checkbox"
-            className="sr-only peer"
-            checked={value}
-            onChange={handlePatch}
-            disabled={isFetching}
-          />
-
-          <div
-            className="relative w-9 h-5 bg-gray-300 rounded-full peer-focus:ring-4 peer-focus:ring-cyan-300 
-              dark:bg-gray-700 dark:peer-focus:ring-cyan-800
-              peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full
-              peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-0.5
-              after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all
-              peer-checked:bg-cyan-600 dark:peer-checked:bg-cyan-400"
-          ></div>
-
-          <span className="ms-3 text-xs text-gray-600 dark:text-gray-300">
-            {value
-              ? translations.Common[language].Enabled
-              : translations.Common[language].Disabled}
-          </span>
-        </label>
+        <ToggleInput
+          onChange={handlePatch}
+          disabled={isFetching}
+          value={value}
+        />
       ) : null}
     </section>
   );

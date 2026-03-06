@@ -30,7 +30,7 @@ conversationsRouter.get(
 );
 
 conversationsRouter.get(
-  "/:conversationId/persmissions",
+  "/:conversationId/permissions",
   conversationsController.conversationPermissionsGet,
 );
 
@@ -75,6 +75,11 @@ conversationsRouter.put(
 conversationsRouter.put(
   "/:conversationId/messages/:messageId",
   messagesCountroller.editMessagePut,
+);
+
+conversationsRouter.put(
+  "/:conversationId/permissions",
+  conversationsController.conversationPermissionsPut,
 );
 
 module.exports = conversationsRouter;
