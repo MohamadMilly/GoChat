@@ -30,8 +30,12 @@ export function SendMessageForm() {
     file: null,
     mimeType: null,
   });
-  const { setRepliedMessage, repliedMessage, permissions } =
-    useContext(ChatPageContext);
+  const {
+    setRepliedMessage,
+    repliedMessage,
+    permissions,
+    isFetchingPermissions,
+  } = useContext(ChatPageContext);
   const [searchParams] = useSearchParams();
   useEffect(() => {
     let ignore = false;
@@ -234,7 +238,7 @@ export function SendMessageForm() {
           </Button>
         </div>
       )}
-      {permissions?.sendingMessages ? (
+      {permissions?.sendingMessages || isFetchingPermissions ? (
         <form method="POST" onSubmit={onSend}>
           <EmojiPicker
             style={{ backgroundColor: theme === "light" ? "white" : "#1e2939" }}
@@ -293,7 +297,7 @@ export function SendMessageForm() {
               </span>
             </button>
           </div>
-          {permissions.sendingMedia && (
+          {permissions?.sendingMedia && (
             <MediaDrawer
               isVisible={isDrawerVisible}
               setMediaFileData={setMediaFileData}

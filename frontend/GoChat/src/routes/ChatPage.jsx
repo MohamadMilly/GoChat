@@ -24,7 +24,11 @@ export const ChatPageContext = createContext({
 export function ChatPage() {
   const pendingMessagesRef = useRef([]);
   const { id } = useParams();
-  const { permissions, isFetching, error } = usePermissions(id);
+  const {
+    permissions,
+    isFetching: isFetchingPermissions,
+    error,
+  } = usePermissions(id);
   const { isConnected } = useSocket();
   const [isInPreviewMode, setIsInPreviewMode] = useState(false);
   const [previewImageURL, setPreviewImageURL] = useState(null);
@@ -51,6 +55,7 @@ export function ChatPage() {
         editedMessage,
         setEditedMessage,
         permissions,
+        isFetchingPermissions,
       }}
     >
       <section
