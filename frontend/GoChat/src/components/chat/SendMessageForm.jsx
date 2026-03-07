@@ -300,17 +300,16 @@ export function SendMessageForm() {
               </span>
             </button>
           </div>
-          {permissions?.sendingMedia ||
-            (isCurrentUserAdmin && (
-              <MediaDrawer
-                isVisible={isDrawerVisible}
-                setMediaFileData={setMediaFileData}
-                mediaFileData={mediaFileData}
-                setIsVisible={setIsDrawerVisible}
-                setPreviewFileURl={setPreviewFileURL}
-                setHasAttached={setHasAttached}
-              />
-            ))}
+          {(permissions?.sendingMedia || isCurrentUserAdmin) && (
+            <MediaDrawer
+              isVisible={isDrawerVisible}
+              setMediaFileData={setMediaFileData}
+              mediaFileData={mediaFileData}
+              setIsVisible={setIsDrawerVisible}
+              setPreviewFileURl={setPreviewFileURL}
+              setHasAttached={setHasAttached}
+            />
+          )}
         </form>
       ) : (
         <div className="dark:bg-gray-800 bg-white ">

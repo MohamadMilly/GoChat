@@ -29,10 +29,9 @@ export function GroupPermisstionsPage() {
   const { language } = useLanguage();
   const handleConfirm = () => {
     update({ conversationId: conversationId, data: newPermissions });
-  };
-  if (isSuccess) {
     navigate(-1);
-  }
+  };
+
   useEffect(() => {
     function setInitialPermissions() {
       if (isFetching) return;

@@ -127,11 +127,12 @@ export function ChatDetails() {
         {translations.ChatDetails[language].ErrorPrefix} {error.message}
       </p>
     );
-  const isCurrentUserAdmin = conversation.admins.some(
-    (admin) => admin.userId === user.id,
-  );
+
   const { title, avatar, description, participants, createdAt, admins } =
     conversation;
+
+  const isCurrentUserAdmin = admins.some((admin) => admin.userId === user.id);
+
   const thisChatConnectedUsers = getConnectedUsers(
     participants,
     connectedUsers,
@@ -140,6 +141,7 @@ export function ChatDetails() {
   const connectedUsersCount = thisChatConnectedUsers.length || 0;
   const transitionId = getGenertedTransitionId();
   const dynamicTransitionName = `${title.replaceAll(" ", "-")}-${transitionId}`;
+  console.log(permissions);
   return (
     <main className="max-w-200 mx-auto bg-white dark:bg-gray-900 font-rubik relative">
       <div className="flex justify-between items-center p-2 bg-gray-50/30 dark:bg-gray-800/80 rounded-lg my-2">
@@ -150,7 +152,7 @@ export function ChatDetails() {
           <p className="sr-only">{translations.Common[language].GoBackSR}</p>
           <ArrowBigLeft size={20} />
         </Button>
-        {conversation.admins.some((admin) => admin.userId === user.id) && (
+        {admins.some((admin) => admin.userId === user.id) && (
           <Button
             onClick={() => navigate(`/chats/groups/${conversation.id}/edit`)}
             className="text-gray-600 dark:text-gray-300"
@@ -173,12 +175,11 @@ export function ChatDetails() {
         <h2 className="text-xl text-gray-800 dark:text-gray-50">{title}</h2>
         <p className="text-sm text-gray-500 dark:text-gray-300">
           {membersCount} {translations.ChatDetails[language].MembersLabel}{" "}
-          {permissions?.onlineMembers ||
-            (isCurrentUserAdmin &&
-              "| " +
-                connectedUsersCount +
-                " " +
-                translations.ChatDetails[language].OnlineLabel)}
+          {(permissions?.onlineMembers || isCurrentUserAdmin) &&
+            "| " +
+              connectedUsersCount +
+              " " +
+              translations.ChatDetails[language].OnlineLabel}
         </p>
       </section>
       <section

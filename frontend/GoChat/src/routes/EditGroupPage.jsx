@@ -449,10 +449,9 @@ export function EditGroupPage() {
 
   const handleConfirm = () => {
     update({ conversationId, data: groupMetaData });
-  };
-  if (isSuccess) {
     navigate(-1);
-  }
+  };
+
   if (error) return <p>Error: {error.message}</p>;
 
   return (

@@ -35,7 +35,7 @@ export const ChatHeader = memo(({ id }) => {
   const isCurrentUserAdmin =
     conversation &&
     !isFetchingConversation &&
-    conversation.admins.some((admin) => admin.userId === user.id);
+    conversation.admins.some((admin) => admin.userId == user.id);
 
   useEffect(() => {
     if (!conversation || !setIsCurrentUserAdmin) return;
@@ -125,23 +125,22 @@ export const ChatHeader = memo(({ id }) => {
                       {translations.ChatHeader[language].MembersLabel}
                     </span>
                   </div>
-                  {permissions?.onlineMembers ||
-                    (isCurrentUserAdmin && (
-                      <>
-                        <span className="mx-1">|</span>
-                        <div className="flex items-center">
-                          <span
-                            className="
+                  {(permissions?.onlineMembers || isCurrentUserAdmin) && (
+                    <>
+                      <span className="mx-1">|</span>
+                      <div className="flex items-center">
+                        <span
+                          className="
                               ltr:mr-1 rtl:ml-1"
-                          >
-                            {connectedUsersCount}
-                          </span>
-                          <span>
-                            {translations.ChatHeader[language].OnlineLabel}
-                          </span>
-                        </div>
-                      </>
-                    ))}
+                        >
+                          {connectedUsersCount}
+                        </span>
+                        <span>
+                          {translations.ChatHeader[language].OnlineLabel}
+                        </span>
+                      </div>
+                    </>
+                  )}
                 </div>
               )
             ) : thisChatTypingUsers.length > 0 ? (
