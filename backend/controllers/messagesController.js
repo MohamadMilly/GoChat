@@ -9,6 +9,7 @@ const bcrypt = require("bcryptjs");
 
 const prisma = require("../lib/prisma");
 const filterProfile = require("../utils/filterProfile");
+const hideUser = require("../utils/hideUser");
 
 const sendMessagePost = async (req, res) => {
   const currentUser = req.currentUser;
@@ -52,6 +53,8 @@ const sendMessagePost = async (req, res) => {
 
 const getConversationMessagesGet = async (req, res) => {
   const { conversationId } = req.params;
+  const { userId: userIdString } = req.query;
+  const userId = parseInt(userIdString);
   try {
     const conversation = await prisma.conversation.findUnique({
       where: {
@@ -71,6 +74,11 @@ const getConversationMessagesGet = async (req, res) => {
         userId: true,
       },
     });
+
+    const isCurrentUserParticipant = userId
+      ? participantsIds.some((idData) => idData.userId === userId)
+      : false;
+
     const participantsPreferences = await prisma.preferences.findMany({
       where: {
         userId: {
@@ -78,6 +86,12 @@ const getConversationMessagesGet = async (req, res) => {
         },
       },
     });
+    const permissions = await prisma.permissions.findUnique({
+      where: {
+        conversationId: parseInt(conversationId),
+      },
+    });
+
     const messages = await prisma.message.findMany({
       where: {
         conversationId: parseInt(conversationId),
@@ -117,7 +131,10 @@ const getConversationMessagesGet = async (req, res) => {
         readers: message.readers.map((readerOnMessage) =>
           filterProfile(readerOnMessage.reader, participantsPreferences),
         ),
-        sender: filterProfile(message.sender, participantsPreferences),
+        sender:
+          permissions?.hideUsersForVisitors && !isCurrentUserParticipant
+            ? hideUser(message.sender)
+            : filterProfile(message.sender, participantsPreferences),
       };
     });
     return res.json({
@@ -128,13 +145,33 @@ const getConversationMessagesGet = async (req, res) => {
     return res.status(500).json({
       message:
         "Unexpected Error happened while getting this conversation messages",
+      error: err.stack,
     });
   }
 };
 
 const getMessageReaders = async (req, res) => {
-  const { messageId } = req.params;
+  const { messageId, conversationId } = req.params;
+  const { userId: userIdString } = req.query;
+  const userId = parseInt(userIdString);
   try {
+    const permissions = await prisma.permissions.findUnique({
+      where: {
+        conversationId: parseInt(conversationId),
+      },
+    });
+    let currentUserAdminData;
+    if (typeof userId !== "undefined" && userId) {
+      currentUserAdminData = await prisma.conversationAdmin.findUnique({
+        where: {
+          conversationId_userId: {
+            conversationId: parseInt(conversationId),
+            userId: userId,
+          },
+        },
+      });
+    }
+
     const message = await prisma.message.findUnique({
       where: {
         id: parseInt(messageId),
@@ -145,35 +182,42 @@ const getMessageReaders = async (req, res) => {
         message: "Message is not found.",
       });
     }
-    const readers = await prisma.messageOnReader.findMany({
-      where: {
-        messageId: parseInt(messageId),
-      },
-      include: {
-        reader: {
-          include: {
-            profile: true,
+    let readers = [];
+    if (permissions?.messageReaders || !!currentUserAdminData) {
+      readers = await prisma.messageOnReader.findMany({
+        where: {
+          messageId: parseInt(messageId),
+        },
+        include: {
+          reader: {
+            include: {
+              profile: true,
+            },
           },
         },
-      },
-    });
-    const readersPreferences = await prisma.preferences.findMany({
-      where: {
-        userId: {
-          in: readers.map((reader) => reader.readerId),
+      });
+      const readersPreferences = await prisma.preferences.findMany({
+        where: {
+          userId: {
+            in: readers.map((reader) => reader.readerId),
+          },
         },
-      },
-    });
-    const filteredReaders = readers.map((messageOnReader) => ({
-      ...messageOnReader,
-      reader: filterProfile(messageOnReader.reader, readersPreferences),
-    }));
+      });
+
+      readers = readers.map((messageOnReader) => ({
+        ...messageOnReader,
+        reader: filterProfile(messageOnReader.reader, readersPreferences),
+      }));
+    }
 
     return res.json({
-      readers: filteredReaders,
+      readers: readers,
     });
   } catch (err) {
-    return res.json({});
+    return res.status(500).json({
+      message: "Unexpected error happened while getting this message readers.",
+      error: err.stack,
+    });
   }
 };
 

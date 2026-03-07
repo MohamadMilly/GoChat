@@ -118,7 +118,7 @@ io.on("connection", async (socket) => {
             },
           },
         });
-        if (!permissions.sendingMessages && !admin) {
+        if (!permissions?.sendingMessages && !admin) {
           throw new Error(
             "Sending messages is not allowed due to permissions restrictions.",
           );

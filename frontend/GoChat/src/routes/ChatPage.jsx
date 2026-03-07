@@ -27,7 +27,7 @@ export function ChatPage() {
   const {
     permissions,
     isFetching: isFetchingPermissions,
-    error,
+    error: fetchingPermissionsError,
   } = usePermissions(id);
   const { isConnected } = useSocket();
   const [isInPreviewMode, setIsInPreviewMode] = useState(false);
@@ -37,6 +37,7 @@ export function ChatPage() {
   const [editedMessage, setEditedMessage] = useState(null);
   const { language } = useLanguage();
   const { theme } = useTheme();
+  const [isCurrentUserAdmin, setIsCurrentUserAdmin] = useState(null);
   useEffect(() => {
     if (!isConnected) return;
     socket.emit("join chat", String(id));
@@ -56,6 +57,8 @@ export function ChatPage() {
         setEditedMessage,
         permissions,
         isFetchingPermissions,
+        isCurrentUserAdmin,
+        setIsCurrentUserAdmin,
       }}
     >
       <section

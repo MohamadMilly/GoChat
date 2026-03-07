@@ -14,14 +14,16 @@ import { ArrowBigLeft } from "lucide-react";
 import { ChatHeaderLoading } from "../skeletonLoadingComponents/ChatHeaderLoading";
 import translations from "../../translations";
 import { useLanguage } from "../../contexts/LanguageContext";
-import { usePermissions } from "../../hooks/usePermissions";
+
+import { useEffect } from "react";
 
 export const ChatHeader = memo(({ id }) => {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const { connectedUsers, typingUsers } = useSocket();
   const { user } = useAuth();
-  const { conversationId, permissions } = useContext(ChatPageContext);
+  const { conversationId, permissions, setIsCurrentUserAdmin } =
+    useContext(ChatPageContext);
 
   const {
     conversation,
@@ -30,6 +32,15 @@ export const ChatHeader = memo(({ id }) => {
     error: conversationError,
   } = useConversation(conversationId || id);
 
+  const isCurrentUserAdmin =
+    conversation &&
+    !isFetchingConversation &&
+    conversation.admins.some((admin) => admin.userId === user.id);
+
+  useEffect(() => {
+    if (!conversation || !setIsCurrentUserAdmin) return;
+    setIsCurrentUserAdmin(isCurrentUserAdmin);
+  }, [conversation, isCurrentUserAdmin, setIsCurrentUserAdmin]);
   const [transitionId, setTransitionId] = useState(null);
 
   if (isFetchingConversation) return <ChatHeaderLoading isGroup={false} />;
@@ -114,22 +125,23 @@ export const ChatHeader = memo(({ id }) => {
                       {translations.ChatHeader[language].MembersLabel}
                     </span>
                   </div>
-                  {permissions?.onlineMembers && (
-                    <>
-                      <span className="mx-1">|</span>
-                      <div className="flex items-center">
-                        <span
-                          className="
+                  {permissions?.onlineMembers ||
+                    (isCurrentUserAdmin && (
+                      <>
+                        <span className="mx-1">|</span>
+                        <div className="flex items-center">
+                          <span
+                            className="
                               ltr:mr-1 rtl:ml-1"
-                        >
-                          {connectedUsersCount}
-                        </span>
-                        <span>
-                          {translations.ChatHeader[language].OnlineLabel}
-                        </span>
-                      </div>
-                    </>
-                  )}
+                          >
+                            {connectedUsersCount}
+                          </span>
+                          <span>
+                            {translations.ChatHeader[language].OnlineLabel}
+                          </span>
+                        </div>
+                      </>
+                    ))}
                 </div>
               )
             ) : thisChatTypingUsers.length > 0 ? (

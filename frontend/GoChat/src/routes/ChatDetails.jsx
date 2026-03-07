@@ -14,11 +14,7 @@ import { useLanguage } from "../contexts/LanguageContext";
 import { useAuth } from "../contexts/AuthContext";
 import { usePermissions } from "../hooks/usePermissions";
 
-function ChatParticipant({
-  participant,
-  isConnected,
-  hideOnlineStatus = false,
-}) {
+function ChatParticipant({ participant, isConnected, showOnlineStatus }) {
   const [transitionId, setTransitionId] = useState(null);
   const { language } = useLanguage();
   return (
@@ -37,7 +33,7 @@ function ChatParticipant({
             }
             color={participant.user?.accountColor || null}
           />
-          {!hideOnlineStatus && (
+          {showOnlineStatus && (
             <span
               className={`absolute w-3 h-3 bottom-0 right-0 rounded-full ${isConnected ? "bg-cyan-600 dark:bg-cyan-400" : "bg-gray-400 dark:bg-gray-300"}`}
             ></span>
@@ -81,7 +77,7 @@ function ChatParticipant({
 export function ParticipantsSection({
   language,
   participants,
-  hideOnlineStatus,
+  showOnlineStatus = true,
 }) {
   const { connectedUsers } = useSocket();
   return (
@@ -101,7 +97,7 @@ export function ParticipantsSection({
           return (
             <ChatParticipant
               participant={participant}
-              hideOnlineStatus={hideOnlineStatus}
+              showOnlineStatus={showOnlineStatus}
               isConnected={isConnected}
               key={participant.user.id}
             />
@@ -131,13 +127,16 @@ export function ChatDetails() {
         {translations.ChatDetails[language].ErrorPrefix} {error.message}
       </p>
     );
-
+  const isCurrentUserAdmin = conversation.admins.some(
+    (admin) => admin.userId === user.id,
+  );
   const { title, avatar, description, participants, createdAt, admins } =
     conversation;
   const thisChatConnectedUsers = getConnectedUsers(
     participants,
     connectedUsers,
   );
+
   const connectedUsersCount = thisChatConnectedUsers.length || 0;
   const transitionId = getGenertedTransitionId();
   const dynamicTransitionName = `${title.replaceAll(" ", "-")}-${transitionId}`;
@@ -174,11 +173,12 @@ export function ChatDetails() {
         <h2 className="text-xl text-gray-800 dark:text-gray-50">{title}</h2>
         <p className="text-sm text-gray-500 dark:text-gray-300">
           {membersCount} {translations.ChatDetails[language].MembersLabel}{" "}
-          {permissions?.onlineMembers &&
-            "| " +
-              connectedUsersCount +
-              " " +
-              translations.ChatDetails[language].OnlineLabel}
+          {permissions?.onlineMembers ||
+            (isCurrentUserAdmin &&
+              "| " +
+                connectedUsersCount +
+                " " +
+                translations.ChatDetails[language].OnlineLabel)}
         </p>
       </section>
       <section
@@ -199,7 +199,7 @@ export function ChatDetails() {
       <ParticipantsSection
         language={language}
         participants={participants}
-        hideOnlineStatus={!permissions?.onlineMembers}
+        showOnlineStatus={permissions?.onlineMembers || isCurrentUserAdmin}
       />
     </main>
   );

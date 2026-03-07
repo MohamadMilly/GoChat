@@ -7,10 +7,11 @@ const SECRET_KEY = process.env.SECRET_KEY;
 
 const prisma = require("../lib/prisma");
 const filterProfile = require("../utils/filterProfile");
-
+const hideUser = require("../utils/hideUser");
 const getSpecificConversationGet = async (req, res) => {
   const { conversationId } = req.params;
-
+  const { userId: userIdString } = req.query;
+  const userId = parseInt(userIdString);
   try {
     const participantsIds = await prisma.conversationParticipant.findMany({
       where: {
@@ -20,6 +21,9 @@ const getSpecificConversationGet = async (req, res) => {
         userId: true,
       },
     });
+    const isCurrentUserParticipant = userId
+      ? participantsIds.some((idData) => idData.userId === userId)
+      : false;
     const participantsPreferences = await prisma.preferences.findMany({
       where: {
         userId: {
@@ -27,28 +31,46 @@ const getSpecificConversationGet = async (req, res) => {
         },
       },
     });
+    const permissions = await prisma.permissions.findUnique({
+      where: {
+        conversationId: parseInt(conversationId),
+      },
+    });
+    let currentUserAdminData;
+    if (userId) {
+      currentUserAdminData = await prisma.conversationAdmin.findUnique({
+        where: {
+          conversationId_userId: {
+            conversationId: parseInt(conversationId),
+            userId: userId,
+          },
+        },
+      });
+    }
 
     let conversation = await prisma.conversation.findUnique({
       where: {
         id: parseInt(conversationId),
       },
       include: {
-        participants: {
-          include: {
-            user: {
-              select: {
-                id: true,
-                profile: true,
-                firstname: true,
-                lastname: true,
-                username: true,
-                accountColor: true,
-              },
-            },
-          },
-        },
+        participants:
+          permissions?.viewMembers || !!currentUserAdminData
+            ? {
+                include: {
+                  user: {
+                    select: {
+                      id: true,
+                      profile: true,
+                      firstname: true,
+                      lastname: true,
+                      username: true,
+                      accountColor: true,
+                    },
+                  },
+                },
+              }
+            : false,
         admins: true,
-        permissions: true,
       },
     });
 
@@ -57,25 +79,35 @@ const getSpecificConversationGet = async (req, res) => {
         message: "Conversation is not found.",
       });
     }
+
     const membersCount = await prisma.conversationParticipant.count({
       where: {
         conversationId: parseInt(conversationId),
       },
     });
-    conversation = {
-      ...conversation,
-      participants: conversation.participants.map((participant) => ({
-        ...participant,
-        isAdmin: conversation.admins.some(
-          (admin) => admin.userId === participant.userId,
-        ),
-        isOwner: conversation.admins.some(
-          (admin) => admin.userId === participant.userId && admin.isOwner,
-        ),
-        user: filterProfile(participant.user, participantsPreferences),
-      })),
-    };
-
+    if (permissions?.viewMembers || !!currentUserAdminData) {
+      conversation = {
+        ...conversation,
+        participants: conversation.participants.map((participant) => ({
+          ...participant,
+          isAdmin: conversation.admins.some(
+            (admin) => admin.userId === participant.userId,
+          ),
+          isOwner: conversation.admins.some(
+            (admin) => admin.userId === participant.userId && admin.isOwner,
+          ),
+          user:
+            permissions?.hideUsersForVisitors && !isCurrentUserParticipant
+              ? hideUser(participant.user)
+              : filterProfile(participant.user, participantsPreferences),
+        })),
+      };
+    } else {
+      conversation = {
+        ...conversation,
+        participants: [],
+      };
+    }
     return res.json({
       conversation: conversation,
       membersCount,
@@ -394,6 +426,9 @@ const conversationPermissionsGet = async (req, res) => {
       where: {
         id: parseInt(conversationId),
       },
+      include: {
+        admins: true,
+      },
     });
     if (!group) {
       return res.status(404).json({
@@ -408,6 +443,7 @@ const conversationPermissionsGet = async (req, res) => {
     if (groupPermissions) {
       return res.json({
         permissions: groupPermissions,
+        admins: group.admins,
       });
     }
     return res.status(404).json({

@@ -419,7 +419,7 @@ export const ChatBubble = memo(
         >
           {isGroupMessage && !isMyMessage && !hideAvatar && (
             <TransitionLink
-              route={`/users/${message.sender.id}`}
+              route={message.sender.id ? `/users/${message.sender?.id}` : ""}
               setDynamicTransitionId={setTransitionId}
             >
               <Avatar

@@ -35,6 +35,7 @@ export function SendMessageForm() {
     repliedMessage,
     permissions,
     isFetchingPermissions,
+    isCurrentUserAdmin,
   } = useContext(ChatPageContext);
   const [searchParams] = useSearchParams();
   useEffect(() => {
@@ -238,7 +239,9 @@ export function SendMessageForm() {
           </Button>
         </div>
       )}
-      {permissions?.sendingMessages || isFetchingPermissions ? (
+      {permissions?.sendingMessages ||
+      isFetchingPermissions ||
+      isCurrentUserAdmin ? (
         <form method="POST" onSubmit={onSend}>
           <EmojiPicker
             style={{ backgroundColor: theme === "light" ? "white" : "#1e2939" }}
@@ -297,16 +300,17 @@ export function SendMessageForm() {
               </span>
             </button>
           </div>
-          {permissions?.sendingMedia && (
-            <MediaDrawer
-              isVisible={isDrawerVisible}
-              setMediaFileData={setMediaFileData}
-              mediaFileData={mediaFileData}
-              setIsVisible={setIsDrawerVisible}
-              setPreviewFileURl={setPreviewFileURL}
-              setHasAttached={setHasAttached}
-            />
-          )}
+          {permissions?.sendingMedia ||
+            (isCurrentUserAdmin && (
+              <MediaDrawer
+                isVisible={isDrawerVisible}
+                setMediaFileData={setMediaFileData}
+                mediaFileData={mediaFileData}
+                setIsVisible={setIsDrawerVisible}
+                setPreviewFileURl={setPreviewFileURL}
+                setHasAttached={setHasAttached}
+              />
+            ))}
         </form>
       ) : (
         <div className="dark:bg-gray-800 bg-white ">
