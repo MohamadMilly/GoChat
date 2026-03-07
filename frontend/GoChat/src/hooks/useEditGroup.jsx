@@ -17,7 +17,9 @@ export function useEditGroup() {
       await queryClient.cancelQueries(queryKey);
 
       const previousConversationInfo = queryClient.getQueryData(queryKey);
-
+      const previousConversationInChatEntry = queryClient.getQueryData([
+        "conversations",
+      ]);
       queryClient.setQueryData(queryKey, (old) => {
         if (!old?.conversation) return old;
         return {
@@ -30,11 +32,46 @@ export function useEditGroup() {
         };
       });
 
-      return { previousConversationInfo };
+      queryClient.setQueryData(["conversations"], (old) => {
+        if (!old.conversations) return old;
+        return {
+          ...old,
+          conversations: old.conversations.map((c) => {
+            if (c.id == conversationId) {
+              return {
+                ...c,
+                ...data,
+              };
+            }
+            return c;
+          }),
+        };
+      });
+      return { previousConversationInfo, previousConversationInChatEntry };
     },
     onError: (_err, args, context) => {
+      const lastMessage = queryClient
+        .getQueryData(["conversations"])
+        .conversations.find((c) => c.id == args.conversationId).messages[0];
       queryClient.setQueryData(["conversation", args.conversationId], (old) => {
         return context.previousConversationInfo;
+      });
+      queryClient.setQueryData(["conversaitons"], (old) => {
+        if (!old.conversations) return old;
+
+        return {
+          ...old,
+          conversations: old.conversations.map((c) => {
+            if (c.id == args.conversationId) {
+              return {
+                ...context.previousConversationInChatEntry,
+                messages: [lastMessage],
+              };
+            } else {
+              return c;
+            }
+          }),
+        };
       });
     },
   });
