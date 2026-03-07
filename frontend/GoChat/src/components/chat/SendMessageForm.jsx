@@ -239,8 +239,7 @@ export function SendMessageForm() {
           </Button>
         </div>
       )}
-      {permissions?.sendingMessages ||
-      isFetchingPermissions ||
+      {(permissions ? permissions?.sendingMessages : true) ||
       isCurrentUserAdmin ? (
         <form method="POST" onSubmit={onSend}>
           <EmojiPicker
