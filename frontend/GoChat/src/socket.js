@@ -2,7 +2,6 @@ import { io } from "socket.io-client";
 
 const user = JSON.parse(localStorage.getItem("user"));
 
-console.log(user);
 // "undefined" means the URL will be computed from the `window.location` object
 const URL =
   import.meta.env.NODE_ENV === "production"
@@ -10,6 +9,10 @@ const URL =
     : import.meta.env.VITE_API_URL;
 
 export const socket = io(URL, {
+  reconnection: true,
+  reconnectionAttempts: Infinity,
+  reconnectionDelay: 1000,
+  reconnectionDelayMax: 5000,
   autoConnect: false,
   auth: {
     userId: user ? user.id : undefined,
