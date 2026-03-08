@@ -25,13 +25,13 @@ export function NavBar() {
       </div>
       <div className="flex items-center gap-2">
         <Link
-          className={"bg-cyan-600 text-white rounded text-xs md:text-base"}
+          className={"bg-cyan-600 text-gray-800 rounded text-xs md:text-base"}
           route={"/auth/login"}
         >
           {t[language].Login}
         </Link>
         <Link
-          className={"bg-cyan-600 text-white rounded text-xs md:text-base"}
+          className={"bg-cyan-600 text-gray-800 rounded text-xs md:text-base"}
           route={"/auth/signup"}
         >
           {t[language].Signup}

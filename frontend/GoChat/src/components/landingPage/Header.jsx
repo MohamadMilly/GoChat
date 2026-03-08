@@ -35,16 +35,14 @@ export default function Header() {
         </p>
         <div className="flex items-center justify-center gap-2 mt-6">
           <Link
-            className={
-              "bg-cyan-600 dark:text-white backdrop-blur-lg text-white rounded"
-            }
+            className={"bg-cyan-600  backdrop-blur-lg text-gray-800 rounded"}
             route={"/auth/login"}
           >
             {translations.Landing.Header[language].Login}
           </Link>
           <Link
             className={
-              "bg-cyan-600 dark:text-white backdrop-blur-lg text-white rounded"
+              "bg-cyan-600 dark:text-white backdrop-blur-lg text-gray-800 rounded"
             }
             route={"/auth/signup"}
           >

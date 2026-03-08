@@ -11,7 +11,9 @@ export function About() {
         {t[language].Title}
       </h2>
       <article>
-        <p className="text-lg text-gray-700">{t[language].Body}</p>
+        <p className="text-lg text-gray-700 dark:text-gray-200">
+          {t[language].Body}
+        </p>
         <aside className="flex justify-between w-full max-w-120 mx-auto shrink-0 mt-6 border-2 border-cyan-500 rounded-md p-3">
           <Link
             route={"https://github.com/MohamadMilly"}
