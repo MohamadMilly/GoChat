@@ -112,10 +112,6 @@ const getConversationMessagesGet = async (req, res) => {
             reader: {
               select: {
                 id: true,
-                firstname: true,
-                lastname: true,
-                username: true,
-                profile: true,
               },
             },
           },

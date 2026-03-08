@@ -16,7 +16,7 @@ import { ChatBubbleStatus } from "./chatBubbleStatus";
 import { ReadersMenu } from "./ReadersMenu";
 import { ChatPageContext } from "../../routes/ChatPage";
 import Button from "../ui/Button";
-import { useSearchParams } from "react-router";
+import { useParams, useSearchParams } from "react-router";
 import translations from "../../translations";
 import { useLanguage } from "../../contexts/LanguageContext";
 import { useQueryClient } from "@tanstack/react-query";
@@ -265,7 +265,7 @@ export const ChatBubble = memo(
     const readersIds = message.readers
       ? message.readers.map((reader) => reader.id)
       : [];
-
+    const queryClient = useQueryClient();
     const [readers, setReaders] = useState(readersIds);
     const [isReadersVisible, setIsReadersVisible] = useState(false);
     const [clickYCoords, setClickYCoords] = useState(null);
@@ -277,6 +277,7 @@ export const ChatBubble = memo(
     const [searchParams, setSearchParams] = useSearchParams();
     const { language } = useLanguage();
     const fullname = message.sender.firstname + " " + message.sender.lastname;
+    const { id: conversationId } = useParams();
 
     const isThereAvatar = !!message.sender.profile?.avatar;
     const avatar = isThereAvatar && message.sender.profile?.avatar;
@@ -293,6 +294,27 @@ export const ChatBubble = memo(
       function onReadMessage(messageId, userId) {
         if (messageId !== message.id) return;
 
+        queryClient.setQueryData(
+          "conversation",
+          "messages",
+          conversationId,
+          (old) => {
+            if (!old.messages) return old;
+            return {
+              ...old,
+              messages: old.messages.map((message) => {
+                if (message.id == messageId) {
+                  return {
+                    ...message,
+                    readers: [...message.readers, { id: userId }],
+                  };
+                } else {
+                  return message;
+                }
+              }),
+            };
+          },
+        );
         setReaders((prev) => [...prev, userId]);
       }
       socket.on("read message", onReadMessage);
@@ -300,7 +322,7 @@ export const ChatBubble = memo(
       return () => {
         socket.off("read message", onReadMessage);
       };
-    }, [message.id]);
+    }, [message.id, conversationId, queryClient]);
 
     useEffect(() => {
       if (!messagesContainerRef.current) return;

@@ -170,6 +170,7 @@ export function SocketProvider({ children }) {
         };
       });
     }
+
     socket.on("chat message", onReceiveMessage);
     socket.on("connect", onConnect);
     socket.on("disconnect", onDisconnect);

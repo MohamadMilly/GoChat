@@ -1,14 +1,19 @@
 import { Link } from "../ui/Link";
 import chatBackground from "../../assets/chat_background.png";
+import darkChatBackground from "../../assets/chat_background_dark.png";
 import translations from "../../translations";
 import { useLanguage } from "../../contexts/LanguageContext";
+import { useTheme } from "../../contexts/ThemeContext";
 export default function Header() {
   const { language } = useLanguage();
+  const { theme } = useTheme();
   const Page = translations.Landing.Header;
   return (
     <header
       className="flex min-h-150 px-4 pt-10 items-center flex-col relative"
-      style={{ backgroundImage: `url(${chatBackground})` }}
+      style={{
+        backgroundImage: `url(${theme === "dark" ? darkChatBackground : chatBackground})`,
+      }}
     >
       <div className="inset-0 bg-gray-800/60 absolute backdrop-blur-xs"></div>
       <div className="flex justify-center items-center -mb-6 z-5">
@@ -19,24 +24,28 @@ export default function Header() {
         />
       </div>
       <div className="z-5 flex flex-col items-center">
-        <h1 className="text-gray-100 font-medium tracking-tight md:text-6xl text-5xl mb-4 font-rubik">
+        <h1 className="text-gray-100 font-medium tracking-tight md:text-6xl sm:text-4xl text-4xl mb-4 font-rubik">
           {Page[language].Title}{" "}
           <span className="font-bold text-cyan-400">
             {Page[language].Blink}
           </span>
         </h1>
-        <p className="text-gray-200 text-center text-lg">
+        <p className="text-gray-200 text-center sm:text-lg">
           {Page[language].Subtitle}
         </p>
         <div className="flex items-center justify-center gap-2 mt-6">
           <Link
-            className={"bg-cyan-600 text-white rounded"}
+            className={
+              "bg-cyan-600 dark:text-white backdrop-blur-lg text-white rounded"
+            }
             route={"/auth/login"}
           >
             {translations.Landing.Header[language].Login}
           </Link>
           <Link
-            className={"bg-cyan-600 text-white rounded"}
+            className={
+              "bg-cyan-600 dark:text-white backdrop-blur-lg text-white rounded"
+            }
             route={"/auth/signup"}
           >
             {translations.Landing.Header[language].Signup}

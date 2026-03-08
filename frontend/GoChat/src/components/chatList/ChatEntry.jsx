@@ -18,7 +18,7 @@ export const ChatEntry = memo(
     color,
   }) => {
     const base_class =
-      "w-full flex items-center gap-x-3 p-3 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-150";
+      "w-full flex items-center gap-x-3 p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-150";
     const initialReadersIds = lastMessage.readers
       ? lastMessage.readers.map((reader) => reader.readerId)
       : [];

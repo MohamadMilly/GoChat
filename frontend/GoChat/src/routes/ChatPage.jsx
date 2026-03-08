@@ -66,7 +66,7 @@ export function ChatPage() {
       >
         <ChatHeader />
         <section
-          className="w-full relative basis-full flex flex-col flex-1 overflow-hidden"
+          className="w-full relative basis-full flex flex-col flex-1 overflow-hidden bg-gray-200 dark:bg-gray-900"
           style={{
             backgroundImage: `url(${theme === "light" ? chatBackground : darkChatBackground})`,
             backgroundAttachment: "scroll",

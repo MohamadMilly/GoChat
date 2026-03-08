@@ -440,14 +440,14 @@ const translations = {
   Landing: {
     Header: {
       Arabic: {
-        Title: "أرسل، استقبل ورد في لمح البصر",
+        Title: "أرسل، استقبل ورد في",
         Blink: "لمح البصر",
         Subtitle: "دع أفكارك تتدفق في محادثة فورية",
         Login: "تسجيل الدخول",
         Signup: "التسجيل",
       },
       English: {
-        Title: "Send, receive and reply in a blink",
+        Title: "Send, receive and reply in a ",
         Blink: "blink",
         Subtitle: "Let your thoughts flow in a real-time conversation",
         Login: "Login",
