@@ -10,7 +10,12 @@ const login = async (data) => {
 };
 
 export function useLogIn() {
+  const { login: loginInLocalStorage } = useAuth();
   return useMutation({
     mutationFn: login,
+    onSuccess: (data) => {
+      loginInLocalStorage(data.token, data.user);
+      api.defaults.headers.common["authorization"] = `Bearer ${data.token}`;
+    },
   });
 }

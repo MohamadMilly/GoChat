@@ -21,15 +21,8 @@ const {
 const accountColors = ["#16a34a", "#a855f7", "#d97706", "#1e40af", "#ff4d91"];
 
 const signupPost = async (req, res) => {
-  const {
-    firstname,
-    lastname,
-    username,
-    password,
-    passwordConfirmation,
-    email,
-    phoneNumber,
-  } = req.body;
+  const { firstname, lastname, username, password, passwordConfirmation } =
+    req.body;
   const randomColor =
     accountColors[Math.floor(Math.random() * (accountColors.length + 1))];
   try {
@@ -41,15 +34,10 @@ const signupPost = async (req, res) => {
         username,
         password: hashedPassword,
         profile: {
-          create: {
-            phoneNumber: phoneNumber ? phoneNumber : null,
-            email: email ? email : null,
-          },
+          create: {},
         },
         preferences: {
-          create: {
-            preferredVerification: phoneNumber ? "PHONE" : "EMAIL",
-          },
+          create: {},
         },
         accountColor: randomColor,
       },
@@ -92,8 +80,11 @@ const loginPost = async (req, res) => {
         username: username,
       },
       include: {
-        preferences: true,
-        profile: true,
+        profile: {
+          select: {
+            email: true,
+          },
+        },
       },
     });
 
@@ -106,25 +97,17 @@ const loginPost = async (req, res) => {
       return res.status(401).json({ message: "Password is incorrect." });
     }
 
-    const preferredVerification = user.preferences.preferredVerification;
-
-    const codeData = await createVerificationCode(
-      user.id,
-      preferredVerification,
-    );
-    res.json({
-      message: "Verification code sent.",
-      preferredVerification: preferredVerification,
-      phoneNumber:
-        preferredVerification === "PHONE" ? user.profile?.phoneNumber : "",
-      email: preferredVerification === "EMAIL" ? user.profile?.email : "",
-    });
-
-    if (preferredVerification === "EMAIL") {
-      await sendEmailVerification(user.profile.email, codeData.code);
-    } else if (preferredVerification === "PHONE") {
-      await sendSmsVerification(user.profile.phoneNumber, codeData.code);
-    }
+    const payload = {
+      user: {
+        id: user.id,
+        firstname: user.firstname,
+        lastname: user.lastname,
+        username: user.username,
+        email: user?.profile.email || "",
+      },
+    };
+    const token = jwt.sign(payload, SECRET_KEY);
+    return res.json({ token: token, user: payload.user });
   } catch (err) {
     return res.status(500).json({
       message: "Unexpected error happened while logging in",

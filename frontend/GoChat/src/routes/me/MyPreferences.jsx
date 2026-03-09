@@ -190,7 +190,7 @@ export function MyPreferences() {
         />
       </section>
 
-      <section
+      {/*<section
         dir={language === "Arabic" ? "rtl" : "ltr"}
         className="shadow-xs p-2 rounded-lg my-4 border border-gray-300/50 bg-gray-50 dark:bg-gray-800 dark:border-gray-700"
       >
@@ -206,7 +206,8 @@ export function MyPreferences() {
           }
           isFetching={isFetching}
         />
-      </section>
+       
+      </section> */}
     </main>
   );
 }

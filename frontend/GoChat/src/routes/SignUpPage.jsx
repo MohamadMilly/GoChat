@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { InputField } from "../components/ui/InputField";
 import chatBackground from "../assets/chat_background.png";
+import darkChatBackground from "../assets/chat_background_dark.png";
 import { Link } from "../components/ui/Link";
 import Button from "../components/ui/Button";
 import { useSignUp } from "../hooks/auth/useSignUp";
@@ -8,9 +9,11 @@ import { Navigate } from "react-router";
 import { useAuth } from "../contexts/AuthContext";
 import translations from "../translations";
 import { useLanguage } from "../contexts/LanguageContext";
+import { useTheme } from "../contexts/ThemeContext";
 
 export function SignUpPage() {
   const { language } = useLanguage();
+  const { theme } = useTheme();
   const PageTranslations = translations.SignUpPage;
   const [signupData, setSignupData] = useState({
     firstname: "",
@@ -21,7 +24,7 @@ export function SignUpPage() {
     email: "",
     phoneNumber: "",
   });
-  let [maxStep, minStep] = [3, 1];
+  let [maxStep, minStep] = [1, 1];
   const [preferredVerification, setPreferredVerification] = useState("email");
   const onFieldChange = (fieldname, e) => {
     setSignupData((prev) => ({
@@ -31,7 +34,7 @@ export function SignUpPage() {
   };
   const [step, setstep] = useState(1);
   const { mutate: signup, isPending, error, isSuccess, data } = useSignUp();
-  const { login } = useAuth();
+
   const goNext = () => {
     if (step >= maxStep) return;
     setstep((prev) => prev + 1);
@@ -45,18 +48,22 @@ export function SignUpPage() {
     signup(signupData);
   };
   if (isSuccess) {
-    login(data.token, data.user);
     return <Navigate to="/chats" />;
   }
   return (
     <main className="md:flex">
       <section
         className="max-w-250 w-full px-4 hidden md:flex flex-col items-center h-screen relative"
-        style={{ backgroundImage: `url(${chatBackground})` }}
+        style={{
+          backgroundImage: `url(${theme === "light" ? chatBackground : darkChatBackground})`,
+        }}
       >
         <div className="inset-0 z-1 absolute bg-gray-800/60 backdrop-blur-xs"></div>
         <article className="z-10 relative top-1/3">
-          <h2 className="text-5xl font-bold tracking-tight text-cyan-200 text-shadow-cyan-100 text-shadow-xs mb-6">
+          <h2
+            dir="auto"
+            className="text-5xl font-bold tracking-tight text-cyan-200 text-shadow-cyan-100 text-shadow-xs mb-6"
+          >
             {PageTranslations[language].JoinTitle}
           </h2>
           <p className="max-w-120 text-sm text-gray-200">
@@ -74,12 +81,12 @@ export function SignUpPage() {
         </article>
       </section>
       <section className="basis-xl px-4 flex flex-1 flex-col items-center">
-        <h2 className="font-rubik text-4xl font-bold text-center my-10 tracking-tight text-cyan-800 ">
+        <h2 className="font-rubik text-4xl font-bold text-center my-10 tracking-tight text-cyan-800 dark:text-cyan-400 ">
           {PageTranslations[language].SignUpButton}
         </h2>
         <form
           onSubmit={handleSignUp}
-          className="shadow px-6 py-12 rounded-md w-full max-w-85"
+          className="shadow px-6 py-12 rounded-md w-full max-w-85 border dark:border-gray-800 border-gray-100"
           action="POST"
         >
           {step === 1 && (
@@ -126,90 +133,8 @@ export function SignUpPage() {
               />
               <div className="mt-6 mx-auto text-center">
                 <Button
-                  onClick={goNext}
-                  className={"border border-cyan-600 text-xs text-cyan-600"}
-                >
-                  {PageTranslations[language].Next}
-                </Button>
-              </div>
-            </section>
-          )}
-
-          {step === 2 && preferredVerification === "email" && (
-            <section>
-              <InputField
-                label={PageTranslations[language].Email}
-                id="email"
-                name="email"
-                type="email"
-                value={signupData.email}
-                onChange={(e) => onFieldChange("email", e)}
-              />
-              <div className="mt-6 mx-auto flex items-center gap-x-4">
-                <Button
-                  onClick={goBack}
-                  className={"border border-cyan-600 text-xs text-cyan-600"}
-                >
-                  {translations.Common[language].GoBack}
-                </Button>
-                <Button
-                  onClick={() => setPreferredVerification("phoneNumber")}
-                  className={"text-xs bg-cyan-600 text-white"}
-                >
-                  {PageTranslations[language].ContinueWithPhone}
-                </Button>
-                <Button
-                  onClick={goNext}
-                  className={"text-xs border border-cyan-600 text-cyan-600"}
-                >
-                  {PageTranslations[language].Next}
-                </Button>
-              </div>
-            </section>
-          )}
-
-          {step === 2 && preferredVerification === "phoneNumber" && (
-            <section>
-              <InputField
-                label={PageTranslations[language].PhoneNumber}
-                id="phoneNumber"
-                name="phoneNumber"
-                type="tel"
-                value={signupData.phoneNumber}
-                onChange={(e) => onFieldChange("phoneNumber", e)}
-              />
-              <div className="mt-6 mx-auto flex items-center gap-x-4">
-                <Button
-                  onClick={goBack}
-                  className={"border border-cyan-600 text-xs text-cyan-600"}
-                >
-                  {translations.Common[language].GoBack}
-                </Button>
-                <Button
-                  onClick={() => setPreferredVerification("email")}
-                  className={"text-xs bg-cyan-600 text-white"}
-                >
-                  {PageTranslations[language].ContinueWithEmail}
-                </Button>
-                <Button
-                  onClick={goNext}
-                  className={"text-xs border border-cyan-600 text-cyan-600"}
-                >
-                  {PageTranslations[language].Next}
-                </Button>
-              </div>
-            </section>
-          )}
-
-          {step === 3 && (
-            <section>
-              <div className="text-center">
-                <p className="text-sm text-gray-800 mb-6">
-                  {PageTranslations[language].YouMadeIt}
-                </p>
-                <Button
                   type="submit"
-                  className={"text-xs bg-cyan-600 text-white"}
+                  className={"border border-cyan-600 text-xs text-cyan-600"}
                 >
                   {PageTranslations[language].CreateAccountButton}
                 </Button>
