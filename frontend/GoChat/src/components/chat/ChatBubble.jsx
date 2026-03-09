@@ -153,11 +153,13 @@ export const ChatBubbleContext = createContext({
   isFadeRunning: false,
 });
 
-function ChatBubbleToolsMenu({ message }) {
+function ChatBubbleToolsMenu({ message, isMessageToolsVisible }) {
   const { messageId, isInPreview } = useContext(ChatBubbleContext);
+  const [screenWidth, setScreenWidth] = useState(window.innerWidth);
   const { setEditedMessage } = useContext(ChatPageContext);
   const queryClient = useQueryClient();
   const { conversationId } = useContext(ChatPageContext);
+
   const handleDeleteMessage = (messageId, conversationId) => {
     if (!messageId || !conversationId) return;
     let newMessages = [];
@@ -234,9 +236,18 @@ function ChatBubbleToolsMenu({ message }) {
         }
       });
   };
+  useEffect(() => {
+    function handleResize() {
+      setScreenWidth(window.innerWidth);
+    }
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
   if (isInPreview) return null;
+
+  if (!isMessageToolsVisible && screenWidth < 768) return null;
   return (
-    <div className="opacity-0 group-hover:opacity-100 transition-all delay-300 duration-300 absolute -left-2 bottom-2 -translate-x-full w-30 dark:bg-gray-700 bg-gray-100 rounded-md overflow-hidden">
+    <div className="md:opacity-0 h-fit z-10 md:group-hover:opacity-100 transition-all delay-300 duration-300 absolute md:bottom-2 md:-left-2 -top-2 md:translate-y-0 -translate-x-1/3 md:-translate-x-full -translate-y-1/2 w-30 dark:bg-gray-700 bg-gray-100 rounded-md overflow-hidden">
       <button
         className="text-sm dark:text-gray-200 text-gray-600 cursor-pointer w-full p-2 hover:bg-gray-200 hover:text-gray-700"
         onClick={() => handleDeleteMessage(messageId, conversationId)}
@@ -268,6 +279,7 @@ export const ChatBubble = memo(
     const queryClient = useQueryClient();
     const [readers, setReaders] = useState(readersIds);
     const [isReadersVisible, setIsReadersVisible] = useState(false);
+    const [isMessageToolsVisible, setIsMessageToolsVisible] = useState(false);
     const [clickYCoords, setClickYCoords] = useState(null);
     const [transitionId, setTransitionId] = useState(null);
     const [isFadeRunning, setIsFadeRunning] = useState(false);
@@ -350,11 +362,11 @@ export const ChatBubble = memo(
       let timer;
       function handleClickOutside(event) {
         if (
-          isReadersVisible &&
           messageContentContainerRef.current &&
           !messageContentContainerRef.current.contains(event.target)
         ) {
           setIsFadeRunning(true);
+          setIsMessageToolsVisible(false);
           timer = setTimeout(() => {
             setIsFadeRunning(false);
             setIsReadersVisible(false);
@@ -425,6 +437,32 @@ export const ChatBubble = memo(
         content.removeEventListener("touchstart", handleStart);
       };
     }, [message, handleReply]);
+    useEffect(() => {
+      let timer;
+      const message = messageContentContainerRef.current;
+
+      const handleStart = () => {
+        timer = setTimeout(() => {
+          setIsMessageToolsVisible(true);
+        }, 700);
+        if (window.navigator.vibrate) window.navigator.vibrate(50);
+      };
+
+      const handleEnd = () => {
+        clearTimeout(timer);
+      };
+
+      message.addEventListener("touchstart", handleStart);
+      message.addEventListener("touchend", handleEnd);
+      message.addEventListener("touchmove", handleEnd);
+
+      return () => {
+        clearTimeout(timer);
+        message.removeEventListener("touchstart", handleStart);
+        message.removeEventListener("touchend", handleEnd);
+        message.removeEventListener("touchmove", handleEnd);
+      };
+    }, []);
 
     return (
       <ChatBubbleContext
@@ -531,7 +569,12 @@ export const ChatBubble = memo(
                   <ReadersMenu />
                 </>
               )}
-              {isMyMessage && <ChatBubbleToolsMenu message={message} />}
+              {isMyMessage && (
+                <ChatBubbleToolsMenu
+                  message={message}
+                  isMessageToolsVisible={isMessageToolsVisible}
+                />
+              )}
             </div>
           </div>
         </li>

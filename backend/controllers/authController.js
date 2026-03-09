@@ -53,7 +53,7 @@ const signupPost = async (req, res) => {
     };
     jwt.sign(payLoad, SECRET_KEY, (err, token) => {
       if (err) {
-        return res.json({
+        return res.status(500).json({
           message: "Token error",
         });
       }
