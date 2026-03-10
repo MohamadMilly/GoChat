@@ -8,6 +8,7 @@ import Button from "../components/ui/Button";
 import { ArrowBigLeft } from "lucide-react";
 import translations from "../translations";
 import { useLanguage } from "../contexts/LanguageContext";
+import { LoadingLayer } from "../components/ui/LoadingLayer";
 
 export function NewChatPage() {
   const { language } = useLanguage();
@@ -35,6 +36,9 @@ export function NewChatPage() {
   };
   if (isSuccess && !!data) {
     return <Navigate to={`/chats/direct/${data.conversation.id}`} />;
+  }
+  if (isConversationPending) {
+    return <LoadingLayer className={"text-sm"} title={"Directing..."} />;
   }
   return (
     <main className="max-w-200 mx-auto bg-white dark:bg-gray-900 font-rubik relative">

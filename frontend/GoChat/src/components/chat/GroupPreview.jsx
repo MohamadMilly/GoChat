@@ -12,41 +12,30 @@ import { useJoinGroup } from "../../hooks/me/useJoinGroup";
 import { useTheme } from "../../contexts/ThemeContext";
 import translations from "../../translations";
 import { useLanguage } from "../../contexts/LanguageContext";
+import { LoadingLayer } from "../ui/LoadingLayer";
 
 function GroupPreviewFooter() {
   const { id } = useParams();
-  const navigate = useNavigate();
   const {
     conversations,
     isFetching: isFetchingMyConversations,
     error: myConversationsError,
   } = useMyConversations();
   const { user } = useAuth();
-  const {
-    mutate: join,
-    isPending: isJoinPending,
-    error: joinError,
-    isSuccess,
-  } = useJoinGroup();
+  const { mutate: join, isPending: isJoinPending } = useJoinGroup();
   const { language } = useLanguage();
   if (isFetchingMyConversations)
     return <p>{translations.GroupPreview[language].Loading}</p>;
-  if (myConversationsError)
-    return (
-      <p>
-        {translations.GroupPreview[language].ErrorPrefix}{" "}
-        {myConversationsError.message}
-      </p>
-    );
 
   const isJoined = conversations.some((conversation) => conversation.id == id);
   const isLoggedIn = !!user;
 
   const handleJoinGroup = () => {
+    if (typeof id === "undefined") return;
     join(id);
   };
-  if (isSuccess) {
-    navigate(`/chats/group/${id}`);
+  if (isJoinPending) {
+    return <LoadingLayer title={"Joining"} />;
   }
   return (
     <div className="px-4 py-2 flex flex-col items-center gap-2 bg-white dark:bg-gray-800">
@@ -68,7 +57,7 @@ function GroupPreviewFooter() {
             <p className="text-sm text-gray-400">
               {translations.GroupPreview[language].ReadOnlyJoinPrompt}
             </p>
-            <Button onClick={handleJoinGroup} className={"text-xs"}>
+            <Button onClick={handleJoinGroup} className={"text-base"}>
               {translations.GroupPreview[language].JoinButton}
             </Button>
           </>

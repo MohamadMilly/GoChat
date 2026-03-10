@@ -34,5 +34,8 @@ export function useCreateConversation() {
     onError: (error) => {
       console.error("mutation failed: ", error);
     },
+    onSettled: () => {
+      queryClient.invalidateQueries(["conversations"]);
+    },
   });
 }
