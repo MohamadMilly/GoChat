@@ -307,18 +307,17 @@ export const ChatBubble = memo(
         if (messageId !== message.id) return;
 
         queryClient.setQueryData(
-          "conversation",
-          "messages",
-          conversationId,
+          ["conversation", "messages", conversationId],
           (old) => {
             if (!old.messages) return old;
             return {
               ...old,
               messages: old.messages.map((message) => {
-                if (message.id == messageId) {
+                const previousReaders = message?.readers || [];
+                if (message.id == messageId && userId !== user.id) {
                   return {
                     ...message,
-                    readers: [...message.readers, { id: userId }],
+                    readers: [...previousReaders, { id: userId }],
                   };
                 } else {
                   return message;
@@ -327,6 +326,35 @@ export const ChatBubble = memo(
             };
           },
         );
+        queryClient.setQueryData(["conversations"], (old) => {
+          if (!old.conversations) return old;
+          return {
+            ...old,
+            conversations: old.conversations.map((c) => {
+              if (c.id == conversationId) {
+                const readMessage = c.messages.find((m) => m.id == messageId);
+                if (!readMessage && userId !== user.id) {
+                  return c;
+                } else {
+                  return {
+                    ...c,
+                    messages: [
+                      {
+                        ...readMessage,
+                        readers: [
+                          ...(readMessage.readers || []),
+                          { id: userId },
+                        ],
+                      },
+                    ],
+                  };
+                }
+              } else {
+                return c;
+              }
+            }),
+          };
+        });
         setReaders((prev) => [...prev, userId]);
       }
       socket.on("read message", onReadMessage);
@@ -334,7 +362,7 @@ export const ChatBubble = memo(
       return () => {
         socket.off("read message", onReadMessage);
       };
-    }, [message.id, conversationId, queryClient]);
+    }, [message.id, conversationId, queryClient, user.id]);
 
     useEffect(() => {
       if (!messagesContainerRef.current) return;
@@ -388,7 +416,7 @@ export const ChatBubble = memo(
     );
     useEffect(() => {
       const container = messagesContainerRef.current;
-      const content = messageContentContainerRef.current;
+      const content = messagesContainerRef.current;
 
       if (!container || !content) return;
 
@@ -429,12 +457,12 @@ export const ChatBubble = memo(
         document.addEventListener("touchend", handleEnd);
       };
 
-      content.addEventListener("mousedown", handleStart);
-      content.addEventListener("touchstart", handleStart);
+      container.addEventListener("mousedown", handleStart);
+      container.addEventListener("touchstart", handleStart);
 
       return () => {
-        content.removeEventListener("mousedown", handleStart);
-        content.removeEventListener("touchstart", handleStart);
+        container.removeEventListener("mousedown", handleStart);
+        container.removeEventListener("touchstart", handleStart);
       };
     }, [message, handleReply]);
     useEffect(() => {

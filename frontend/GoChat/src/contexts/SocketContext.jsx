@@ -25,7 +25,11 @@ export function SocketProvider({ children }) {
     }
 
     function onDisconnect() {
-      setIsConnected(false);
+      if (!socket.active) {
+        socket.connect();
+      } else {
+        setIsConnected(false);
+      }
     }
     function onUserConnect(users) {
       setConnectedUsers(users);

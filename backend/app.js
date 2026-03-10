@@ -29,6 +29,7 @@ io.on("connection", async (socket) => {
   socket.on("disconnect", async () => {
     const userId = socket.handshake.auth.userId;
     if (!userId) return;
+
     delete connectedUsers[userId];
 
     await prisma.profile.update({
@@ -209,6 +210,17 @@ io.on("connection", async (socket) => {
 
   socket.on("read message", async (messageId, readerId) => {
     if (!messageId || !readerId) return;
+    const messageOnReader = await prisma.messageOnReader.findUnique({
+      where: {
+        messageId_readerId: {
+          messageId: parseInt(messageId),
+          readerId: parseInt(readerId),
+        },
+      },
+    });
+    if (messageOnReader) {
+      return;
+    }
     await prisma.messageOnReader.upsert({
       where: {
         messageId_readerId: {
@@ -235,83 +247,94 @@ io.on("connection", async (socket) => {
 
   socket.on("delete message", async (messageId, conversationId, callback) => {
     const userId = socket.handshake.auth.userId;
-    const message = await prisma.message.findUnique({
-      where: {
-        id: messageId,
-      },
-    });
-    if (!message) {
-      callback({
-        status: 404,
+    try {
+      const message = await prisma.message.findUnique({
+        where: {
+          id: messageId,
+        },
       });
-      return;
-    }
-    if (message.senderId !== userId) {
-      callback({
-        status: 401,
+      if (!message) {
+        callback({
+          status: 404,
+        });
+        return;
+      }
+      if (message.senderId !== userId) {
+        callback({
+          status: 401,
+        });
+        return;
+      }
+      const deletedReadersPromise = prisma.messageOnReader.deleteMany({
+        where: {
+          messageId: messageId,
+        },
       });
-      return;
+      const deletedMessagePromise = prisma.message.delete({
+        where: {
+          id: messageId,
+          senderId: userId,
+        },
+      });
+      await prisma.$transaction([deletedReadersPromise, deletedMessagePromise]);
+      callback({
+        status: "ok",
+      });
+      io.emit("delete message", messageId, conversationId);
+    } catch (err) {
+      callback({
+        status: 500,
+      });
     }
-    const deletedReadersPromise = prisma.messageOnReader.deleteMany({
-      where: {
-        messageId: messageId,
-      },
-    });
-    const deletedMessagePromise = prisma.message.delete({
-      where: {
-        id: messageId,
-        senderId: userId,
-      },
-    });
-    await prisma.$transaction([deletedReadersPromise, deletedMessagePromise]);
-    callback({
-      status: "ok",
-    });
-    io.emit("delete message", messageId, conversationId);
   });
   socket.on("edit message", async (message, conversationId, callback) => {
     if (!message || !conversationId) return;
     const userId = socket.handshake.auth.userId;
-
-    const dbMessage = await prisma.message.findUnique({
-      where: {
-        id: message.id,
-      },
-    });
-    if (!message) {
-      callback({
-        status: 404,
+    try {
+      const dbMessage = await prisma.message.findUnique({
+        where: {
+          id: message.id,
+        },
       });
-      return;
-    }
-    if (userId !== dbMessage.senderId) {
+      if (!message) {
+        callback({
+          status: 404,
+        });
+        return;
+      }
+      if (userId !== dbMessage.senderId) {
+        callback({
+          status: 401,
+        });
+      }
+
+      const updatedMessage = await prisma.message.update({
+        where: {
+          id: message.id,
+        },
+        data: {
+          content: message.content,
+          mimeType: message.mimeType,
+          type: message.type,
+          fileURL: message?.fileURL || "",
+          edit: true,
+        },
+        include: {
+          sender: true,
+        },
+      });
       callback({
-        status: 401,
+        status: "ok",
+      });
+
+      socket.broadcast
+        .to(conversationId)
+        .emit("edit message", updatedMessage, conversationId);
+    } catch (err) {
+      callback({
+        status: 500,
       });
     }
-
-    const updatedMessage = await prisma.message.update({
-      where: {
-        id: message.id,
-      },
-      data: {
-        content: message.content,
-        mimeType: message.mimeType,
-        type: message.type,
-        fileURL: message?.fileURL || "",
-        edit: true,
-      },
-      include: {
-        sender: true,
-      },
-    });
-    callback({
-      status: "ok",
-    });
-
-    socket.broadcast
-      .to(conversationId)
-      .emit("edit message", updatedMessage, conversationId);
   });
 });
 
