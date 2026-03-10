@@ -1,7 +1,7 @@
 import { useAuth } from "../../contexts/AuthContext";
 import { api } from "../../utils/api";
 import { useMutation } from "@tanstack/react-query";
-
+import { toast } from "react-toastify";
 const login = async (data) => {
   const response = await api.post("/auth/login", {
     ...data,
@@ -16,6 +16,9 @@ export function useLogIn() {
     onSuccess: (data) => {
       loginInLocalStorage(data.token, data.user);
       api.defaults.headers.common["authorization"] = `Bearer ${data.token}`;
+    },
+    onError: (_err, args, context) => {
+      toast.error(_err?.response?.data?.message || _err.message);
     },
   });
 }

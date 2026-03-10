@@ -26,7 +26,18 @@ const signupPost = async (req, res) => {
   const randomColor =
     accountColors[Math.floor(Math.random() * (accountColors.length + 1))];
   try {
+    const previousUser = await prisma.user.findUnique({
+      where: {
+        username: username,
+      },
+    });
+    if (previousUser) {
+      return res.status(401).json({
+        message: "Username is already used.",
+      });
+    }
     const hashedPassword = await bcrypt.hash(password, 10);
+
     const createdUser = await prisma.user.create({
       data: {
         firstname,

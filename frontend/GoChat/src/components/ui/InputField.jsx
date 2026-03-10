@@ -31,6 +31,7 @@ export function InputField({
         type={type}
         onChange={onChange}
         value={value}
+        required={!isOptional}
       />
     </div>
   );

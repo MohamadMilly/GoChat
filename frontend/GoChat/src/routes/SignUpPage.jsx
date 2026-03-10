@@ -10,7 +10,8 @@ import { useAuth } from "../contexts/AuthContext";
 import translations from "../translations";
 import { useLanguage } from "../contexts/LanguageContext";
 import { useTheme } from "../contexts/ThemeContext";
-
+import { ToastContainer } from "react-toastify";
+import { Spinner } from "../components/ui/Spinner";
 export function SignUpPage() {
   const { language } = useLanguage();
   const { theme } = useTheme();
@@ -33,7 +34,13 @@ export function SignUpPage() {
     }));
   };
   const [step, setstep] = useState(1);
-  const { mutate: signup, isPending, error, isSuccess, data } = useSignUp();
+  const {
+    mutate: signup,
+    isPending: isSigningUp,
+    error,
+    isSuccess,
+    data,
+  } = useSignUp();
 
   const goNext = () => {
     if (step >= maxStep) return;
@@ -52,6 +59,7 @@ export function SignUpPage() {
   }
   return (
     <main className="md:flex">
+      <ToastContainer position="top-right" draggable={true} autoClose={3000} />
       <section
         className="max-w-250 w-full px-4 hidden md:flex flex-col items-center h-screen relative"
         style={{
@@ -134,9 +142,17 @@ export function SignUpPage() {
               <div className="mt-6 mx-auto text-center">
                 <Button
                   type="submit"
-                  className={"border border-cyan-600 text-xs text-cyan-600"}
+                  className={
+                    "border mx-auto flex items-center gap-2 px-4 border-cyan-600 text-base text-cyan-600"
+                  }
                 >
-                  {PageTranslations[language].CreateAccountButton}
+                  <span>{PageTranslations[language].CreateAccountButton}</span>
+                  {isSigningUp && (
+                    <Spinner
+                      className={"text-cyan-600 dark:text-cyan-400"}
+                      size={18}
+                    />
+                  )}
                 </Button>
               </div>
             </section>

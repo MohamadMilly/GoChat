@@ -12,6 +12,7 @@ import Button from "../components/ui/Button";
 import translations from "../translations";
 import { useLanguage } from "../contexts/LanguageContext";
 import { useTheme } from "../contexts/ThemeContext";
+import { Spinner } from "../components/ui/Spinner";
 
 export function LogInPage() {
   const { language } = useLanguage();
@@ -120,10 +121,16 @@ export function LogInPage() {
             <Button
               type="submit"
               className={
-                "block mx-auto mt-6 border border-cyan-600 dark:border-cyan-400 text-xs text-cyan-600 dark:text-cyan-400!"
+                "flex items-center gap-2 mx-auto mt-6 border border-cyan-600 px-4 dark:border-cyan-400 text-base text-cyan-600 dark:text-cyan-400!"
               }
             >
-              {PageTranslations[language].LoginButton}
+              <span>{PageTranslations[language].LoginButton}</span>
+              {isLoggingIn && (
+                <Spinner
+                  className={"text-cyan-600 dark:text-cyan-400"}
+                  size={18}
+                />
+              )}
             </Button>
           </section>
         </form>
