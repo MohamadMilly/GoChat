@@ -189,7 +189,8 @@ export const SendMessageForm = memo(() => {
   return (
     <div
       dir={language === "Arabic" ? "rtl" : "ltr"}
-      className="z-20 shrink-0 md:relative fixed bottom-0 right-0 left-0"
+      className="z-20 shrink-0 relative
+       bottom-0 right-0 left-0"
     >
       {repliedMessage && (
         <div
