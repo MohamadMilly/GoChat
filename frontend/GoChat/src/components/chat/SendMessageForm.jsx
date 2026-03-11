@@ -154,8 +154,9 @@ export const SendMessageForm = memo(() => {
     let cursor = 0;
     while (pendingMessages.length > 0) {
       const pendingMessage = pendingMessages[cursor];
+
       if (pendingMessage.processing) return;
-      pendingMessage[cursor].processing = true;
+      pendingMessages[cursor].processing = true;
       const { data, error } = await supabase.storage
         .from("files")
         .upload(
@@ -165,6 +166,7 @@ export const SendMessageForm = memo(() => {
         );
       if (error) {
         console.error(error.message);
+        pendingMessage[cursor].processing = false;
         throw new Error(error.message);
       }
       const { data: publicUrlData } = supabase.storage
