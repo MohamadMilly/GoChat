@@ -42,6 +42,8 @@ export const SendMessageForm = memo(() => {
     let ignore = false;
     if (messagesQueueRef.current.length > 0) {
       messagesQueueRef.current.forEach(async (pendingMessage) => {
+        if (pendingMessage.processing) return;
+        pendingMessage.processing = true;
         const { data, error } = await supabase.storage
           .from("files")
           .upload(
@@ -149,7 +151,7 @@ export const SendMessageForm = memo(() => {
     if (hasAttached) {
       messagesQueueRef.current = [
         ...messagesQueueRef.current,
-        optimisticMessage,
+        { ...optimisticMessage, processing: false },
       ];
     } else {
       socket.emit(
