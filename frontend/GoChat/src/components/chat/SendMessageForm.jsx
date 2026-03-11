@@ -38,54 +38,14 @@ export const SendMessageForm = memo(() => {
     isCurrentUserAdmin,
   } = useContext(ChatPageContext);
   const [searchParams] = useSearchParams();
-  useEffect(() => {
-    let ignore = false;
-    if (messagesQueueRef.current.length > 0) {
-      messagesQueueRef.current.forEach(async (pendingMessage) => {
-        if (pendingMessage.processing) return;
-        pendingMessage.processing = true;
-        const { data, error } = await supabase.storage
-          .from("files")
-          .upload(
-            `${Date.now()}-${pendingMessage.file.name}`,
-            pendingMessage.file,
-            { contentType: pendingMessage.mimeType },
-          );
-        if (error) {
-          console.error(error.message);
-          throw new Error(error.message);
-        }
-        const { data: publicUrlData } = supabase.storage
-          .from("files")
-          .getPublicUrl(data.path);
-        const client_offset = `${socket.id}-${++counter}`;
-        if (ignore) return;
-        socket.emit(
-          "chat message",
-          {
-            createdAt: pendingMessage.createdAt,
-            content: pendingMessage.content,
-            fileURL: publicUrlData.publicUrl || "",
-            mimeType: pendingMessage?.mimeType || "text/plain",
-            type: pendingMessage.mimeType.includes("image") ? "IMAGE" : "FILE",
-          },
-          String(conversationId),
-          client_offset,
-        );
-        messagesQueueRef.current.shift();
-      });
-    }
-    return () => {
-      ignore = true;
-    };
-  });
-  const [previewFileURL, setPreviewFileURL] = useState(null);
-
   const { conversationId } = useContext(ChatPageContext);
   const queryClient = useQueryClient();
   const { user } = useAuth();
 
+  const [previewFileURL, setPreviewFileURL] = useState(null);
+
   const messageRef = useRef(message);
+
   useEffect(() => {
     messageRef.current = message;
     const timer = setTimeout(() => {
@@ -188,6 +148,46 @@ export const SendMessageForm = memo(() => {
     setMediaFileData({ file: null, mimeType: null });
     setHasAttached(false);
   };
+
+  const processQueue = async () => {
+    const pendingMessages = messagesQueueRef.current;
+    let cursor = 0;
+    while (pendingMessages.length > 0) {
+      const pendingMessage = pendingMessages[cursor];
+      if (pendingMessage.processing) return;
+      pendingMessage[cursor].processing = true;
+      const { data, error } = await supabase.storage
+        .from("files")
+        .upload(
+          `${Date.now()}-${pendingMessage.file.name}`,
+          pendingMessage.file,
+          { contentType: pendingMessage.mimeType },
+        );
+      if (error) {
+        console.error(error.message);
+        throw new Error(error.message);
+      }
+      const { data: publicUrlData } = supabase.storage
+        .from("files")
+        .getPublicUrl(data.path);
+      const client_offset = `${socket.id}-${++counter}`;
+
+      socket.emit(
+        "chat message",
+        {
+          createdAt: pendingMessage.createdAt,
+          content: pendingMessage.content,
+          fileURL: publicUrlData.publicUrl || "",
+          mimeType: pendingMessage?.mimeType || "text/plain",
+          type: pendingMessage.mimeType.includes("image") ? "IMAGE" : "FILE",
+        },
+        String(conversationId),
+        client_offset,
+      );
+      messagesQueueRef.current.shift();
+      cursor++;
+    }
+  };
   return (
     <div
       dir={language === "Arabic" ? "rtl" : "ltr"}
@@ -243,7 +243,15 @@ export const SendMessageForm = memo(() => {
       )}
       {(permissions ? permissions?.sendingMessages : true) ||
       isCurrentUserAdmin ? (
-        <form method="POST" onSubmit={onSend}>
+        <form
+          method="POST"
+          onSubmit={(e) => {
+            onSend(e);
+            if (hasAttached) {
+              processQueue();
+            }
+          }}
+        >
           <EmojiPicker
             style={{ backgroundColor: theme === "light" ? "white" : "#1e2939" }}
             previewConfig={{ showPreview: false }}
