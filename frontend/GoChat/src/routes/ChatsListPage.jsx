@@ -26,7 +26,7 @@ export function ChatsListPage() {
     <ChatsListContext
       value={{ isChatsPanelCollapsed, handleChatsPanelCollapse }}
     >
-      <div className="flex flex-col h-full">
+      <div className="flex flex-col h-full md:h-screen">
         <SideDrawer />
         <ChatsListHeader />
         <main

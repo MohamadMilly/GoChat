@@ -62,7 +62,7 @@ export function ChatPage() {
       }}
     >
       <section
-        className={`flex flex-col ${isChatsPanelCollapsed ? "md:col-start-1 md:col-end-2" : language === "Arabic" ? "md:col-start-1 md:col-end-2" : "md:col-start-2 md:col-end-3"} md:row-start-1 md:row-end-2 absolute inset-0 h-full w-screen md:w-full md:h-full md:static scrollbar-custom overflow-hidden `}
+        className={`flex flex-col ${isChatsPanelCollapsed ? "md:col-start-1 md:col-end-2" : language === "Arabic" ? "md:col-start-1 md:col-end-2" : "md:col-start-2 md:col-end-3"} md:row-start-1 md:row-end-2 absolute inset-0 h-screen w-screen md:w-full md:h-full md:static scrollbar-custom overflow-hidden `}
       >
         <ChatHeader />
         <section
