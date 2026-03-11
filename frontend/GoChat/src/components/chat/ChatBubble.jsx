@@ -380,6 +380,7 @@ export const ChatBubble = memo(
       });
       const observedMessage = messagesContainerRef.current;
       observer.observe(observedMessage);
+      console.log("THIS RUNS");
       return () => {
         if (!observedMessage) return;
         observer.unobserve(observedMessage);
@@ -390,8 +391,10 @@ export const ChatBubble = memo(
       let timer;
       function handleClickOutside(event) {
         if (
-          messageContentContainerRef.current &&
-          !messageContentContainerRef.current.contains(event.target)
+          isReadersVisible ||
+          (isMessageToolsVisible &&
+            messageContentContainerRef.current &&
+            !messageContentContainerRef.current.contains(event.target))
         ) {
           setIsFadeRunning(true);
           setIsMessageToolsVisible(false);

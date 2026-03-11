@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { memo, useContext, useState } from "react";
 import { socket } from "../../socket";
 import { useEffect } from "react";
 import { useRef } from "react";
@@ -17,7 +17,7 @@ import { useLanguage } from "../../contexts/LanguageContext";
 
 let counter = 0;
 
-export function SendMessageForm() {
+export const SendMessageForm = memo(() => {
   const { language } = useLanguage();
   const [message, setMessage] = useState("");
   const [isDrawerVisible, setIsDrawerVisible] = useState(false);
@@ -324,4 +324,4 @@ export function SendMessageForm() {
       )}
     </div>
   );
-}
+});
