@@ -14,7 +14,7 @@ export const ChatsListContext = createContext(null);
 
 export function ChatsListPage() {
   const [isChatsPanelCollapsed, setIsChatsPanelCollapsed] = useState(
-    storedChatsPanelStatus || false,
+    storedChatsPanelStatus ?? false,
   );
   const { language } = useLanguage();
   const handleChatsPanelCollapse = (value) => {
@@ -26,7 +26,7 @@ export function ChatsListPage() {
     <ChatsListContext
       value={{ isChatsPanelCollapsed, handleChatsPanelCollapse }}
     >
-      <div className="flex flex-col h-screen">
+      <div className="flex flex-col h-full">
         <SideDrawer />
         <ChatsListHeader />
         <main
