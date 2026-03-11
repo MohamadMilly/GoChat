@@ -186,7 +186,7 @@ export const SendMessageForm = memo(() => {
         String(conversationId),
         client_offset,
       );
-      messagesQueueRef.current.shift();
+      messagesQueueRef.current.splice(cursor, 1);
       cursor++;
     }
   };
