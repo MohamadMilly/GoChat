@@ -29,7 +29,7 @@ export function UserProfile() {
     ? `${fullname.replaceAll(" ", "-")}-${transitionId}`
     : null;
   return (
-    <main className="max-w-200 mx-auto bg-white dark:bg-gray-900 font-rubik relative">
+    <main className="max-w-200 mx-auto dark:bg-gray-900 font-rubik relative">
       <div className="flex justify-start items-center p-2 bg-gray-50/30 dark:bg-gray-800/80 rounded-lg my-2">
         <Button
           onClick={() => navigate(-1)}

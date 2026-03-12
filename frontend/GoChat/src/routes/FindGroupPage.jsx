@@ -78,7 +78,7 @@ export function FindGroupPage() {
   const { language } = useLanguage();
   return (
     <>
-      <main className="max-w-200 mx-auto bg-white dark:bg-gray-900 font-rubik">
+      <main className="max-w-200 mx-auto dark:bg-gray-900 font-rubik">
         <div className="flex justify-start items-center p-2 bg-gray-50/30 dark:bg-gray-800/80 rounded-lg mt-2 mb-4">
           <Button
             onClick={() => navigate(-1)}

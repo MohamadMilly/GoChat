@@ -230,7 +230,7 @@ export function Settings() {
   const { language } = useLanguage();
 
   return (
-    <main className="max-w-200 mx-auto bg-white dark:bg-gray-900 font-rubik relative p-2">
+    <main className="max-w-200 mx-auto dark:bg-gray-900 font-rubik relative p-1">
       <div className="flex justify-start items-center p-2 bg-gray-50/30 dark:bg-gray-800/80 rounded-lg my-2">
         <Button
           onClick={() => navigate(-1)}
@@ -244,7 +244,7 @@ export function Settings() {
         <h2 className="text-lg tracking-tight font-bold text-cyan-600">
           {PageTranslations[language].RouteTitle}
         </h2>
-        <div className="my-4 bg-gray-50 dark:bg-gray-800 shadow-xs border border-gray-100 dark:border-gray-700 p-4 rounded">
+        <div className="my-4 bg-white dark:bg-gray-800 shadow-xs border border-gray-100 dark:border-gray-700 p-4 rounded">
           <h3 className="text-gray-600 dark:text-gray-50 tracking-tight mb-4 font-medium">
             {PageTranslations[language].AccountSectionTitle}
           </h3>
@@ -269,7 +269,7 @@ export function Settings() {
             <span>{PageTranslations[language].ChangePassword}</span>
           </Button>
         </div>
-        <div className="my-4 bg-gray-50 dark:bg-gray-800 shadow-xs border border-gray-100 dark:border-gray-700 p-4 rounded">
+        <div className="my-4 bg-white dark:bg-gray-800 shadow-xs border border-gray-100 dark:border-gray-700 p-4 rounded">
           <h3 className="text-gray-600 dark:text-gray-50 tracking-tight mb-4 font-medium">
             {PageTranslations[language].GeneralSectionTitle}
           </h3>
