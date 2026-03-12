@@ -151,45 +151,54 @@ export const SendMessageForm = memo(() => {
 
   const processQueue = async () => {
     const pendingMessages = messagesQueueRef.current;
-    let cursor = 0;
+
+    let index = 0;
     while (pendingMessages.length > 0) {
-      const pendingMessage = pendingMessages[cursor];
-
-      if (pendingMessage.processing) return;
-      pendingMessages[cursor].processing = true;
-      const { data, error } = await supabase.storage
-        .from("files")
-        .upload(
-          `${Date.now()}-${pendingMessage.file.name}`,
-          pendingMessage.file,
-          { contentType: pendingMessage.mimeType },
-        );
-      if (error) {
-        console.error(error.message);
-        pendingMessage[cursor].processing = false;
-        throw new Error(error.message);
+      const pendingMessage = pendingMessages[index];
+      if (pendingMessage.processing) {
+        index++;
+        continue;
       }
-      const { data: publicUrlData } = supabase.storage
-        .from("files")
-        .getPublicUrl(data.path);
-      const client_offset = `${socket.id}-${++counter}`;
+      pendingMessage.processing = true;
+      pendingMessage.processId = index;
+      try {
+        const { data, error } = await supabase.storage
+          .from("files")
+          .upload(
+            `${Date.now()}-${pendingMessage.file.name}`,
+            pendingMessage.file,
+            { contentType: pendingMessage.mimeType },
+          );
+        if (error) {
+          throw new Error(error.message);
+        }
+        const { data: publicUrlData } = supabase.storage
+          .from("files")
+          .getPublicUrl(data.path);
+        const client_offset = `${socket.id}-${++counter}`;
 
-      socket.emit(
-        "chat message",
-        {
-          createdAt: pendingMessage.createdAt,
-          content: pendingMessage.content,
-          fileURL: publicUrlData.publicUrl || "",
-          mimeType: pendingMessage?.mimeType || "text/plain",
-          type: pendingMessage.mimeType.includes("image") ? "IMAGE" : "FILE",
-        },
-        String(conversationId),
-        client_offset,
-      );
-      messagesQueueRef.current.splice(cursor, 1);
-      cursor++;
+        socket.emit(
+          "chat message",
+          {
+            createdAt: pendingMessage.createdAt,
+            content: pendingMessage.content,
+            fileURL: publicUrlData.publicUrl || "",
+            mimeType: pendingMessage?.mimeType || "text/plain",
+            type: pendingMessage.mimeType.includes("image") ? "IMAGE" : "FILE",
+          },
+          String(conversationId),
+          client_offset,
+        );
+      } catch (err) {
+        console.error(err.message);
+        pendingMessage.processing = false;
+        pendingMessage.processId = null;
+      } finally {
+        pendingMessage.splice(pendingMessage.processId, 1);
+      }
     }
   };
+  /*  */
   return (
     <div
       dir={language === "Arabic" ? "rtl" : "ltr"}
