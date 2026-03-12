@@ -10,7 +10,7 @@ export function ChatsListHeader() {
   return (
     <header
       dir={language === "Arabic" ? "rtl" : "ltr"}
-      className="col-start-1 col-end-3 row-start-1 row-end-2 bg-gray-50 dark:bg-gray-900 shadow-xs"
+      className="col-start-1 col-end-3 row-start-1 row-end-2 bg-white dark:bg-gray-900 shadow-xs border-b border-gray-50 dark:border-gray-800"
     >
       <nav className="flex items-center justify-between gap-x-4 px-4 h-16">
         <div className="flex items-center gap-x-3">

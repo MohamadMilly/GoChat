@@ -30,7 +30,7 @@ export function ChatsListPage() {
         <SideDrawer />
         <ChatsListHeader />
         <main
-          className={`basis-full w-full md:grid  ${isChatsPanelCollapsed ? "md:grid-cols-[1fr]" : language === "Arabic" ? "md:grid-cols-[1fr_350px]" : "md:grid-cols-[350px_1fr]"} h-[calc(100dvh-64px)]`}
+          className={`basis-full w-full md:grid  ${isChatsPanelCollapsed ? "md:grid-cols-[1fr]" : language === "Arabic" ? "md:grid-cols-[1fr_350px]" : "md:grid-cols-[350px_1fr]"} h-[calc(100dvh-65px)]`}
         >
           <ChatsPanel />
           <Outlet /> {/* ChatPage */}

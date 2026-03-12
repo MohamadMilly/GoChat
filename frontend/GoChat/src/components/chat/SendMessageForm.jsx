@@ -21,7 +21,7 @@ export const SendMessageForm = memo(() => {
   const { language } = useLanguage();
   const [message, setMessage] = useState("");
   const [isDrawerVisible, setIsDrawerVisible] = useState(false);
-  const messagesQueueRef = useRef([]);
+
   const [hasAttached, setHasAttached] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const { theme } = useTheme();
@@ -63,7 +63,7 @@ export const SendMessageForm = memo(() => {
     return () => clearTimeout(timer);
   }, [message, conversationId]);
 
-  const onSend = (e) => {
+  const onSend = async (e) => {
     e.preventDefault();
     const client_offset = `${socket.id}-${++counter}`;
     const now = new Date();
@@ -82,55 +82,55 @@ export const SendMessageForm = memo(() => {
       status: "pending",
       repliedMessage: repliedMessage,
     };
+
     queryClient.setQueryData(
       ["conversation", "messages", conversationId],
       (old) => {
-        if (!old?.messages || !old?.type) return old;
-        return {
-          ...old,
-          messages: [...old.messages, optimisticMessage],
-        };
+        if (!old?.messages) return old;
+        return { ...old, messages: [...old.messages, optimisticMessage] };
       },
     );
+    setMessage("");
+    setHasAttached(false);
+    setRepliedMessage(null);
+    try {
+      let finalFileURL = "";
 
-    queryClient.setQueryData(["conversations"], (old) => {
-      if (!old?.conversations) return old;
-      return {
-        ...old,
-        conversations: old.conversations.map((conversation) => {
-          if (conversation.id == conversationId) {
-            return {
-              ...conversation,
-              messages: [optimisticMessage],
-            };
-          }
-          return conversation;
-        }),
-      };
-    });
-    if (hasAttached) {
-      messagesQueueRef.current = [
-        ...messagesQueueRef.current,
-        { ...optimisticMessage, processing: false },
-      ];
-    } else {
+      if (hasAttached && mediaFileData.file) {
+        const { data, error } = await supabase.storage
+          .from("files")
+          .upload(
+            `${Date.now()}-${mediaFileData.file.name}`,
+            mediaFileData.file,
+          );
+
+        if (error) throw error;
+        const { data: publicUrlData } = supabase.storage
+          .from("files")
+          .getPublicUrl(data.path);
+        finalFileURL = publicUrlData.publicUrl;
+      }
+
       socket.emit(
         "chat message",
         {
           createdAt: optimisticMessage.createdAt,
           content: message,
-          fileURL: "",
-          mimeType: "text/plain",
-          type: "TEXT",
-          repliedMessageId: repliedMessage ? repliedMessage.id : null,
+          fileURL: finalFileURL,
+          mimeType: mediaFileData?.mimeType || "text/plain",
+          type: finalFileURL
+            ? mediaFileData.mimeType.includes("image")
+              ? "IMAGE"
+              : "FILE"
+            : "TEXT",
+          repliedMessageId: repliedMessage?.id || null,
         },
         String(conversationId),
         client_offset,
       );
+    } catch (err) {
+      console.error("Upload failed:", err);
     }
-    setMessage("");
-    setPreviewFileURL(null);
-    setHasAttached(false);
   };
 
   const handlePickEmoji = (emojiObj) => {
@@ -149,56 +149,6 @@ export const SendMessageForm = memo(() => {
     setHasAttached(false);
   };
 
-  const processQueue = async () => {
-    const pendingMessages = messagesQueueRef.current;
-
-    let index = 0;
-    while (pendingMessages.length > 0) {
-      const pendingMessage = pendingMessages[index];
-      if (pendingMessage.processing) {
-        index++;
-        continue;
-      }
-      pendingMessage.processing = true;
-      pendingMessage.processId = index;
-      try {
-        const { data, error } = await supabase.storage
-          .from("files")
-          .upload(
-            `${Date.now()}-${pendingMessage.file.name}`,
-            pendingMessage.file,
-            { contentType: pendingMessage.mimeType },
-          );
-        if (error) {
-          throw new Error(error.message);
-        }
-        const { data: publicUrlData } = supabase.storage
-          .from("files")
-          .getPublicUrl(data.path);
-        const client_offset = `${socket.id}-${++counter}`;
-
-        socket.emit(
-          "chat message",
-          {
-            createdAt: pendingMessage.createdAt,
-            content: pendingMessage.content,
-            fileURL: publicUrlData.publicUrl || "",
-            mimeType: pendingMessage?.mimeType || "text/plain",
-            type: pendingMessage.mimeType.includes("image") ? "IMAGE" : "FILE",
-          },
-          String(conversationId),
-          client_offset,
-        );
-      } catch (err) {
-        console.error(err.message);
-        pendingMessage.processing = false;
-        pendingMessage.processId = null;
-      } finally {
-        pendingMessage.splice(pendingMessage.processId, 1);
-      }
-    }
-  };
-  /*  */
   return (
     <div
       dir={language === "Arabic" ? "rtl" : "ltr"}
@@ -258,9 +208,6 @@ export const SendMessageForm = memo(() => {
           method="POST"
           onSubmit={(e) => {
             onSend(e);
-            if (hasAttached) {
-              processQueue();
-            }
           }}
         >
           <EmojiPicker
