@@ -24,7 +24,7 @@ export function ChatsListHeader() {
               className="text-lg font-semibold tracking-tight font-rupik
              text-cyan-600 dark:text-cyan-400"
             >
-              GoChat
+              {translations.Common[language].gochat}
             </h1>
             <div className="text-xs text-gray-400 dark:text-gray-200">
               {isConnected

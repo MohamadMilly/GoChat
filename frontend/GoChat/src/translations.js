@@ -11,14 +11,13 @@ const translations = {
       OnlyVisibleToYou: "(مرئي لك فقط)",
       AlreadyHaveAccount: "هل لديك حساب بالفعل؟",
       GoBackAndEdit: "العودة والتعديل",
-
+      gochat: "غو تشات",
       ErrorPrefix: "خطأ:",
       Connecting: "جاري الاتصال...",
 
       Optional: "(اختياري)",
       Enabled: "مُفعل",
-      NoPrefix: "No",
-      OnlyVisibleToYou: "(Only visible to you)",
+
       Disabled: "معطّل",
     },
     English: {
@@ -32,10 +31,12 @@ const translations = {
       GoBackAndEdit: "Go back and edit",
       ErrorPrefix: "Error:",
       Connecting: "Connecting...",
-
+      NoPrefix: "No",
+      OnlyVisibleToYou: "(Only visible to you)",
       Optional: "(optional)",
       Enabled: "Enabled",
       Disabled: "Disabled",
+      gochat: "GoChat",
     },
   },
 
