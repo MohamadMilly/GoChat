@@ -363,8 +363,6 @@ const deleteAccountDelete = async (req, res) => {
           update: {
             avatar: "",
             avatarBackground: "",
-            email: "",
-            phoneNumber: "",
           },
         },
         accountColor: "#191919",

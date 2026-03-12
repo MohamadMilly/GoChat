@@ -116,7 +116,7 @@ export const ChatHeader = memo(({ id }) => {
                   );
                 })
               ) : (
-                <div className="flex items-center text-xs text-gray-700 dark:text-gray-100">
+                <div className="flex items-center text-xs text-gray-700 dark:text-gray-200">
                   <div className="flex items-center">
                     <span className="inline-block ltr:mr-1 rtl:ml-1">
                       {membersCount}

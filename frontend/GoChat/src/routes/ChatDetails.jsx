@@ -170,7 +170,7 @@ export function ChatDetails() {
           backgroundPosition: "center",
           backgroundSize: "cover",
         }}
-        className="bg-gray-100 dark:bg-gray-800 p-4 min-h-70 flex flex-col justify-end items-start"
+        className="bg-gray-100  dark:bg-gray-800 p-4 min-h-70 flex flex-col justify-end items-start"
       >
         <h2 className="text-xl text-gray-800 dark:text-gray-50">{title}</h2>
         <p className="text-sm text-gray-500 dark:text-gray-300">

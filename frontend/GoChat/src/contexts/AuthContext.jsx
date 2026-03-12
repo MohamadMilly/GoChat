@@ -1,4 +1,5 @@
 import { createContext, useContext, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 
 const initialToken = localStorage.getItem("token");
 const initialUser = JSON.parse(localStorage.getItem("user"));
@@ -11,6 +12,7 @@ const AuthContext = createContext({
 export function AuthProvider({ children }) {
   const [token, setToken] = useState(initialToken);
   const [user, setUser] = useState(initialUser);
+  const queryClient = useQueryClient();
   const login = (token, user) => {
     setToken(token);
     setUser(user);
@@ -22,6 +24,7 @@ export function AuthProvider({ children }) {
     setUser("");
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+    queryClient.clear();
   };
   const editUser = (data = {}) => {
     const newUserData = { ...user, ...data };
