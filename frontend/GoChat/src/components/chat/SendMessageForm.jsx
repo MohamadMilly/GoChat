@@ -14,6 +14,7 @@ import Button from "../ui/Button";
 import { useTheme } from "../../contexts/ThemeContext";
 import translations from "../../translations";
 import { useLanguage } from "../../contexts/LanguageContext";
+import { toast } from "react-toastify";
 
 let counter = 0;
 
@@ -130,6 +131,7 @@ export const SendMessageForm = memo(() => {
       );
     } catch (err) {
       console.error("Upload failed:", err);
+      toast.error(err.message);
     }
   };
 
