@@ -154,7 +154,7 @@ export const SendMessageForm = memo(() => {
   return (
     <div
       dir={language === "Arabic" ? "rtl" : "ltr"}
-      className="z-20 shrink-0 relative"
+      className="z-20 shrink-0 relative md:bottom-4 bottom-2 mx-2"
     >
       {repliedMessage && (
         <div
@@ -224,7 +224,7 @@ export const SendMessageForm = memo(() => {
           <label htmlFor="chat" className="sr-only">
             {translations.SendMessageForm[language].YourMessageSR}
           </label>
-          <div className="flex items-center px-3 py-2 rounded-t-lg bg-white dark:bg-gray-800 shadow">
+          <div className="flex  items-center px-3 py-2 rounded-4xl bg-white dark:bg-gray-800 shadow">
             <button
               onClick={() => setIsDrawerVisible((prev) => !prev)}
               type="button"
@@ -251,7 +251,7 @@ export const SendMessageForm = memo(() => {
               dir="auto"
               id="chat"
               rows="1"
-              className="block max-h-37.5 resize-none min-h-15 mx-4 p-2.5 w-full text-sm text-gray-900 bg-white dark:bg-gray-900 dark:text-gray-50 outline-2 outline-gray-400/20 dark:outline-gray-200/20 focus:outline-offset-2 focus:outline-cyan-600/80 dark:focus:outline-cyan-400/80 rounded-lg"
+              className="block max-h-37.5 md:min-h-12 resize-none mx-4 p-2.5 w-full text-sm text-gray-900 bg-white dark:bg-gray-900 dark:text-gray-50 outline-2 outline-gray-400/20 dark:outline-gray-200/20 focus:outline-offset-2 focus:outline-cyan-600/80 dark:focus:outline-cyan-400/80 rounded-lg"
               placeholder={translations.SendMessageForm[language].Placeholder}
               onChange={onMessageChange}
               value={message}

@@ -66,7 +66,7 @@ export function ChatPage() {
       >
         <ChatHeader />
         <section
-          className="w-full relative basis-full flex flex-col flex-1 overflow-hidden bg-gray-200 dark:bg-gray-900"
+          className="relative basis-full flex flex-col flex-1 overflow-hidden bg-gray-200 dark:bg-gray-900"
           style={{
             backgroundImage: `url(${theme === "light" ? chatBackground : darkChatBackground})`,
             backgroundAttachment: "scroll",
@@ -75,7 +75,7 @@ export function ChatPage() {
             backgroundSize: "cover",
           }}
         >
-          <div className="inset-0 absolute bg-gray-600/20 dark:bg-gray-800/60"></div>
+          <div className="inset-0  absolute bg-gray-600/20 dark:bg-gray-800/60 "></div>
           <MessagesList />
           <SendMessageForm />
           {editedMessage && <EditMessageDialog message={editedMessage} />}

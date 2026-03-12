@@ -380,7 +380,7 @@ export const ChatBubble = memo(
       });
       const observedMessage = messagesContainerRef.current;
       observer.observe(observedMessage);
-      console.log("THIS RUNS");
+
       return () => {
         if (!observedMessage) return;
         observer.unobserve(observedMessage);
@@ -409,7 +409,7 @@ export const ChatBubble = memo(
         document.removeEventListener("mousedown", handleClickOutside);
         clearTimeout(timer);
       };
-    }, [isReadersVisible]);
+    }, [isReadersVisible, isMessageToolsVisible]);
     const handleReply = useCallback(
       (message) => {
         setRepliedMessage(message);
