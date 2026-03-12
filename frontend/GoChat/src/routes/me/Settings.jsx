@@ -20,6 +20,7 @@ import { useTheme } from "../../contexts/ThemeContext";
 import { useDeleteAccount } from "../../hooks/me/useDeleteAccount";
 import { useState } from "react";
 import { useLanguage } from "../../contexts/LanguageContext";
+import { useQueryClient } from "@tanstack/react-query";
 
 const PageTranslations = {
   Arabic: {
@@ -98,9 +99,11 @@ function DeleteAccountButton() {
   } = useDeleteAccount();
   const { logout } = useAuth();
   const { language } = useLanguage();
+  const queryClient = useQueryClient();
   const handleDeleteAccount = () => {
     deleteAccount();
     logout();
+    queryClient.clear();
   };
   if (isSuccess) {
     return <Navigate to={"/"} />;

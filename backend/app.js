@@ -18,10 +18,15 @@ const io = new Server(server, {
     maxDisconnectionDuration: 1000 * 60 * 2,
   },
 });
+let connectedUsers = [];
+(async () => {
+  connectedUsers = (await io.fetchSockets()).map((socket) => ({
+    [socket.handshake.auth.userId]: socket.id,
+  }));
+})();
 
-const connectedUsers = {};
 io.on("connection", async (socket) => {
-  socket.on("user connected", (userId) => {
+  socket.on("user connected", async (userId) => {
     connectedUsers[userId] = socket.id;
     socket.isFirstConnection = true;
     io.emit("user connected", Object.keys(connectedUsers));
@@ -29,9 +34,7 @@ io.on("connection", async (socket) => {
   socket.on("disconnect", async () => {
     const userId = socket.handshake.auth.userId;
     if (!userId) return;
-
     delete connectedUsers[userId];
-
     await prisma.profile.update({
       where: {
         userId: userId,
@@ -41,7 +44,6 @@ io.on("connection", async (socket) => {
       },
     });
     io.emit("user disconnected", userId);
-    console.log("user diconnected.");
   });
   console.log("user connected.");
   socket.on("join chat", async (conversationId) => {
