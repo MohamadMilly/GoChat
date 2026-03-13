@@ -291,6 +291,11 @@ const getCurrentUserGet = async (req, res) => {
         username: true,
         profile: true,
         accountColor: true,
+        blockedUsers: {
+          select: {
+            id: true,
+          },
+        },
       },
     });
     if (!user) {
@@ -311,6 +316,7 @@ const getCurrentUserGet = async (req, res) => {
   } catch (err) {
     return res.status(500).json({
       message: "Unexpected error happened while getting this user data.",
+      error: err.stack,
     });
   }
 };
@@ -383,6 +389,93 @@ const deleteAccountDelete = async (req, res) => {
   }
 };
 
+const editUserPatch = async (req, res) => {
+  const currentUser = req.currentUser;
+  const {
+    firstname,
+    username,
+    lastname,
+    password,
+    passwordConfirmation,
+    accountColor,
+    blockedUserId,
+  } = req.body;
+
+  const data = {};
+  if (firstname) data.firstname = firstname;
+  if (lastname) data.lastname = lastname;
+  if (accountColor) data.accountColor = accountColor;
+  if (blockedUserId)
+    data.blockedUsers = {
+      connect: {
+        id: parseInt(blockedUserId),
+      },
+    };
+
+  try {
+    const user = await prisma.user.findUnique({
+      where: {
+        id: currentUser.id,
+      },
+    });
+    if (!user) {
+      return res.status(404).json({
+        message: "User is not found.",
+      });
+    }
+    if (password) {
+      const match = bcrypt.compare(password, user.password);
+      if (!match) {
+        return res.status(401).json({
+          message: "Password is incorrect.",
+        });
+      }
+      if (password !== passwordConfirmation) {
+        return res.status(401).json({
+          message: "Passwords do not match.",
+        });
+      }
+      data.password = await bcrypt.hash(password, 10);
+    }
+    if (username) {
+      const userWithThisUsername = await prisma.findUnique({
+        where: {
+          username: username,
+        },
+      });
+      if (userWithThisUsername) {
+        return res.status(401).json({
+          message: "This username is already used.",
+        });
+      }
+      data.username = username;
+    }
+    const updatedUser = await prisma.user.update({
+      where: {
+        id: currentUser.id,
+      },
+      data: {
+        ...data,
+      },
+      select: {
+        id: true,
+        firstname: true,
+        lastname: true,
+        username: true,
+        accountColor: true,
+      },
+    });
+    return res.json({
+      message: "User is updated successfully.",
+      user: updatedUser,
+    });
+  } catch (err) {
+    return res.status(500).json({
+      message: "Unexpected error happened while updating user.",
+    });
+  }
+};
+
 module.exports = {
   myConversationsGet,
   queryUsersGet,
@@ -393,4 +486,5 @@ module.exports = {
   preferencesPatch,
   editProfilePut,
   deleteAccountDelete,
+  editUserPatch,
 };

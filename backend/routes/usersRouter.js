@@ -37,5 +37,5 @@ usersRouter.get("/me/preferences", usersController.getCurrentuserPreferences);
 usersRouter.patch("/me/preferences", usersController.preferencesPatch);
 usersRouter.put("/me/profile", usersController.editProfilePut);
 usersRouter.delete("/me", usersController.deleteAccountDelete);
-
+usersRouter.patch("/me", usersController.editUserPatch);
 module.exports = usersRouter;

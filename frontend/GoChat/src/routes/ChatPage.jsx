@@ -66,16 +66,16 @@ export function ChatPage() {
       >
         <ChatHeader />
         <section
-          className="relative basis-full flex flex-col flex-1 overflow-hidden bg-gray-200 dark:bg-gray-900"
+          className="relative basis-full flex flex-col flex-1 overflow-hidden 
+             bg-white dark:bg-slate-950 
+             bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] 
+             dark:bg-[radial-gradient(#1e293b_1px,transparent_1px)] 
+             [background-size:16px_16px]"
           style={{
-            backgroundImage: `url(${theme === "light" ? chatBackground : darkChatBackground})`,
             backgroundAttachment: "scroll",
             backgroundRepeat: "repeat",
-            backgroundPosition: "center",
-            backgroundSize: "cover",
           }}
         >
-          <div className="inset-0  absolute bg-gray-600/20 dark:bg-gray-800/60 "></div>
           <MessagesList />
           <SendMessageForm />
           {editedMessage && <EditMessageDialog message={editedMessage} />}

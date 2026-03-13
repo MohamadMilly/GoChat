@@ -10,9 +10,11 @@ export function ChatBubbleStatus({
 }) {
   const { user } = useAuth();
   const isMyMessage = user.id === senderId;
-  const readersWithOutMe = readers.filter((id) => id != user.id);
+  const actualReaders = isMyMessage
+    ? readers.filter((id) => id != user.id)
+    : readers;
 
-  const isReadByMe = readers.includes(user.id);
+  const isReadByMe = actualReaders.includes(user.id);
   if (!isMyMessage && !supportNotifications) return;
   return (
     <div>
@@ -20,7 +22,7 @@ export function ChatBubbleStatus({
         {isMyMessage ? (
           status === "pending" ? (
             <Clock size={12} />
-          ) : readers && readersWithOutMe.length > 0 ? (
+          ) : readers && actualReaders.length > 0 ? (
             <CheckCheck size={12} />
           ) : (
             <Check size={12} />

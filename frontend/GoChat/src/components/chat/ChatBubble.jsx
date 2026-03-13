@@ -333,6 +333,7 @@ export const ChatBubble = memo(
             conversations: old.conversations.map((c) => {
               if (c.id == conversationId) {
                 const readMessage = c.messages.find((m) => m.id == messageId);
+
                 if (!readMessage) {
                   return c;
                 } else {
@@ -342,7 +343,7 @@ export const ChatBubble = memo(
                       {
                         ...readMessage,
                         readers:
-                          userId == user.id
+                          userId == user.id && readMessage.senderId === user.id
                             ? readMessage.readers
                             : [...(readMessage.readers || []), { id: userId }],
                       },

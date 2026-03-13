@@ -16,6 +16,7 @@ import translations from "../../translations";
 import { useLanguage } from "../../contexts/LanguageContext";
 
 import { useEffect } from "react";
+import { ChatHeaderMenu } from "./ChatHeaderMenu";
 
 export const ChatHeader = memo(({ id }) => {
   const navigate = useNavigate();
@@ -75,89 +76,94 @@ export const ChatHeader = memo(({ id }) => {
   return (
     <header
       dir={language === "Arabic" ? "rtl" : "ltr"}
-      className="z-20 border-b border-gray-50 dark:border-gray-700 px-4 py-2 shadow-lg bg-white dark:bg-gray-800 flex items-center gap-2"
+      className="z-20 border-b border-gray-50 dark:border-gray-700 px-4 py-2 shadow-xs bg-white dark:bg-gray-800 flex items-center justify-between gap-2"
     >
-      <Button
-        onClick={() => navigate("/chats", { viewTransition: true })}
-        className={"text-gray-600 md:hidden"}
-      >
-        <p className="sr-only">{translations.Common[language].GoBackSR}</p>
-        <ArrowBigLeft size={18} />
-      </Button>
-      <TransitionLink
-        route={
-          isGroup
-            ? `/chats/${conversationId || id}/details`
-            : `/users/${chatPartner.id}`
-        }
-        setDynamicTransitionId={setTransitionId}
-        className={"flex items-center gap-x-2"}
-      >
-        <Avatar
-          dynamicTransitionId={transitionId}
-          chatTitle={chatTitle}
-          avatar={chatAvatar}
-          color={color}
-        />
-        <div className="flex flex-col justify-center items-start">
-          <p className="text-sm text-gray-900 dark:text-gray-50">{chatTitle}</p>
-          <span
-            dir={language === "Arabic" ? "rtl" : "ltr"}
-            className="text-xs text-gray-700 dark:text-gray-100"
-          >
-            {isGroup ? (
-              thisChatTypingUsers.length > 0 ? (
-                thisChatTypingUsers.map((userData) => {
-                  return (
-                    <span>
-                      {userData.user.firstname +
-                        translations.ChatHeader[language].TypingSuffix}
-                    </span>
-                  );
-                })
-              ) : (
-                <div className="flex items-center text-xs text-gray-700 dark:text-gray-200">
-                  <div className="flex items-center">
-                    <span className="inline-block ltr:mr-1 rtl:ml-1">
-                      {membersCount}
-                    </span>
-                    <span>
-                      {translations.ChatHeader[language].MembersLabel}
-                    </span>
-                  </div>
-                  {(permissions?.onlineMembers || isCurrentUserAdmin) && (
-                    <>
-                      <span className="mx-1">|</span>
-                      <div className="flex items-center">
-                        <span
-                          className="
+      <div className="flex items-center gap-2">
+        <Button
+          onClick={() => navigate("/chats", { viewTransition: true })}
+          className={"text-gray-600 md:hidden"}
+        >
+          <p className="sr-only">{translations.Common[language].GoBackSR}</p>
+          <ArrowBigLeft size={18} />
+        </Button>
+        <TransitionLink
+          route={
+            isGroup
+              ? `/chats/${conversationId || id}/details`
+              : `/users/${chatPartner.id}`
+          }
+          setDynamicTransitionId={setTransitionId}
+          className={"flex items-center gap-x-2"}
+        >
+          <Avatar
+            dynamicTransitionId={transitionId}
+            chatTitle={chatTitle}
+            avatar={chatAvatar}
+            color={color}
+          />
+          <div className="flex flex-col justify-center items-start">
+            <p className="text-sm text-gray-900 dark:text-gray-50">
+              {chatTitle}
+            </p>
+            <span
+              dir={language === "Arabic" ? "rtl" : "ltr"}
+              className="text-xs text-gray-700 dark:text-gray-100"
+            >
+              {isGroup ? (
+                thisChatTypingUsers.length > 0 ? (
+                  thisChatTypingUsers.map((userData) => {
+                    return (
+                      <span>
+                        {userData.user.firstname +
+                          translations.ChatHeader[language].TypingSuffix}
+                      </span>
+                    );
+                  })
+                ) : (
+                  <div className="flex items-center text-xs text-gray-700 dark:text-gray-200">
+                    <div className="flex items-center">
+                      <span className="inline-block ltr:mr-1 rtl:ml-1">
+                        {membersCount}
+                      </span>
+                      <span>
+                        {translations.ChatHeader[language].MembersLabel}
+                      </span>
+                    </div>
+                    {(permissions?.onlineMembers || isCurrentUserAdmin) && (
+                      <>
+                        <span className="mx-1">|</span>
+                        <div className="flex items-center">
+                          <span
+                            className="
                               ltr:mr-1 rtl:ml-1"
-                        >
-                          {connectedUsersCount}
-                        </span>
-                        <span>
-                          {translations.ChatHeader[language].OnlineLabel}
-                        </span>
-                      </div>
-                    </>
-                  )}
-                </div>
-              )
-            ) : thisChatTypingUsers.length > 0 ? (
-              translations.ChatHeader[language].TypingStandalone
-            ) : isOneToOneChatPartnerConnected ? (
-              <span className="text-cyan-600">
-                {translations.ChatHeader[language].Online}
-              </span>
-            ) : (
-              <span>
-                {translations.ChatHeader[language].LastSeenPrefix}{" "}
-                {new Date(chatPartner.profile.lastSeen).toLocaleTimeString()}
-              </span>
-            )}
-          </span>
-        </div>
-      </TransitionLink>
+                          >
+                            {connectedUsersCount}
+                          </span>
+                          <span>
+                            {translations.ChatHeader[language].OnlineLabel}
+                          </span>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                )
+              ) : thisChatTypingUsers.length > 0 ? (
+                translations.ChatHeader[language].TypingStandalone
+              ) : isOneToOneChatPartnerConnected ? (
+                <span className="text-cyan-600">
+                  {translations.ChatHeader[language].Online}
+                </span>
+              ) : (
+                <span>
+                  {translations.ChatHeader[language].LastSeenPrefix}{" "}
+                  {new Date(chatPartner.profile.lastSeen).toLocaleTimeString()}
+                </span>
+              )}
+            </span>
+          </div>
+        </TransitionLink>
+      </div>
+      <ChatHeaderMenu isGroup={isGroup} chatPartner={chatPartner} />
     </header>
   );
 });

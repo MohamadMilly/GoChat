@@ -4,6 +4,7 @@ import { NavLink } from "react-router";
 import { memo, useEffect, useState } from "react";
 import { socket } from "../../socket";
 import { ChatBubbleStatus } from "../chat/chatBubbleStatus";
+import { useAuth } from "../../contexts/AuthContext";
 
 export const ChatEntry = memo(
   ({
@@ -23,10 +24,14 @@ export const ChatEntry = memo(
       ? lastMessage.readers.map((reader) => reader.readerId)
       : [];
     const [readers, setReaders] = useState(initialReadersIds);
-
+    const { user } = useAuth();
     useEffect(() => {
       function onReadMessage(messageId, readerId) {
         if (messageId === lastMessage?.id) {
+          const isMyMessage = lastMessage.senderId === user.id;
+          if (readerId === user.id && isMyMessage) {
+            return;
+          }
           setReaders((prev) => [...prev, readerId]);
         }
       }

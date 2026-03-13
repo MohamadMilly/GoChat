@@ -18,11 +18,11 @@ const io = new Server(server, {
     maxDisconnectionDuration: 1000 * 60 * 2,
   },
 });
-let connectedUsers = [];
+let connectedUsers = {};
 (async () => {
-  connectedUsers = (await io.fetchSockets()).map((socket) => ({
-    [socket.handshake.auth.userId]: socket.id,
-  }));
+  (await io.fetchSockets()).forEach((socket) => {
+    connectedUsers[socket.handshake.auth.userId] = socket.id;
+  });
 })();
 
 io.on("connection", async (socket) => {
@@ -30,6 +30,7 @@ io.on("connection", async (socket) => {
     connectedUsers[userId] = socket.id;
     socket.isFirstConnection = true;
     io.emit("user connected", Object.keys(connectedUsers));
+    console.log(connectedUsers);
   });
   socket.on("disconnect", async () => {
     const userId = socket.handshake.auth.userId;
@@ -44,14 +45,18 @@ io.on("connection", async (socket) => {
       },
     });
     io.emit("user disconnected", userId);
+    console.log("user connected.");
+    console.log(connectedUsers);
   });
-  console.log("user connected.");
+
   socket.on("join chat", async (conversationId) => {
+    if (!conversationId) return;
     const convId = String(conversationId);
 
     socket.join(convId);
     try {
       const userId = socket.handshake.auth.userId;
+      if (!userId) return;
       const userPreferences = await prisma.preferences.findUnique({
         where: { userId: userId },
       });

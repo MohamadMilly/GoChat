@@ -12,7 +12,7 @@ generator client {
 datasource db {
   provider = "postgresql"
   url = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+   directUrl = env("DIRECT_URL")
 }
 
 /* 
@@ -41,7 +41,8 @@ datasource db {
   deleted Boolean @default(false)
   createdAt DateTime @default(now())
   preferences Preferences? @relation("preferences to user")
-  
+  blockedUsers User[] @relation("blocked users")
+  blockingUsers User[] @relation("blocked users")
   accountColor String?
   readMessages MessageOnReader[]
   
