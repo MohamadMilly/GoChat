@@ -16,7 +16,7 @@ export function ChatHeaderMenu({ isGroup, chatPartner }) {
         {isOpen ? <X size={20} /> : <EllipsisVertical size={20} />}
       </Button>
       {isOpen && (
-        <div className="absolute text-sm animate-pop w-32 shadow-xs border border-gray-50 rounded-lg flex flex-col right-0 translate-y-2">
+        <div className="absolute text-sm animate-pop w-32 shadow-xs border bg-gray-50 border-gray-100 dark:border-gray-800 dark:bg-gray-800 dark: rounded-lg flex flex-col ltr:right-0 rtl:left-0 translate-y-2">
           {!isGroup && (
             <Button onClick={() => handleBlock(chatPartner.id)}>Block</Button>
           )}

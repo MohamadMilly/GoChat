@@ -14,6 +14,7 @@ export function SocketProvider({ children }) {
 
   useEffect(() => {
     if (!token || !user) return;
+
     socket.connect();
     socket.emit("user connected", user.id);
     return () => socket.disconnect();
@@ -24,12 +25,12 @@ export function SocketProvider({ children }) {
       setIsConnected(true);
     }
 
-    function onDisconnect() {
-      if (!socket.active) {
-        socket.connect();
-      } else {
+    function onDisconnect(reason) {
+      if (reason === "io server disconnect") {
         setIsConnected(false);
+        return;
       }
+      socket.connect();
     }
     function onUserConnect(users) {
       setConnectedUsers(users);
