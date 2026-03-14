@@ -21,12 +21,12 @@ const io = new Server(server, {
 let connectedUsers = new Map();
 
 io.on("connection", async (socket) => {
-  socket.on("user connected", async (userId) => {
-    if (!connectedUsers[userId]) connectedUsers.set(userId, socket.id);
-    socket.isFirstConnection = true;
-    console.log(connectedUsers.keys());
-    io.emit("user connected", [...connectedUsers.keys()]);
-  });
+  const userId = socket.handshake.auth.userId;
+  if (!connectedUsers[userId]) connectedUsers.set(userId, socket.id);
+
+  socket.isFirstConnection = true;
+  io.emit("user connected", [...connectedUsers.keys()]);
+
   socket.on("disconnect", async () => {
     const userId = socket.handshake.auth.userId;
     if (!userId) return;
