@@ -85,17 +85,35 @@ export function SocketProvider({ children }) {
           }
 
           if (message.sender.id === user.id) {
-            return {
-              ...old,
-              messages: old.messages.map((m) => {
-                const d1 = new Date(m.createdAt);
-                const d2 = new Date(optimisticMessageCreatedAt);
-
-                if (d1.getTime() === d2.getTime()) {
-                  return message;
-                } else return m;
-              }),
+            /* if there is a message with the same date as the received one (the optmiticMessageCreatedAt value) replace it 
+              if not , then the user probably using two desvices , then just add it
+            */
+            const checkSameDate = (date1, date2) => {
+              const d1 = new Date(date1);
+              const d2 = new Date(date2);
+              return d1.getTime() === d2.getTime();
             };
+            const existingOptimsticMessage = old.messages.some((message) =>
+              checkSameDate(message.createdAt, optimisticMessageCreatedAt),
+            );
+            if (existingOptimsticMessage) {
+              return {
+                ...old,
+                messages: old.messages.map((m) => {
+                  const d1 = new Date(m.createdAt);
+                  const d2 = new Date(optimisticMessageCreatedAt);
+
+                  if (d1.getTime() === d2.getTime()) {
+                    return message;
+                  } else return m;
+                }),
+              };
+            } else {
+              return {
+                ...old,
+                messages: [...old.messages, message],
+              };
+            }
           }
           return {
             ...old,

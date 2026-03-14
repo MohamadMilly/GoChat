@@ -376,7 +376,13 @@ export const ChatBubble = memo(
           !isReadByMe &&
           message.status !== "pending"
         ) {
-          socket.emit("read message", message.id, user.id);
+          socket
+            .timeout(5000)
+            .emit("read message", message.id, user.id, (response) => {
+              if (response?.status !== "ok") {
+                console.error("Read message error:", response?.status);
+              }
+            });
         }
       });
       const observedMessage = messagesContainerRef.current;
