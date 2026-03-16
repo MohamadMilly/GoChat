@@ -7,45 +7,47 @@ import { getTypingUsers } from "../../utils/getTypingUsers";
 import { ChatPageContext } from "../../routes/ChatPage";
 import { getChatInfo } from "../../utils/getChatInfo";
 import { getConnectedUsers } from "../../utils/getConnectedUsers";
-import { useConversation } from "../../hooks/useConversation";
 import { TransitionLink } from "../ui/TransitionLink";
 import Button from "../ui/Button";
 import { ArrowBigLeft } from "lucide-react";
 import { ChatHeaderLoading } from "../skeletonLoadingComponents/ChatHeaderLoading";
 import translations from "../../translations";
 import { useLanguage } from "../../contexts/LanguageContext";
-
-import { useEffect } from "react";
 import { ChatHeaderMenu } from "./ChatHeaderMenu";
 
-export const ChatHeader = memo(({ id }) => {
+export function ChatHeader() {
+  const {
+    permissions,
+    conversation,
+    isFetchingConversation,
+    membersCount,
+    isAdmin,
+    conversationId,
+  } = useContext(ChatPageContext);
+
+  return (
+    <ChatHeaderContent
+      permissions={permissions}
+      conversation={conversation}
+      isFetchingConversation={isFetchingConversation}
+      membersCount={membersCount}
+      isAdmin={isAdmin}
+      conversationId={conversationId}
+    />
+  );
+}
+
+export const ChatHeaderContent = memo((props) => {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const { connectedUsers, typingUsers } = useSocket();
   const { user } = useAuth();
-  const { conversationId, permissions, setIsCurrentUserAdmin } =
-    useContext(ChatPageContext);
+  const conversation = props.conversation;
 
-  const {
-    conversation,
-    membersCount,
-    isFetching: isFetchingConversation,
-    error: conversationError,
-  } = useConversation(conversationId || id);
-
-  const isCurrentUserAdmin =
-    conversation &&
-    !isFetchingConversation &&
-    conversation.admins.some((admin) => admin.userId == user.id);
-
-  useEffect(() => {
-    if (!conversation || !setIsCurrentUserAdmin) return;
-    setIsCurrentUserAdmin(isCurrentUserAdmin);
-  }, [conversation, isCurrentUserAdmin, setIsCurrentUserAdmin]);
   const [transitionId, setTransitionId] = useState(null);
 
-  if (isFetchingConversation) return <ChatHeaderLoading isGroup={false} />;
-  if (conversationError) return <p>Error: {conversationError.message}</p>;
+  if (props.isFetchingConversation)
+    return <ChatHeaderLoading isGroup={false} />;
 
   const { chatTitle, chatAvatar, color, chatPartner, isGroup } = getChatInfo(
     {
@@ -70,7 +72,7 @@ export const ChatHeader = memo(({ id }) => {
   const thisChatTypingUsers = getTypingUsers(
     conversation.participants,
     typingUsers,
-    conversationId || id,
+    props.conversationId,
   );
 
   return (
@@ -89,7 +91,7 @@ export const ChatHeader = memo(({ id }) => {
         <TransitionLink
           route={
             isGroup
-              ? `/chats/${conversationId || id}/details`
+              ? `/chats/${props.conversationId}/details`
               : `/users/${chatPartner.id}`
           }
           setDynamicTransitionId={setTransitionId}
@@ -123,13 +125,13 @@ export const ChatHeader = memo(({ id }) => {
                   <div className="flex items-center text-xs text-gray-700 dark:text-gray-200">
                     <div className="flex items-center">
                       <span className="inline-block ltr:mr-1 rtl:ml-1">
-                        {membersCount}
+                        {props.membersCount}
                       </span>
                       <span>
                         {translations.ChatHeader[language].MembersLabel}
                       </span>
                     </div>
-                    {(permissions?.onlineMembers || isCurrentUserAdmin) && (
+                    {(props.permissions?.onlineMembers || props.isAdmin) && (
                       <>
                         <span className="mx-1">|</span>
                         <div className="flex items-center">

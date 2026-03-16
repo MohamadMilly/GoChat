@@ -15,6 +15,7 @@ import { useTheme } from "../contexts/ThemeContext";
 import { useLanguage } from "../contexts/LanguageContext";
 import { EditMessageDialog } from "../components/chat/EditMessageDialog";
 import { usePermissions } from "../hooks/usePermissions";
+import { useConversation } from "../hooks/useConversation";
 
 export const ChatPageContext = createContext({
   conversationId: null,
@@ -22,13 +23,19 @@ export const ChatPageContext = createContext({
 });
 
 export function ChatPage() {
-  const pendingMessagesRef = useRef([]);
   const { id } = useParams();
   const {
     permissions,
     isFetching: isFetchingPermissions,
     error: fetchingPermissionsError,
   } = usePermissions(id);
+  const {
+    conversation,
+    membersCount,
+    isFetching: isFetchingConversation,
+    error: conversationError,
+  } = useConversation(id);
+  console.log(conversation, isFetchingConversation);
   const { isConnected } = useSocket();
   const [isInPreviewMode, setIsInPreviewMode] = useState(false);
   const [previewImageURL, setPreviewImageURL] = useState(null);
@@ -36,8 +43,7 @@ export function ChatPage() {
   const [repliedMessage, setRepliedMessage] = useState(null);
   const [editedMessage, setEditedMessage] = useState(null);
   const { language } = useLanguage();
-  const { theme } = useTheme();
-  const [isCurrentUserAdmin, setIsCurrentUserAdmin] = useState(null);
+
   useEffect(() => {
     if (!isConnected) return;
     socket.emit("join chat", String(id));
@@ -48,7 +54,8 @@ export function ChatPage() {
       value={{
         conversationId: id,
         isInPreview: false,
-        pendingMessagesRef,
+        conversation,
+        isFetchingConversation,
         setIsInPreviewMode,
         setPreviewImageURL,
         setRepliedMessage,
@@ -57,8 +64,7 @@ export function ChatPage() {
         setEditedMessage,
         permissions,
         isFetchingPermissions,
-        isCurrentUserAdmin,
-        setIsCurrentUserAdmin,
+        membersCount,
       }}
     >
       <section

@@ -91,6 +91,22 @@ export const SendMessageForm = memo(() => {
         return { ...old, messages: [...old.messages, optimisticMessage] };
       },
     );
+    queryClient.setQueryData(["conversations"], (old) => {
+      if (!old?.conversations) return old;
+      return {
+        ...old,
+        conversations: old.conversations.map((c) => {
+          if (c.id == conversationId) {
+            return {
+              ...c,
+              messages: [optimisticMessage],
+            };
+          } else {
+            return c;
+          }
+        }),
+      };
+    });
     setMessage("");
     setHasAttached(false);
     setRepliedMessage(null);

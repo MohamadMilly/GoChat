@@ -1,33 +1,31 @@
 import { useAuth } from "../../contexts/AuthContext";
 import { ChatBubble } from "./ChatBubble";
-import { Fragment, useCallback, useContext, useEffect, useRef } from "react";
+import { Fragment, useContext, useEffect, useRef } from "react";
 import { ChatPageContext } from "../../routes/ChatPage";
 import { useMessages } from "../../hooks/useMessages";
 import { MessagesListLoading } from "../skeletonLoadingComponents/MessagesListLoading";
-import { getLatestUnReadMessages } from "../../utils/getLatestUnReadMessages";
 
-export function MessagesList({ convId = null }) {
+export function MessagesList() {
+  const { conversationId } = useContext(ChatPageContext);
+  return <MessagesListContent conversationId={conversationId} />;
+}
+
+export function MessagesListContent(props) {
   const { user } = useAuth();
   const messagesListRef = useRef(null);
 
-  const { conversationId } = useContext(ChatPageContext);
   const {
     messages,
     type,
     error: messagesError,
     isFetching: isFetchingMessages,
-  } = useMessages(conversationId || convId);
+  } = useMessages(props.conversationId);
 
   useEffect(() => {
     if (messagesListRef.current) {
       messagesListRef.current.scrollTop = messagesListRef.current.scrollHeight;
     }
   }, [messages]);
-
-  const [unreadMessagesCount, lastUnReadMessageIndex] = getLatestUnReadMessages(
-    user.id,
-    messages,
-  );
 
   if (isFetchingMessages) return <MessagesListLoading />;
   if (messagesError) return <p>Error: {messagesError.message}</p>;
@@ -73,15 +71,7 @@ export function MessagesList({ convId = null }) {
                   {new Date(message.createdAt).toLocaleDateString()}
                 </span>
               )}
-              {lastUnReadMessageIndex + 1 === index &&
-                unreadMessagesCount !== 0 && (
-                  <span
-                    dir="rtl"
-                    className="text-xs text-gray-500 bg-gray-50/40 mx-auto my-2 block w-fit p-0.5 rounded"
-                  >
-                    Unread messages {unreadMessagesCount}
-                  </span>
-                )}
+
               <ChatBubble
                 message={message}
                 isGroupMessage={type === "GROUP"}
