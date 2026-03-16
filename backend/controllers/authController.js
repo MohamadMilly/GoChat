@@ -159,7 +159,7 @@ const verifyPost = async (req, res) => {
   } catch (err) {
     return res.status(500).json({
       message: "Unexpected error happened while verifying",
-      error: err,
+      error: err.stack,
     });
   }
 };

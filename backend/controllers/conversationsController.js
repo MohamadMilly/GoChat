@@ -79,7 +79,9 @@ const getSpecificConversationGet = async (req, res) => {
         message: "Conversation is not found.",
       });
     }
-
+    const isCurrentUserAdmin = conversation.admins.some(
+      (admin) => admin.userId === userId,
+    );
     const membersCount = await prisma.conversationParticipant.count({
       where: {
         conversationId: parseInt(conversationId),
@@ -111,6 +113,8 @@ const getSpecificConversationGet = async (req, res) => {
     return res.json({
       conversation: conversation,
       membersCount,
+      isJoined: isCurrentUserParticipant,
+      isAdmin: isCurrentUserAdmin,
     });
   } catch (err) {
     console.error(err);
