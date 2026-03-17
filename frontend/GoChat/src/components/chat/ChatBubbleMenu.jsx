@@ -2,6 +2,7 @@ import { useContext } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { ChatPageContext } from "../../routes/ChatPage";
 import { socket } from "../../socket";
+import { ReadersMenu } from "./ReadersMenu";
 export function ChatBubbleMenu({ message, clickCoords, menuRef }) {
   const { setEditedMessage, conversationId } = useContext(ChatPageContext);
   const queryClient = useQueryClient();
@@ -91,8 +92,10 @@ export function ChatBubbleMenu({ message, clickCoords, menuRef }) {
         "--x": Math.floor(x) + "px",
         "--y": Math.floor(y) + "px",
       }}
-      className="h-fit z-10 animate-pop transition-all delay-300 duration-300 w-30 fixed -translate-x-full left-[var(--x)] top-[var(--y)] dark:bg-gray-700 bg-gray-100 rounded-md overflow-hidden"
+      className="h-fit z-10 animate-pop transition-all delay-300 duration-300 w-fit fixed -translate-x-full -translate-y-1/2 overflow-hidden left-[var(--x)] top-[var(--y)] dark:bg-gray-700 bg-gray-100 rounded-md"
     >
+      {" "}
+      <ReadersMenu messageId={message.id} />
       <button
         className="text-sm dark:text-gray-200 text-gray-600 cursor-pointer w-full p-2 hover:bg-gray-200 hover:text-gray-700"
         onClick={() => handleDeleteMessage(message.id, conversationId)}

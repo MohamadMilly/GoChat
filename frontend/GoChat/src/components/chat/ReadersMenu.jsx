@@ -7,10 +7,9 @@ import { useAuth } from "../../contexts/AuthContext";
 import translations from "../../translations";
 import { useLanguage } from "../../contexts/LanguageContext";
 
-export const ReadersMenu = memo(() => {
+export const ReadersMenu = memo(({ messageId }) => {
   const { conversationId, isInPreview } = useContext(ChatPageContext);
-  const { messageId, isReadersVisible, clickYCoords, isFadeRunning } =
-    useContext(ChatBubbleContext);
+
   const { user } = useAuth();
   const { readers, isFetching, error } = useMessageReader(
     messageId,
@@ -27,13 +26,10 @@ export const ReadersMenu = memo(() => {
   readers && !isFetching
     ? readers.filter((readerOnMessage) => readerOnMessage.readerId !== user.id)
     : [];
-  if (!isReadersVisible) return;
+
   return (
     <div
-      className={`w-60 text-gray-700 dark:text-gray-100 ${isReadersVisible && "animate-pop"} ${isFadeRunning && "animate-fade"} bg-white dark:bg-gray-700 p-2 rounded-lg absolute md:-left-2 left-3/4 top-[var(--top)] -translate-x-full shadow-lg z-20`}
-      style={{
-        "--top": Math.floor(clickYCoords - 80) + "px",
-      }}
+      className={`w-50 text-gray-700 dark:text-gray-100 bg-white dark:bg-gray-700 p-2 z-20 border-b border-gray-200 dark:border-gray-600`}
     >
       {isInPreview ? (
         <p className="text-xs">
@@ -66,13 +62,13 @@ export const ReadersMenu = memo(() => {
                   <Avatar
                     avatar={readerOnMessage.reader?.profile.avatar}
                     chatTitle={fullname}
-                    color={readerOnMessage?.accountColor}
+                    color={readerOnMessage?.reader?.accountColor}
                     size="35px"
                     className="text-sm!"
                   />
                   <div className="text-xs flex flex-col items-start">
-                    <span>{fullname}</span>
-                    <span className="text-gray-400 dark:text-gray-300">
+                    <span className="font-medium">{fullname}</span>
+                    <span className="text-gray-400 dark:text-gray-300 text-[10px]">
                       {translations.ReadersMenu[language].SeenAtPrefix}{" "}
                       {new Date(readerOnMessage.seenAt).toLocaleString("en-US")}
                     </span>

@@ -30,7 +30,7 @@ function ChatBubbleMenuContainer({ children }) {
   useEffect(() => {
     const menu = menuRef.current;
     const handleClickOutSide = (e) => {
-      if (!menu.contains(e.target) && message) {
+      if (message && !menu.contains(e.target)) {
         setMessage(null);
       }
     };

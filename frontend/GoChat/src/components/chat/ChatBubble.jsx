@@ -584,11 +584,6 @@ export const ChatBubble = memo(
                   </span>
                 )}
               </div>
-              {user.id === message.senderId && (
-                <>
-                  <ReadersMenu />
-                </>
-              )}
             </div>
           </div>
         </li>
