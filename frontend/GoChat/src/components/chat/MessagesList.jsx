@@ -26,7 +26,7 @@ function ChatBubbleMenuContainer({ children }) {
   const [message, setMessage] = useState(null);
   const [clickCoords, setClickCoords] = useState({ x: null, y: null });
   const menuRef = useRef(null);
-
+  const { user } = useAuth();
   useEffect(() => {
     const menu = menuRef.current;
     const handleClickOutSide = (e) => {
@@ -40,11 +40,12 @@ function ChatBubbleMenuContainer({ children }) {
       window.removeEventListener("mousedown", handleClickOutSide);
     };
   }, [message]);
+
   return (
     <ChatBubbleContainerContext
       value={{ message, setMessage, setClickCoords, clickCoords }}
     >
-      {message && (
+      {message && message.senderId === user.id && (
         <div className="text-white w-full h-full inset-0 bg-gray-700/30 z-100 absolute">
           <ChatBubbleMenu
             message={message}
