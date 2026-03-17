@@ -77,7 +77,7 @@ export const ChatEntry = memo(
                     : ""}
                 </span>
               </div>
-              <p className="text-gray-600 dark:text-gray-200 text-sm  text-left mt-1 flex items-center justify-between">
+              <div className="text-gray-600 dark:text-gray-200 text-sm  text-left mt-1 flex items-center justify-between">
                 {typingUsers.length > 0 ? (
                   isGroup ? (
                     <span className="truncate">
@@ -100,7 +100,7 @@ export const ChatEntry = memo(
                     supportNotifications={true}
                   />
                 )}
-              </p>
+              </div>
             </div>
           </NavLink>
         </button>

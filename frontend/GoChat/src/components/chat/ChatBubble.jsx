@@ -21,6 +21,7 @@ import translations from "../../translations";
 import { useLanguage } from "../../contexts/LanguageContext";
 import { useQueryClient } from "@tanstack/react-query";
 import { EditMessageDialog } from "./EditMessageDialog";
+import { ChatBubbleContainerContext } from "./MessagesList";
 
 function VideoFile({ link }) {
   const { language } = useLanguage();
@@ -279,7 +280,6 @@ export const ChatBubble = memo(
     const queryClient = useQueryClient();
     const [readers, setReaders] = useState(readersIds);
     const [isReadersVisible, setIsReadersVisible] = useState(false);
-    const [isMessageToolsVisible, setIsMessageToolsVisible] = useState(false);
     const [clickYCoords, setClickYCoords] = useState(null);
     const [transitionId, setTransitionId] = useState(null);
     const [isFadeRunning, setIsFadeRunning] = useState(false);
@@ -290,7 +290,9 @@ export const ChatBubble = memo(
     const { language } = useLanguage();
     const fullname = message.sender.firstname + " " + message.sender.lastname;
     const { id: conversationId } = useParams();
-
+    const { setMessage, setClickCoords } = useContext(
+      ChatBubbleContainerContext,
+    );
     const isThereAvatar = !!message.sender.profile?.avatar;
     const avatar = isThereAvatar && message.sender.profile?.avatar;
     const color = message.sender?.accountColor || "";
@@ -301,7 +303,11 @@ export const ChatBubble = memo(
       const y = e.clientY - rect.top;
       setClickYCoords(y);
     };
+    const handleShowChatBubbleMenu = (e) => {
+      setMessage(message);
 
+      setClickCoords({ x: e.clientX, y: e.clientY });
+    };
     useEffect(() => {
       function onReadMessage(messageId, userId) {
         if (messageId !== message.id) return;
@@ -398,13 +404,12 @@ export const ChatBubble = memo(
       let timer;
       function handleClickOutside(event) {
         if (
-          isReadersVisible ||
-          (isMessageToolsVisible &&
-            messageContentContainerRef.current &&
-            !messageContentContainerRef.current.contains(event.target))
+          isReadersVisible &&
+          messageContentContainerRef.current &&
+          !messageContentContainerRef.current.contains(event.target)
         ) {
           setIsFadeRunning(true);
-          setIsMessageToolsVisible(false);
+
           timer = setTimeout(() => {
             setIsFadeRunning(false);
             setIsReadersVisible(false);
@@ -416,7 +421,7 @@ export const ChatBubble = memo(
         document.removeEventListener("mousedown", handleClickOutside);
         clearTimeout(timer);
       };
-    }, [isReadersVisible, isMessageToolsVisible]);
+    }, [isReadersVisible]);
     const handleReply = useCallback(
       (message) => {
         setRepliedMessage(message);
@@ -475,32 +480,6 @@ export const ChatBubble = memo(
         container.removeEventListener("touchstart", handleStart);
       };
     }, [message, handleReply]);
-    useEffect(() => {
-      let timer;
-      const message = messageContentContainerRef.current;
-
-      const handleStart = () => {
-        timer = setTimeout(() => {
-          setIsMessageToolsVisible(true);
-        }, 700);
-        if (window.navigator.vibrate) window.navigator.vibrate(50);
-      };
-
-      const handleEnd = () => {
-        clearTimeout(timer);
-      };
-
-      message.addEventListener("touchstart", handleStart);
-      message.addEventListener("touchend", handleEnd);
-      message.addEventListener("touchmove", handleEnd);
-
-      return () => {
-        clearTimeout(timer);
-        message.removeEventListener("touchstart", handleStart);
-        message.removeEventListener("touchend", handleEnd);
-        message.removeEventListener("touchmove", handleEnd);
-      };
-    }, []);
 
     return (
       <ChatBubbleContext
@@ -539,7 +518,10 @@ export const ChatBubble = memo(
               />
             )}
             <div
-              onClick={handleShowReaders}
+              onClick={(e) => {
+                handleShowReaders(e);
+                handleShowChatBubbleMenu(e);
+              }}
               ref={messageContentContainerRef}
               className={`group relative w-full px-2 py-1 font-rubik rounded-t-xl ${isMyMessage ? "bg-cyan-700 dark:bg-cyan-600 rounded-br-none rounded-bl-xl text-gray-100" : "bg-gray-100 text-gray-600 dark:bg-gray-700 rounded-bl-none rounded-br-xl"} cursor-grab`}
             >
@@ -606,12 +588,6 @@ export const ChatBubble = memo(
                 <>
                   <ReadersMenu />
                 </>
-              )}
-              {isMyMessage && (
-                <ChatBubbleToolsMenu
-                  message={message}
-                  isMessageToolsVisible={isMessageToolsVisible}
-                />
               )}
             </div>
           </div>

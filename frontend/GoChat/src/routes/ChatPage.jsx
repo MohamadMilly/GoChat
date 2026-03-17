@@ -4,14 +4,10 @@ import { ChatHeader } from "../components/chat/ChatHeader";
 import { MessagesList } from "../components/chat/MessagesList";
 import { createContext, useContext, useEffect, useState } from "react";
 import { socket } from "../socket";
-import chatBackground from "../assets/chat_background.png";
-import darkChatBackground from "../assets/chat_background_dark.png";
-import { useRef } from "react";
 import { useSocket } from "../contexts/SocketContext";
 import Button from "../components/ui/Button";
 import { X } from "lucide-react";
 import { ChatsListContext } from "./ChatsListPage";
-import { useTheme } from "../contexts/ThemeContext";
 import { useLanguage } from "../contexts/LanguageContext";
 import { EditMessageDialog } from "../components/chat/EditMessageDialog";
 import { usePermissions } from "../hooks/usePermissions";
@@ -35,7 +31,7 @@ export function ChatPage() {
     isFetching: isFetchingConversation,
     error: conversationError,
   } = useConversation(id);
-  console.log(conversation, isFetchingConversation);
+
   const { isConnected } = useSocket();
   const [isInPreviewMode, setIsInPreviewMode] = useState(false);
   const [previewImageURL, setPreviewImageURL] = useState(null);

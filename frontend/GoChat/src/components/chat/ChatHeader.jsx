@@ -66,9 +66,7 @@ export const ChatHeaderContent = memo((props) => {
   const connectedUsersCount = thisChatConnectedUsers.length;
   const isOneToOneChatPartnerConnected = isGroup
     ? null
-    : connectedUsersCount === 2
-      ? true
-      : false;
+    : thisChatConnectedUsers.some((user) => user.userId == chatPartner.id);
   const thisChatTypingUsers = getTypingUsers(
     conversation.participants,
     typingUsers,
@@ -152,7 +150,7 @@ export const ChatHeaderContent = memo((props) => {
               ) : thisChatTypingUsers.length > 0 ? (
                 translations.ChatHeader[language].TypingStandalone
               ) : isOneToOneChatPartnerConnected ? (
-                <span className="text-cyan-600">
+                <span className="text-cyan-600 dark:text-cyan-400">
                   {translations.ChatHeader[language].Online}
                 </span>
               ) : (
@@ -169,3 +167,7 @@ export const ChatHeaderContent = memo((props) => {
     </header>
   );
 });
+/* 
+TODO :
+i will create small components that contains each logic in the ChatHeaderMenu , so ChatHeaderMenu will only contain the logic for conditional rendering
+and it will not be passed any irrelated props and pass those props via context */

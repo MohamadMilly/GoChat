@@ -13,7 +13,6 @@ export function ThemeProvider({ children }) {
     localStorage.setItem("theme", theme);
   };
   useEffect(() => {
-    console.log("theme set");
     document.documentElement.classList = theme;
   }, [theme]);
   return (
