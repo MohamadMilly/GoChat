@@ -45,7 +45,7 @@ function ChatBubbleMenuContainer({ children }) {
       value={{ message, setMessage, setClickCoords, clickCoords }}
     >
       {message && (
-        <div className="text-white w-full h-full inset-0 bg-gray-700/20 z-100 absolute">
+        <div className="text-white w-full h-full inset-0 bg-gray-700/30 z-100 absolute">
           <ChatBubbleMenu
             message={message}
             clickCoords={clickCoords}

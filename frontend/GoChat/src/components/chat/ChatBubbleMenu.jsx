@@ -91,7 +91,7 @@ export function ChatBubbleMenu({ message, clickCoords, menuRef }) {
         "--x": Math.floor(x) + "px",
         "--y": Math.floor(y) + "px",
       }}
-      className="h-fit z-10 animate-pop transition-all delay-300 duration-300 w-30 fixed -translate-x-1/3 left-[var(--x)] top-[var(--y)] dark:bg-gray-700 bg-gray-100 rounded-md overflow-hidden"
+      className="h-fit z-10 animate-pop transition-all delay-300 duration-300 w-30 fixed -translate-x-full left-[var(--x)] top-[var(--y)] dark:bg-gray-700 bg-gray-100 rounded-md overflow-hidden"
     >
       <button
         className="text-sm dark:text-gray-200 text-gray-600 cursor-pointer w-full p-2 hover:bg-gray-200 hover:text-gray-700"
