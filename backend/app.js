@@ -69,7 +69,19 @@ io.on("connection", async (socket) => {
           include: {
             sender: {
               include: {
-                profile: true,
+                profile: {
+                  where: {
+                    NOT: {
+                      userId: {
+                        in: (
+                          await prisma.$queryRawUnsafe(
+                            `SELECT "banningUserId" FROM "Ban" WHERE "bannedUserId" = ${userId}`,
+                          )
+                        ).map((banningUserObj) => banningUserObj.banningUserId),
+                      },
+                    },
+                  },
+                },
               },
             },
             repliedMessage: true,
@@ -162,7 +174,19 @@ io.on("connection", async (socket) => {
           include: {
             sender: {
               include: {
-                profile: true,
+                profile: {
+                  where: {
+                    NOT: {
+                      userId: {
+                        in: (
+                          await prisma.$queryRawUnsafe(
+                            `SELECT "banningUserId" FROM "Ban" WHERE "bannedUserId" = ${userId}`,
+                          )
+                        ).map((banningUserObj) => banningUserObj.banningUserId),
+                      },
+                    },
+                  },
+                },
               },
             },
             repliedMessage: {
@@ -172,14 +196,60 @@ io.on("connection", async (socket) => {
             },
           },
         });
-
+        /*
+        TO DO 
+        The profile i am gonna send i want to make sure that i have not banned the receiver
+        so the banned-banning row between me and the receiver should be undefined to let him see my profile
+        */
         createdMessage = {
           ...createdMessage,
           sender: filterProfile(createdMessage.sender, [userPreferences]),
         };
+
         await prisma.conversation.update({
           where: { id: parseInt(convId, 10) },
           data: { updatedAt: new Date() },
+        });
+
+        const senderBannedUsers = await prisma.ban.findMany({
+          where: {
+            banningUserId: parseInt(userId),
+          },
+        });
+        const senderBannedUsersIds =
+          senderBannedUsers.length > 0
+            ? senderBannedUsers.map(
+                (senderBannedUser) => senderBannedUser.bannedUserId,
+              )
+            : [];
+
+        const socketInConversations = await io.in(convId).fetchSockets();
+        socketInConversations.forEach((socket) => {
+          const socketUserId = socket.handshake.auth.userId;
+
+          if (senderBannedUsersIds.includes(Number(socketUserId))) {
+            socket.emit(
+              "chat message",
+              {
+                ...createdMessage,
+                sender: {
+                  ...createdMessage.sender,
+                  profile: null,
+                },
+              },
+              convId,
+              createdMessage.id,
+              message.createdAt,
+            );
+          } else {
+            socket.emit(
+              "chat message",
+              createdMessage,
+              convId,
+              createdMessage.id,
+              message.createdAt, // This date for the optimistic message replacement logic
+            );
+          }
         });
       } catch (err) {
         console.error("socket error: ", err);
@@ -187,14 +257,6 @@ io.on("connection", async (socket) => {
         }
         return;
       }
-
-      io.to(convId).emit(
-        "chat message",
-        createdMessage,
-        convId,
-        createdMessage.id,
-        message.createdAt,
-      );
     },
   );
 

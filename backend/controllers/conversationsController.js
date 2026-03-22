@@ -60,7 +60,22 @@ const getSpecificConversationGet = async (req, res) => {
                   user: {
                     select: {
                       id: true,
-                      profile: true,
+                      profile: {
+                        where: {
+                          NOT: {
+                            userId: {
+                              in: (
+                                await prisma.$queryRawUnsafe(
+                                  `SELECT "banningUserId" FROM "Ban" WHERE "bannedUserId" = ${userId}`,
+                                )
+                              ).map(
+                                (banningUserObj) =>
+                                  banningUserObj.banningUserId,
+                              ),
+                            },
+                          },
+                        },
+                      },
                       firstname: true,
                       lastname: true,
                       username: true,

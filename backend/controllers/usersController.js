@@ -128,7 +128,25 @@ const myConversationsGet = async (req, res) => {
       },
       include: {
         participants: {
-          include: { user: { include: { profile: true } } },
+          include: {
+            user: {
+              include: {
+                profile: {
+                  where: {
+                    NOT: {
+                      userId: {
+                        in: (
+                          await prisma.$queryRawUnsafe(
+                            `SELECT "banningUserId" FROM "Ban" WHERE "bannedUserId" = ${currentUser.id}`,
+                          )
+                        ).map((banningUserObj) => banningUserObj.banningUserId),
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
         },
         messages: {
           orderBy: { createdAt: "desc" },
@@ -179,16 +197,21 @@ const queryUsersGet = async (req, res) => {
   const currentUser = req.currentUser;
   const queryArr = query.split(" ");
   try {
-    let users = await prisma.user.findMany({
-      where: {
-        NOT: { id: currentUser.id },
-        OR: [
-          { username: { contains: query } },
-          { firstname: { in: queryArr } },
-          { lastname: { in: queryArr } },
-        ],
-      },
-      include: { profile: true },
+    let users = await prisma.$transaction(async (tx) => {
+      await tx.$executeRawUnsafe(
+        `SET LOCAL app.current_user_id = '${currentUser.id}';`,
+      );
+      return await tsx.user.findMany({
+        where: {
+          NOT: { id: currentUser.id },
+          OR: [
+            { username: { contains: query } },
+            { firstname: { in: queryArr } },
+            { lastname: { in: queryArr } },
+          ],
+        },
+        include: { profile: true },
+      });
     });
 
     const preferences = await prisma.preferences.findMany({
@@ -243,22 +266,47 @@ const getMyContactsGet = async (req, res) => {
   }
 };
 
+/*
+TO DO :
+Exculde all the profiles where their userIds are not in the current user banning list
+*/
+
 const getSpecificUserGet = async (req, res) => {
   const { userId } = req.params;
+  const currentUser = req.currentUser;
+
   try {
-    const user = await prisma.user.findUnique({
-      where: {
-        id: parseInt(userId),
-      },
-      select: {
-        id: true,
-        firstname: true,
-        lastname: true,
-        username: true,
-        profile: true,
-        accountColor: true,
-      },
+    let user = await prisma.$transaction(async (tx) => {
+      await tx.$executeRawUnsafe(
+        `SET LOCAL app.current_user_id = '${currentUser.id}';`,
+      );
+      return await tx.user.findUnique({
+        where: {
+          id: parseInt(userId),
+        },
+        select: {
+          id: true,
+          firstname: true,
+          lastname: true,
+          username: true,
+          profile: {
+            where: {
+              NOT: {
+                userId: {
+                  in: (
+                    await prisma.$queryRawUnsafe(
+                      `SELECT "banningUserId" FROM "Ban" WHERE "bannedUserId" = ${currentUser.id}`,
+                    )
+                  ).map((banningUserObj) => banningUserObj.banningUserId),
+                },
+              },
+            },
+          },
+          accountColor: true,
+        },
+      });
     });
+
     const userPreferences = await prisma.preferences.findUnique({
       where: {
         userId: parseInt(userId),
@@ -279,6 +327,7 @@ const getSpecificUserGet = async (req, res) => {
 
 const getCurrentUserGet = async (req, res) => {
   const currentUser = req.currentUser;
+
   try {
     const user = await prisma.user.findUnique({
       where: {
@@ -291,11 +340,7 @@ const getCurrentUserGet = async (req, res) => {
         username: true,
         profile: true,
         accountColor: true,
-        blockedUsers: {
-          select: {
-            id: true,
-          },
-        },
+        bannedUsers: true,
       },
     });
     if (!user) {
@@ -406,9 +451,13 @@ const editUserPatch = async (req, res) => {
   if (lastname) data.lastname = lastname;
   if (accountColor) data.accountColor = accountColor;
   if (blockedUserId)
-    data.blockedUsers = {
-      connect: {
-        id: parseInt(blockedUserId),
+    data.bannedUsers = {
+      create: {
+        banned: {
+          connect: {
+            id: parseInt(blockedUserId),
+          },
+        },
       },
     };
 
@@ -472,6 +521,7 @@ const editUserPatch = async (req, res) => {
   } catch (err) {
     return res.status(500).json({
       message: "Unexpected error happened while updating user.",
+      error: err.stack,
     });
   }
 };

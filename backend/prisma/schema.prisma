@@ -13,7 +13,7 @@ generator client {
 datasource db {
   provider = "postgresql"
   url = env("DATABASE_URL")
-   directUrl = env("DIRECT_URL")
+   // directUrl = env("DIRECT_URL")
 }
 
 /* 
@@ -29,6 +29,7 @@ datasource db {
 - account created at
 - preferences (hide email , bio , phone number , ...)
   */
+
  model User {
   id Int @id @default(autoincrement())
   firstname String
@@ -42,8 +43,8 @@ datasource db {
   deleted Boolean @default(false)
   createdAt DateTime @default(now())
   preferences Preferences? @relation("preferences to user")
-  blockedUsers User[] @relation("blocked users")
-  blockingUsers User[] @relation("blocked users")
+  banningUsers Ban[]  @relation("banningRelation")
+  bannedUsers Ban[] @relation("bannedRelation")
   accountColor String?
   readMessages MessageOnReader[]
   
@@ -98,7 +99,13 @@ admins ConversationAdmin[]
 permissions Permissions?
 }
 
-
+model Ban {
+  id Int @id @default(autoincrement())
+  banBy User @relation("bannedRelation",fields: [banningUserId],references: [id])
+  banningUserId Int
+  banned User @relation("banningRelation",fields: [bannedUserId],references: [id])
+  bannedUserId Int
+}
 
 /*
 Each converstion participant should have 

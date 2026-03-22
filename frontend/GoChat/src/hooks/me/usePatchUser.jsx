@@ -23,10 +23,10 @@ export function usePatchUser() {
           user: {
             ...old.user,
             ...data,
-            blockedUsers:
+            bannedUsers:
               typeof data.blockedUserId !== "undefined"
-                ? [...old.user.blockedUsers, { id: data.blockedUserId }]
-                : old.user.blockedUsers,
+                ? [...old.user.bannedUsers, { id: data.blockedUserId }]
+                : old.user.bannedUsers,
           },
         };
       });

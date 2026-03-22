@@ -1,0 +1,1 @@
+DROP POLICY IF EXISTS select_profiles_policy ON "Profile";
