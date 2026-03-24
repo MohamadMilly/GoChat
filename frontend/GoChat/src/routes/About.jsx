@@ -26,7 +26,7 @@ export function About() {
             {t[language].Github}
           </Link>
           <Link
-            route={"https://t.me"}
+            route={"https://t.me/V_7oz"}
             className="text-gray-700 text-xs text-center p-3! grow md:text-base bg-gray-50"
           >
             {t[language].Telegram}
