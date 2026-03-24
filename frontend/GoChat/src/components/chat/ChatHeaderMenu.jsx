@@ -3,10 +3,10 @@ import Button from "../ui/Button";
 import { usePatchUser } from "../../hooks/me/usePatchUser";
 import { EllipsisVertical, X } from "lucide-react";
 
-export function ChatHeaderMenu({ isGroup, chatPartner }) {
+export function ChatHeaderMenu({ isGroup, chatPartnerId }) {
   const [isOpen, setIsOpen] = useState(false);
   const { mutate: patch, error, isPending } = usePatchUser();
-
+  const { conversation } = useContext(ChatHeader);
   const handleBlock = (userId) => {
     patch({ blockedUserId: userId });
   };
@@ -18,7 +18,7 @@ export function ChatHeaderMenu({ isGroup, chatPartner }) {
       {isOpen && (
         <div className="absolute text-sm animate-pop w-32 shadow-xs border bg-gray-50 border-gray-100 dark:border-gray-800 dark:bg-gray-800 dark: rounded-lg flex flex-col ltr:right-0 rtl:left-0 translate-y-2">
           {!isGroup && (
-            <Button onClick={() => handleBlock(chatPartner.id)}>Block</Button>
+            <Button onClick={() => handleBlock(chatPartnerId)}>Block</Button>
           )}
         </div>
       )}

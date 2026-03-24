@@ -110,6 +110,17 @@ io.on("connection", async (socket) => {
     async (message, conversationId, clientOffset) => {
       const convId = String(conversationId);
       const userId = socket.handshake.auth.userId;
+      const conversationData = await prisma.conversation.findUnique({
+        where: {
+          id: parseInt(convId),
+        },
+        include: {
+          participants: true,
+        },
+      });
+      if (!conversationData) {
+        throw new Error("conversation does not exist");
+      }
 
       const userPreferences = await prisma.preferences.findUnique({
         where: {
@@ -146,65 +157,14 @@ io.on("connection", async (socket) => {
             "Sending media messages is not allowed due to permissions restrictions.",
           );
         }
-        createdMessage = await prisma.message.create({
-          data: {
-            sender: {
-              connect: {
-                id: userId,
-              },
-            },
-            conversation: {
-              connect: {
-                id: parseInt(convId),
-              },
-            },
-            content: message.content,
-            fileURL: message.fileURL,
-            mimeType: message.mimeType,
-            type: message.type,
-            clientOffset: clientOffset,
-            repliedMessage: message.repliedMessageId
-              ? {
-                  connect: {
-                    id: message.repliedMessageId,
-                  },
-                }
-              : undefined,
-          },
-          include: {
-            sender: {
-              include: {
-                profile: {
-                  where: {
-                    NOT: {
-                      userId: {
-                        in: (
-                          await prisma.$queryRawUnsafe(
-                            `SELECT "banningUserId" FROM "Ban" WHERE "bannedUserId" = ${userId}`,
-                          )
-                        ).map((banningUserObj) => banningUserObj.banningUserId),
-                      },
-                    },
-                  },
-                },
-              },
-            },
-            repliedMessage: {
-              include: {
-                sender: true,
-              },
-            },
-          },
-        });
+
         /*
-        TO DO 
+        TO DO :
         The profile i am gonna send i want to make sure that i have not banned the receiver
         so the banned-banning row between me and the receiver should be undefined to let him see my profile
+
+        If The chat is direct i don't want even to receieve messages , and neither create them in the database
         */
-        createdMessage = {
-          ...createdMessage,
-          sender: filterProfile(createdMessage.sender, [userPreferences]),
-        };
 
         await prisma.conversation.update({
           where: { id: parseInt(convId, 10) },
@@ -224,33 +184,136 @@ io.on("connection", async (socket) => {
             : [];
 
         const socketInConversations = await io.in(convId).fetchSockets();
-        socketInConversations.forEach((socket) => {
-          const socketUserId = socket.handshake.auth.userId;
-
-          if (senderBannedUsersIds.includes(Number(socketUserId))) {
-            socket.emit(
-              "chat message",
-              {
-                ...createdMessage,
-                sender: {
-                  ...createdMessage.sender,
-                  profile: null,
-                },
-              },
-              convId,
-              createdMessage.id,
-              message.createdAt,
-            );
-          } else {
-            socket.emit(
-              "chat message",
-              createdMessage,
-              convId,
-              createdMessage.id,
-              message.createdAt, // This date for the optimistic message replacement logic
+        if (conversationData.type === "DIRECT") {
+          if (
+            conversationData.participants.some((p) =>
+              senderBannedUsersIds.includes(p.userId),
+            )
+          ) {
+            throw new Error(
+              "the chat partner has banned you from sending messages",
             );
           }
-        });
+          createdMessage = await prisma.message.create({
+            data: {
+              sender: {
+                connect: {
+                  id: userId,
+                },
+              },
+              conversation: {
+                connect: {
+                  id: parseInt(convId),
+                },
+              },
+              content: message.content,
+              fileURL: message.fileURL,
+              mimeType: message.mimeType,
+              type: message.type,
+              clientOffset: clientOffset,
+              repliedMessage: message.repliedMessageId
+                ? {
+                    connect: {
+                      id: message.repliedMessageId,
+                    },
+                  }
+                : undefined,
+            },
+            include: {
+              sender: {
+                include: {
+                  profile: true,
+                },
+              },
+              repliedMessage: {
+                include: {
+                  sender: true,
+                },
+              },
+            },
+          });
+          createdMessage = {
+            ...createdMessage,
+            sender: filterProfile(createdMessage.sender, [userPreferences]),
+          };
+          io.to(convId).emit(
+            "chat message",
+            createdMessage,
+            convId,
+            createdMessage.id,
+            message.createdAt, // This date for the optimistic message replacement logic
+          );
+        } else if (conversationData.type === "GROUP") {
+          createdMessage = await prisma.message.create({
+            data: {
+              sender: {
+                connect: {
+                  id: userId,
+                },
+              },
+              conversation: {
+                connect: {
+                  id: parseInt(convId),
+                },
+              },
+              content: message.content,
+              fileURL: message.fileURL,
+              mimeType: message.mimeType,
+              type: message.type,
+              clientOffset: clientOffset,
+              repliedMessage: message.repliedMessageId
+                ? {
+                    connect: {
+                      id: message.repliedMessageId,
+                    },
+                  }
+                : undefined,
+            },
+            include: {
+              sender: {
+                include: {
+                  profile: true,
+                },
+              },
+              repliedMessage: {
+                include: {
+                  sender: true,
+                },
+              },
+            },
+          });
+          createdMessage = {
+            ...createdMessage,
+            sender: filterProfile(createdMessage.sender, [userPreferences]),
+          };
+          socketInConversations.forEach(async (socket) => {
+            const socketUserId = socket.handshake.auth.userId;
+
+            if (senderBannedUsersIds.includes(Number(socketUserId))) {
+              socket.emit(
+                "chat message",
+                {
+                  ...createdMessage,
+                  sender: {
+                    ...createdMessage.sender,
+                    profile: null,
+                  },
+                },
+                convId,
+                createdMessage.id,
+                message.createdAt,
+              );
+            } else {
+              socket.emit(
+                "chat message",
+                createdMessage,
+                convId,
+                createdMessage.id,
+                message.createdAt, // This date for the optimistic message replacement logic
+              );
+            }
+          });
+        }
       } catch (err) {
         console.error("socket error: ", err);
         if (err.code === "P2002") {

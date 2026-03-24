@@ -163,7 +163,7 @@ export const ChatHeaderContent = memo((props) => {
           </div>
         </TransitionLink>
       </div>
-      <ChatHeaderMenu isGroup={isGroup} chatPartner={chatPartner} />
+      <ChatHeaderMenu isGroup={isGroup} chatPartnerId={chatPartner?.id} />
     </header>
   );
 });
