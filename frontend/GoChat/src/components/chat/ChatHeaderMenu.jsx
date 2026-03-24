@@ -2,11 +2,12 @@ import { useContext, useState } from "react";
 import Button from "../ui/Button";
 import { usePatchUser } from "../../hooks/me/usePatchUser";
 import { EllipsisVertical, X } from "lucide-react";
+import { ChatPageContext } from "../../routes/ChatPage";
 
 export function ChatHeaderMenu({ isGroup, chatPartnerId }) {
   const [isOpen, setIsOpen] = useState(false);
   const { mutate: patch, error, isPending } = usePatchUser();
-  const { conversation } = useContext(ChatHeader);
+  const { conversation } = useContext(ChatPageContext);
   const handleBlock = (userId) => {
     patch({ blockedUserId: userId });
   };

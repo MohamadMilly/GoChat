@@ -201,7 +201,7 @@ const queryUsersGet = async (req, res) => {
       await tx.$executeRawUnsafe(
         `SET LOCAL app.current_user_id = '${currentUser.id}';`,
       );
-      return await tsx.user.findMany({
+      return await tx.user.findMany({
         where: {
           NOT: { id: currentUser.id },
           OR: [
@@ -210,7 +210,21 @@ const queryUsersGet = async (req, res) => {
             { lastname: { in: queryArr } },
           ],
         },
-        include: { profile: true },
+        include: {
+          profile: {
+            where: {
+              NOT: {
+                userId: {
+                  in: (
+                    await prisma.$queryRawUnsafe(
+                      `SELECT "banningUserId" FROM "Ban" WHERE "bannedUserId" = ${currentUser.id}`,
+                    )
+                  ).map((banningUserObj) => banningUserObj.banningUserId),
+                },
+              },
+            },
+          },
+        },
       });
     });
 
@@ -224,7 +238,7 @@ const queryUsersGet = async (req, res) => {
   } catch (err) {
     return res.status(500).json({
       message: "Unexpected error happened while fetching users.",
-      error: err,
+      error: err.stack,
     });
   }
 };
@@ -248,7 +262,21 @@ const getMyContactsGet = async (req, res) => {
         NOT: { id: currentUser.id },
         deleted: false,
       },
-      include: { profile: true },
+      include: {
+        profile: {
+          where: {
+            NOT: {
+              userId: {
+                in: (
+                  await prisma.$queryRawUnsafe(
+                    `SELECT "banningUserId" FROM "Ban" WHERE "bannedUserId" = ${currentUser.id}`,
+                  )
+                ).map((banningUserObj) => banningUserObj.banningUserId),
+              },
+            },
+          },
+        },
+      },
     });
 
     const preferences = await prisma.preferences.findMany({
@@ -259,6 +287,7 @@ const getMyContactsGet = async (req, res) => {
 
     return res.json({ users });
   } catch (err) {
+    console.error(err);
     return res.status(500).json({
       message: "Unexpected error happened while getting contacts.",
       error: err,
@@ -267,7 +296,7 @@ const getMyContactsGet = async (req, res) => {
 };
 
 /*
-TO DO :
+TO DO : (Done)
 Exculde all the profiles where their userIds are not in the current user banning list
 */
 
@@ -521,7 +550,6 @@ const editUserPatch = async (req, res) => {
   } catch (err) {
     return res.status(500).json({
       message: "Unexpected error happened while updating user.",
-      error: err.stack,
     });
   }
 };

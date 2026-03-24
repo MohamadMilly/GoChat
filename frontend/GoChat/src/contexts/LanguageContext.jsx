@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { useContext, createContext } from "react";
 
 const LanguageContext = createContext();
@@ -10,10 +10,10 @@ export function LanguageProvider({ children }) {
     storedLanguageSelection || "English",
   );
 
-  const handleLanguageSet = (value) => {
+  const handleLanguageSet = useCallback((value) => {
     setLanguage(value);
     localStorage.setItem("language", value);
-  };
+  }, []);
 
   return (
     <LanguageContext value={{ language, handleLanguageSet }}>

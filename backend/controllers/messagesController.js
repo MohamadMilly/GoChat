@@ -199,7 +199,19 @@ const getMessageReaders = async (req, res) => {
         include: {
           reader: {
             include: {
-              profile: true,
+              profile: {
+                where: {
+                  NOT: {
+                    userId: {
+                      in: (
+                        await prisma.$queryRawUnsafe(
+                          `SELECT "banningUserId" FROM "Ban" WHERE "bannedUserId" = ${userId}`,
+                        )
+                      ).map((banningUserObj) => banningUserObj.banningUserId),
+                    },
+                  },
+                },
+              },
             },
           },
         },

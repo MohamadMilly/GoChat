@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useCallback, useContext, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 
 const initialToken = localStorage.getItem("token");
@@ -13,24 +13,27 @@ export function AuthProvider({ children }) {
   const [token, setToken] = useState(initialToken);
   const [user, setUser] = useState(initialUser);
   const queryClient = useQueryClient();
-  const login = (token, user) => {
+  const login = useCallback((token, user) => {
     setToken(token);
     setUser(user);
     localStorage.setItem("token", token);
     localStorage.setItem("user", JSON.stringify(user));
-  };
-  const logout = () => {
+  }, []);
+  const logout = useCallback(() => {
     setToken("");
     setUser("");
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     queryClient.clear();
-  };
-  const editUser = (data = {}) => {
-    const newUserData = { ...user, ...data };
-    localStorage.setItem("user", JSON.stringify(newUserData));
-    setUser(newUserData);
-  };
+  }, [queryClient]);
+  const editUser = useCallback(
+    (data = {}) => {
+      const newUserData = { ...user, ...data };
+      localStorage.setItem("user", JSON.stringify(newUserData));
+      setUser(newUserData);
+    },
+    [user],
+  );
   return (
     <AuthContext.Provider value={{ token, user, login, logout, editUser }}>
       {children}

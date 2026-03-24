@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 import { useState } from "react";
 import { createContext, useContext } from "react";
 
@@ -8,10 +8,10 @@ const storedTheme = localStorage.getItem("theme");
 
 export function ThemeProvider({ children }) {
   const [theme, setTheme] = useState(storedTheme || "light");
-  const handleSetTheme = (theme) => {
+  const handleSetTheme = useCallback((theme) => {
     setTheme(theme);
     localStorage.setItem("theme", theme);
-  };
+  }, []);
   useEffect(() => {
     document.documentElement.classList = theme;
   }, [theme]);
