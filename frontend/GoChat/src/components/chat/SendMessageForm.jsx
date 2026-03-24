@@ -110,6 +110,7 @@ export const SendMessageForm = memo(() => {
     setMessage("");
     setHasAttached(false);
     setRepliedMessage(null);
+    setMediaFileData({ file: null, mimeType: null });
     try {
       let finalFileURL = "";
 
