@@ -68,7 +68,7 @@ export function MessagesList() {
 
   return (
     <ChatBubbleMenuContainer>
-      <MessagesListContent conversationId={conversationId} />;
+      <MessagesListContent conversationId={conversationId} />
     </ChatBubbleMenuContainer>
   );
 }
@@ -78,6 +78,8 @@ export function MessagesListContent(props) {
   const messagesListRef = useRef(null);
   const { setMessage, setClickCoords } = useContext(ChatBubbleContainerContext);
   const { setRepliedMessage } = useContext(ChatPageContext);
+  const { setIsInPreviewMode, setPreviewImageURL } =
+    useContext(ChatPageContext);
   const {
     messages,
     type,
@@ -101,6 +103,14 @@ export function MessagesListContent(props) {
   const handleReply = useCallback(
     (message) => setRepliedMessage(message),
     [setRepliedMessage],
+  );
+
+  const handlePreview = useCallback(
+    (fileURL) => {
+      setIsInPreviewMode(true);
+      setPreviewImageURL(fileURL);
+    },
+    [setIsInPreviewMode, setPreviewImageURL],
   );
   if (isFetchingMessages) return <MessagesListLoading />;
   if (messagesError) return <p>Error: {messagesError.message}</p>;
@@ -157,6 +167,7 @@ export function MessagesListContent(props) {
                 hideName={isTherePreviousMessageFromTheSameuser}
                 handleShowChatBubbleMenu={handleShowChatBubbleMenu}
                 handleReply={handleReply}
+                handlePreview={handlePreview}
               />
             </Fragment>
           );

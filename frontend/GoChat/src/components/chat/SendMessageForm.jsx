@@ -301,11 +301,8 @@ export const SendMessageForm = memo(() => {
         <div className="dark:bg-gray-800 bg-white ">
           <div className="flex flex-col items-center justify-center p-3">
             <p className="dark:text-gray-100 font-medium text-sm text-gray-800">
-              Sending messages is not allowed in this conversation
+              Sending message is not allowed in this group
             </p>
-            <span className="dark:text-gray-600 text-xs text-gray-400">
-              Restrication is due to permissions
-            </span>
           </div>
         </div>
       )}

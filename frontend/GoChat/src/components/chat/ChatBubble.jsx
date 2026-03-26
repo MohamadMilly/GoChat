@@ -59,14 +59,12 @@ function FileItem({ icon, link, colors = {}, label = "File" }) {
   );
 }
 
-function ImageFile({ mimeType, fileURL, editMode = false }) {
-  const { setIsInPreviewMode, setPreviewImageURL } =
-    useContext(ChatPageContext);
-  const handlePreview = (fileURL) => {
+function ImageFile({ mimeType, fileURL, editMode = false, handlePreview }) {
+  /* const handlePreview = (fileURL) => {
     if (editMode) return;
     setIsInPreviewMode(true);
     setPreviewImageURL(fileURL);
-  };
+  }; */
   const { language } = useLanguage();
   return (
     <div className="p-0.5 rounded-xl max-w-md overflow-hidden relative group">
@@ -93,12 +91,22 @@ function ImageFile({ mimeType, fileURL, editMode = false }) {
   );
 }
 
-export function MediaFilePreview({ fileURL, mimeType, editMode }) {
+export function MediaFilePreview({
+  fileURL,
+  mimeType,
+  editMode,
+  handlePreview,
+}) {
   const { language } = useLanguage();
   if (!fileURL) return null;
   if (mimeType.includes("image")) {
     return (
-      <ImageFile editMode={editMode} fileURL={fileURL} mimeType={mimeType} />
+      <ImageFile
+        editMode={editMode}
+        fileURL={fileURL}
+        mimeType={mimeType}
+        handlePreview={handlePreview}
+      />
     );
   }
   if (mimeType.includes("application")) {
@@ -274,6 +282,7 @@ export const ChatBubble = memo(
     hideName = false,
     handleShowChatBubbleMenu,
     handleReply,
+    handlePreview,
   }) => {
     const { user } = useAuth();
     const readersIds = message.readers
@@ -495,6 +504,7 @@ export const ChatBubble = memo(
               <MediaFilePreview
                 fileURL={message.fileURL}
                 mimeType={message.mimeType}
+                handlePreview={handlePreview}
               />
             )}
             <div
