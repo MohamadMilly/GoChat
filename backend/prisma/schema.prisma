@@ -13,7 +13,7 @@ generator client {
 datasource db {
   provider = "postgresql"
   url = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  // directUrl = env("DIRECT_URL")
 }
 
 /* 
@@ -105,6 +105,9 @@ model Ban {
   banningUserId Int
   banned User @relation("banningRelation",fields: [bannedUserId],references: [id])
   bannedUserId Int
+   
+  @@unique([bannedUserId,banningUserId])
+  
 }
 
 /*

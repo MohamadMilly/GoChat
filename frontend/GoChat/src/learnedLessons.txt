@@ -1,0 +1,4 @@
+I learned that if i have a map returning items and the list is wrapped via context , i should pass the function mutating the state of the context
+provider to the items and also use useCallback hook instead of calling useContext inside each item , so when i change the state of the context provider it will not cause all the items to re-render but only the one that
+ is being mutated.
+ This way i can optimize the performance of my application and avoid unnecessary re-renders.

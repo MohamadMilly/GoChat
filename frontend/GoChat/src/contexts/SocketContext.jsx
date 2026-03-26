@@ -194,6 +194,59 @@ export function SocketProvider({ children }) {
       });
     }
 
+    function onRecieveBlock(userId, conversationId) {
+      const updateParticipants = (participants) =>
+        participants.map((p) =>
+          p.userId === userId
+            ? { ...p, user: { ...p.user, profile: null } }
+            : p,
+        );
+      queryClient.setQueryData(
+        ["conversation", conversationId.toString()],
+        (old) => {
+          if (!old?.conversation) return old;
+          return {
+            ...old,
+            conversation: {
+              ...old.conversation,
+              participants: updateParticipants(old.conversation.participants),
+            },
+          };
+        },
+      );
+
+      queryClient.setQueryData(["conversations"], (old) => {
+        if (!old?.conversations) return old;
+
+        return {
+          ...old,
+          conversations: old.conversations.map((c) => {
+            if (c.conversation.id === conversationId) {
+              return {
+                ...c,
+                conversation: {
+                  ...c.conversation,
+                  participants: updateParticipants(c.conversation.participants),
+                },
+              };
+            }
+            return c;
+          }),
+        };
+      });
+      queryClient.setQueryData(["user", userId], (old) => {
+        if (!old?.user) return old;
+
+        return {
+          ...old,
+          user: {
+            ...old.user,
+            profile: null,
+          },
+        };
+      });
+    }
+
     socket.on("chat message", onReceiveMessage);
     socket.on("connect", onConnect);
     socket.on("disconnect", onDisconnect);
@@ -203,6 +256,7 @@ export function SocketProvider({ children }) {
     socket.on("stopped typing", onUserStoppedTyping);
     socket.on("delete message", onDeleteMessage);
     socket.on("edit message", onEditMessage);
+    socket.on("block user", onRecieveBlock);
     return () => {
       socket.off("chat message", onReceiveMessage);
       socket.off("connect", onConnect);
@@ -213,6 +267,7 @@ export function SocketProvider({ children }) {
       socket.off("stopped typing", onUserStoppedTyping);
       socket.off("delete message", onDeleteMessage);
       socket.off("edit message", onEditMessage);
+      socket.off("block user", onRecieveBlock);
     };
   }, [queryClient, user]);
   return (

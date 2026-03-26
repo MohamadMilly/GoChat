@@ -23,9 +23,19 @@ export function usePatchUser() {
           user: {
             ...old.user,
             ...data,
-            bannedUsers:
-              typeof data.blockedUserId !== "undefined"
-                ? [...old.user.bannedUsers, { id: data.blockedUserId }]
+            bannedUsers: old.user.bannedUsers.some(
+              (bannedUserObj) =>
+                bannedUserObj.bannedUserId === data?.blockedUserId,
+            )
+              ? old.user.bannedUsers.filter(
+                  (bannedUserObj) =>
+                    bannedUserObj.bannedUserId !== data?.blockedUserId,
+                )
+              : typeof data.blockedUserId !== "undefined"
+                ? [
+                    ...old.user.bannedUsers,
+                    { bannedUserId: data.blockedUserId },
+                  ]
                 : old.user.bannedUsers,
           },
         };

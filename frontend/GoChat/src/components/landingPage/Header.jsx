@@ -1,12 +1,9 @@
 import { Link } from "../ui/Link";
-import chatBackground from "../../assets/chat_background.png";
-import darkChatBackground from "../../assets/chat_background_dark.png";
 import translations from "../../translations";
 import { useLanguage } from "../../contexts/LanguageContext";
-import { useTheme } from "../../contexts/ThemeContext";
 export default function Header() {
   const { language } = useLanguage();
-  const { theme } = useTheme();
+
   const Page = translations.Landing.Header;
   return (
     <header

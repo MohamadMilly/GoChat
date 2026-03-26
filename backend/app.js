@@ -176,6 +176,11 @@ io.on("connection", async (socket) => {
             banningUserId: parseInt(userId),
           },
         });
+        const senderBanningUsers = await prisma.ban.findMany({
+          where: {
+            bannedUserId: parseInt(userId),
+          },
+        });
         const senderBannedUsersIds =
           senderBannedUsers.length > 0
             ? senderBannedUsers.map(
@@ -184,14 +189,29 @@ io.on("connection", async (socket) => {
             : [];
 
         const socketInConversations = await io.in(convId).fetchSockets();
+
         if (conversationData.type === "DIRECT") {
+          const chatPartnerId = socketInConversations.find(
+            (socket) => socket.handshake.auth.userId !== parseInt(userId),
+          );
+          const chatPartnerBanningUsers = await prisma.ban.findMany({
+            where: {
+              banningUserId: chatPartnerId,
+            },
+          });
+
           if (
-            conversationData.participants.some((p) =>
-              senderBannedUsersIds.includes(p.userId),
+            conversationData.participants.some(
+              (p) =>
+                senderBannedUsersIds.includes(p.userId) ||
+                chatPartnerBanningUsers.find(
+                  (banningUserObj) =>
+                    banningUserObj.bannedUserId === parseInt(userId),
+                ),
             )
           ) {
             throw new Error(
-              "the chat partner has banned you from sending messages",
+              "one of the chat partners banned the other from sending messages",
             );
           }
           createdMessage = await prisma.message.create({
@@ -471,6 +491,19 @@ io.on("connection", async (socket) => {
       callback({
         status: 500,
       });
+    }
+  });
+
+  socket.on("block user", async (userId, conversationId) => {
+    const sockets = await io.fetchSockets();
+    const blockedSocket = sockets.find(
+      (s) => s.handshake.auth.userId == userId,
+    );
+
+    if (blockedSocket) {
+      blockedSocket.emit("block user", userId, conversationId);
+    } else {
+      return;
     }
   });
 });

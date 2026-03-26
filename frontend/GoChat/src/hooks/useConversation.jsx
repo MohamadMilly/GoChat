@@ -19,7 +19,6 @@ export function useConversation(conversationId) {
     enabled: !!conversationId,
     staleTime: 1000 * 60 * 5,
   });
-  const conversation = data ? data.conversation : null;
-  const membersCount = data ? data.membersCount : null;
-  return { conversation, isFetching, error, membersCount };
+
+  return { isFetching, error, ...data };
 }

@@ -369,7 +369,12 @@ const getCurrentUserGet = async (req, res) => {
         username: true,
         profile: true,
         accountColor: true,
-        bannedUsers: true,
+        bannedUsers: {
+          select: {
+            bannedUserId: true,
+          },
+        },
+        banningUsers: true,
       },
     });
     if (!user) {
@@ -479,16 +484,38 @@ const editUserPatch = async (req, res) => {
   if (firstname) data.firstname = firstname;
   if (lastname) data.lastname = lastname;
   if (accountColor) data.accountColor = accountColor;
-  if (blockedUserId)
-    data.bannedUsers = {
-      create: {
-        banned: {
-          connect: {
-            id: parseInt(blockedUserId),
-          },
+
+  if (blockedUserId) {
+    const blockedUserRecord = await prisma.ban.findUnique({
+      where: {
+        bannedUserId_banningUserId: {
+          bannedUserId: parseInt(blockedUserId),
+          banningUserId: currentUser.id,
         },
       },
-    };
+    });
+    console.log(blockedUserRecord);
+    if (blockedUserRecord) {
+      await prisma.ban.delete({
+        where: {
+          bannedUserId_banningUserId: {
+            bannedUserId: parseInt(blockedUserId),
+            banningUserId: currentUser.id,
+          },
+        },
+      });
+    } else {
+      data.bannedUsers = {
+        create: {
+          banned: {
+            connect: {
+              id: parseInt(blockedUserId),
+            },
+          },
+        },
+      };
+    }
+  }
 
   try {
     const user = await prisma.user.findUnique({

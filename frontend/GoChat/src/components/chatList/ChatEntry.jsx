@@ -12,7 +12,6 @@ export const ChatEntry = memo(
     isGroup,
     chatTitle,
     lastMessage = null,
-    onOpenChat,
     isConnected,
     typingUsers,
     conversationId,
@@ -43,67 +42,65 @@ export const ChatEntry = memo(
 
     return (
       <li>
-        <button className="w-full" onClick={onOpenChat}>
-          <NavLink
-            viewTransition
-            to={`/chats/${isGroup ? "group" : "direct"}/${conversationId}`}
-            className={({ isActive, isPending }) => {
-              if (isActive) {
-                return `${base_class} bg-cyan-600/40 dark:bg-cyan-400/40`;
-              }
-              if (isPending) {
-                return `${base_class} bg-gray-100`;
-              }
-              return base_class;
-            }}
-          >
-            <div className="shrink-0 relative">
-              <Avatar avatar={chatAvatar} chatTitle={chatTitle} color={color} />
-              {!isGroup && (
-                <span
-                  className={`absolute w-3 h-3 bottom-0 right-0 rounded-full ${isConnected ? "bg-cyan-600 dark:bg-cyan-400" : "bg-gray-400 dark:bg-gray-300"}`}
-                ></span>
+        <NavLink
+          viewTransition
+          to={`/chats/${isGroup ? "group" : "direct"}/${conversationId}`}
+          className={({ isActive, isPending }) => {
+            if (isActive) {
+              return `${base_class} bg-cyan-600/40 dark:bg-cyan-400/40`;
+            }
+            if (isPending) {
+              return `${base_class} bg-gray-100`;
+            }
+            return base_class;
+          }}
+        >
+          <div className="shrink-0 relative">
+            <Avatar avatar={chatAvatar} chatTitle={chatTitle} color={color} />
+            {!isGroup && (
+              <span
+                className={`absolute w-3 h-3 bottom-0 right-0 rounded-full ${isConnected ? "bg-cyan-600 dark:bg-cyan-400" : "bg-gray-400 dark:bg-gray-300"}`}
+              ></span>
+            )}
+          </div>
+
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center justify-between gap-x-2">
+              <strong className="text-gray-900 dark:text-gray-50 truncate">
+                {chatTitle}
+              </strong>
+              <span className="text-xs text-gray-400 dark:text-gray-200">
+                {lastMessage?.createdAt
+                  ? new Date(lastMessage.createdAt).toLocaleTimeString()
+                  : ""}
+              </span>
+            </div>
+            <div className="text-gray-600 dark:text-gray-200 text-sm  text-left mt-1 flex items-center justify-between">
+              {typingUsers.length > 0 ? (
+                isGroup ? (
+                  <span className="truncate">
+                    {printGroupTypingUsers(typingUsers)}
+                  </span>
+                ) : (
+                  <span>typing...</span>
+                )
+              ) : (
+                <span className="truncate">
+                  {lastMessage ? lastMessage.content : ""}
+                </span>
+              )}
+              {lastMessage && (
+                <ChatBubbleStatus
+                  readers={readers}
+                  senderId={lastMessage?.sender?.id || lastMessage.senderId}
+                  status={lastMessage.status}
+                  className={"shrink-0"}
+                  supportNotifications={true}
+                />
               )}
             </div>
-
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center justify-between gap-x-2">
-                <strong className="text-gray-900 dark:text-gray-50 truncate">
-                  {chatTitle}
-                </strong>
-                <span className="text-xs text-gray-400 dark:text-gray-200">
-                  {lastMessage?.createdAt
-                    ? new Date(lastMessage.createdAt).toLocaleTimeString()
-                    : ""}
-                </span>
-              </div>
-              <div className="text-gray-600 dark:text-gray-200 text-sm  text-left mt-1 flex items-center justify-between">
-                {typingUsers.length > 0 ? (
-                  isGroup ? (
-                    <span className="truncate">
-                      {printGroupTypingUsers(typingUsers)}
-                    </span>
-                  ) : (
-                    <span>typing...</span>
-                  )
-                ) : (
-                  <span className="truncate">
-                    {lastMessage ? lastMessage.content : ""}
-                  </span>
-                )}
-                {lastMessage && (
-                  <ChatBubbleStatus
-                    readers={readers}
-                    senderId={lastMessage?.sender?.id || lastMessage.senderId}
-                    status={lastMessage.status}
-                    className={"shrink-0"}
-                    supportNotifications={true}
-                  />
-                )}
-              </div>
-            </div>
-          </NavLink>
-        </button>
+          </div>
+        </NavLink>
       </li>
     );
   },

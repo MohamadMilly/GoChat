@@ -272,6 +272,8 @@ export const ChatBubble = memo(
     isMyMessage,
     hideAvatar = false,
     hideName = false,
+    handleShowChatBubbleMenu,
+    handleReply,
   }) => {
     const { user } = useAuth();
     const readersIds = message.readers
@@ -280,34 +282,19 @@ export const ChatBubble = memo(
     const queryClient = useQueryClient();
     const [readers, setReaders] = useState(readersIds);
     const [isReadersVisible, setIsReadersVisible] = useState(false);
-    const [clickYCoords, setClickYCoords] = useState(null);
+
     const [transitionId, setTransitionId] = useState(null);
     const [isFadeRunning, setIsFadeRunning] = useState(false);
     const messagesContainerRef = useRef(null);
     const messageContentContainerRef = useRef(null);
-    const { setRepliedMessage } = useContext(ChatPageContext);
-    const [searchParams, setSearchParams] = useSearchParams();
     const { language } = useLanguage();
     const fullname = message.sender.firstname + " " + message.sender.lastname;
     const { id: conversationId } = useParams();
-    const { setMessage, setClickCoords } = useContext(
-      ChatBubbleContainerContext,
-    );
+
     const isThereAvatar = !!message.sender.profile?.avatar;
     const avatar = isThereAvatar && message.sender.profile?.avatar;
     const color = message.sender?.accountColor || "";
 
-    const handleShowReaders = (e) => {
-      setIsReadersVisible(true);
-      const rect = e.currentTarget.getBoundingClientRect();
-      const y = e.clientY - rect.top;
-      setClickYCoords(y);
-    };
-    const handleShowChatBubbleMenu = (e) => {
-      setMessage(message);
-
-      setClickCoords({ x: e.clientX, y: e.clientY });
-    };
     useEffect(() => {
       function onReadMessage(messageId, userId) {
         if (messageId !== message.id) return;
@@ -422,13 +409,7 @@ export const ChatBubble = memo(
         clearTimeout(timer);
       };
     }, [isReadersVisible]);
-    const handleReply = useCallback(
-      (message) => {
-        setRepliedMessage(message);
-        setSearchParams({ reply: message?.id || message.createdAt });
-      },
-      [setRepliedMessage, setSearchParams],
-    );
+
     useEffect(() => {
       const container = messagesContainerRef.current;
       const content = messagesContainerRef.current;
@@ -487,7 +468,6 @@ export const ChatBubble = memo(
           messageId: message.id,
           isReadersVisible: isReadersVisible,
           isFadeRunning: isFadeRunning,
-          clickYCoords: clickYCoords,
         }}
       >
         <li
@@ -519,8 +499,7 @@ export const ChatBubble = memo(
             )}
             <div
               onClick={(e) => {
-                handleShowReaders(e);
-                handleShowChatBubbleMenu(e);
+                handleShowChatBubbleMenu(message, e.clientX, e.clientY);
               }}
               ref={messageContentContainerRef}
               className={`group relative w-full px-2 py-1 font-rubik rounded-t-xl ${isMyMessage ? "bg-cyan-700 dark:bg-cyan-600 rounded-br-none rounded-bl-xl text-gray-100" : "bg-gray-100 text-gray-600 dark:bg-gray-700 rounded-bl-none rounded-br-xl"} cursor-grab`}

@@ -140,22 +140,6 @@ const getSpecificConversationGet = async (req, res) => {
       membersCount,
       isJoined: isCurrentUserParticipant,
       isAdmin: isCurrentUserAdmin,
-      isBlocked:
-        conversation.type === "DIRECT"
-          ? blockingnUsers.some((blockingUser) =>
-              participantsIds.some(
-                (idData) => idData.userId === blockingUser.banningUserId,
-              ),
-            )
-          : null,
-      isBlocking:
-        conversation.type === "DIRECT"
-          ? blockedUsers.some((blockedUser) =>
-              participantsIds.some(
-                (idData) => idData.userId === blockedUser.bannedUserId,
-              ),
-            )
-          : null,
     });
   } catch (err) {
     console.error(err);

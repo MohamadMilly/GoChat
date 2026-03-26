@@ -22,13 +22,11 @@ createRoot(document.getElementById("root")).render(
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <SocketProvider>
-          <ConversationProvider>
-            <LanguageProvider>
-              <ThemeProvider>
-                <RouterProvider router={router} />
-              </ThemeProvider>
-            </LanguageProvider>
-          </ConversationProvider>
+          <LanguageProvider>
+            <ThemeProvider>
+              <RouterProvider router={router} />
+            </ThemeProvider>
+          </LanguageProvider>
         </SocketProvider>
       </AuthProvider>
     </QueryClientProvider>

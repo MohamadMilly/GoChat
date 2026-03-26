@@ -28,6 +28,8 @@ export function ChatPage() {
   const {
     conversation,
     membersCount,
+    isBlocked,
+    isBlocking,
     isFetching: isFetchingConversation,
     error: conversationError,
   } = useConversation(id);
@@ -48,6 +50,8 @@ export function ChatPage() {
   return (
     <ChatPageContext
       value={{
+        isBlocked,
+        isBlocking,
         conversationId: id,
         isInPreview: false,
         conversation,

@@ -3,6 +3,7 @@ import { ChatBubble } from "./ChatBubble";
 import {
   createContext,
   Fragment,
+  useCallback,
   useContext,
   useEffect,
   useRef,
@@ -12,6 +13,7 @@ import { ChatPageContext } from "../../routes/ChatPage";
 import { useMessages } from "../../hooks/useMessages";
 import { MessagesListLoading } from "../skeletonLoadingComponents/MessagesListLoading";
 import { ChatBubbleMenu } from "./ChatBubbleMenu";
+import { useMemo } from "react";
 
 /*
 TO DO :
@@ -27,6 +29,7 @@ function ChatBubbleMenuContainer({ children }) {
   const [clickCoords, setClickCoords] = useState({ x: null, y: null });
   const menuRef = useRef(null);
   const { user } = useAuth();
+
   useEffect(() => {
     const menu = menuRef.current;
     const handleClickOutSide = (e) => {
@@ -40,11 +43,12 @@ function ChatBubbleMenuContainer({ children }) {
       window.removeEventListener("mousedown", handleClickOutSide);
     };
   }, [message]);
-
+  const contextValue = useMemo(
+    () => ({ message, setMessage, setClickCoords, clickCoords }),
+    [clickCoords, message],
+  );
   return (
-    <ChatBubbleContainerContext
-      value={{ message, setMessage, setClickCoords, clickCoords }}
-    >
+    <ChatBubbleContainerContext value={contextValue}>
       {message && message.senderId === user.id && (
         <div className="text-white w-full h-full inset-0 bg-gray-700/30 z-100 absolute">
           <ChatBubbleMenu
@@ -61,84 +65,103 @@ function ChatBubbleMenuContainer({ children }) {
 
 export function MessagesList() {
   const { conversationId } = useContext(ChatPageContext);
-  return <MessagesListContent conversationId={conversationId} />;
+
+  return (
+    <ChatBubbleMenuContainer>
+      <MessagesListContent conversationId={conversationId} />;
+    </ChatBubbleMenuContainer>
+  );
 }
 
 export function MessagesListContent(props) {
   const { user } = useAuth();
   const messagesListRef = useRef(null);
-
+  const { setMessage, setClickCoords } = useContext(ChatBubbleContainerContext);
+  const { setRepliedMessage } = useContext(ChatPageContext);
   const {
     messages,
     type,
     error: messagesError,
     isFetching: isFetchingMessages,
   } = useMessages(props.conversationId);
-
+  const memoizedMessages = useMemo(() => messages, [messages]);
   useEffect(() => {
     if (messagesListRef.current) {
       messagesListRef.current.scrollTop = messagesListRef.current.scrollHeight;
     }
   }, [messages]);
 
+  const handleShowChatBubbleMenu = useCallback(
+    (message, x, y) => {
+      setClickCoords({ x: x, y: y });
+      setMessage(message);
+    },
+    [setClickCoords, setMessage],
+  );
+  const handleReply = useCallback(
+    (message) => setRepliedMessage(message),
+    [setRepliedMessage],
+  );
   if (isFetchingMessages) return <MessagesListLoading />;
   if (messagesError) return <p>Error: {messagesError.message}</p>;
+
   return (
-    <ChatBubbleMenuContainer>
-      <ul
-        dir="ltr"
-        ref={messagesListRef}
-        className="flex-1 px-1 sm:px-3 pt-1 pb-6 overflow-visible overflow-y-auto overflow-x-hidden z-10 scrollbar-custom"
-      >
-        {messages && messages.length === 0 ? (
-          <p
-            className="text-center text-lg h-full flex justify-center items-center text-gray-800 dark:text-gray-100 p-1 z-10
+    <ul
+      dir="ltr"
+      ref={messagesListRef}
+      className="flex-1 px-1 sm:px-3 pt-1 pb-6 overflow-visible overflow-y-auto overflow-x-hidden z-10 scrollbar-custom"
+    >
+      {memoizedMessages && memoizedMessages.length === 0 ? (
+        <p
+          className="text-center text-lg h-full flex justify-center items-center text-gray-800 dark:text-gray-100 p-1 z-10
             "
-          >
-            No messages yet.
-          </p>
-        ) : (
-          messages.map((message, index) => {
-            const previousMessageDate = messages[index - 1]
-              ? messages[index - 1].createdAt
-              : null;
+        >
+          No messages yet.
+        </p>
+      ) : (
+        memoizedMessages.map((message, index) => {
+          const previousMessageDate = memoizedMessages[index - 1]
+            ? memoizedMessages[index - 1].createdAt
+            : null;
 
-            const isNewDayMessage = previousMessageDate
-              ? new Date(message.createdAt).getDate() !=
-                new Date(previousMessageDate).getDate()
-              : true;
+          const isNewDayMessage = previousMessageDate
+            ? new Date(message.createdAt).getDate() !=
+              new Date(previousMessageDate).getDate()
+            : true;
 
-            const sender = message.sender;
-            const isMyMessage = user.id === sender.id;
+          const sender = message.sender;
+          const isMyMessage = user.id === sender.id;
 
-            const isThereNextMessageFromTheSameUser =
-              messages[index + 1]?.senderId === message.senderId;
-            const isTherePreviousMessageFromTheSameuser =
-              messages[index - 1]?.senderId === message.senderId;
+          const isThereNextMessageFromTheSameUser =
+            memoizedMessages[index + 1]?.senderId === message.senderId;
+          const isTherePreviousMessageFromTheSameuser =
+            memoizedMessages[index - 1]?.senderId === message.senderId;
 
-            return (
-              <Fragment key={message.id || message.createdAt}>
-                {isNewDayMessage && (
-                  <span
-                    dir="rtl"
-                    className="text-xs text-gray-500 dark:text-gray-200 bg-gray-50/40 dark:bg-gray-600/40 mx-auto my-2 block w-fit p-0.5 rounded"
-                  >
-                    {new Date(message.createdAt).toLocaleDateString()}
-                  </span>
-                )}
+          return (
+            <Fragment key={message.id || message.createdAt}>
+              {isNewDayMessage && (
+                <span
+                  dir="rtl"
+                  className="text-xs text-gray-500 dark:text-gray-200 bg-gray-50/40 dark:bg-gray-600/40 mx-auto my-2 block w-fit p-0.5 rounded"
+                >
+                  {new Date(message.createdAt).toLocaleDateString()}
+                </span>
+              )}
 
-                <ChatBubble
-                  message={message}
-                  isGroupMessage={type === "GROUP"}
-                  isMyMessage={isMyMessage}
-                  hideAvatar={isThereNextMessageFromTheSameUser}
-                  hideName={isTherePreviousMessageFromTheSameuser}
-                />
-              </Fragment>
-            );
-          })
-        )}
-      </ul>
-    </ChatBubbleMenuContainer>
+              <ChatBubble
+                key={message.id}
+                message={message}
+                isGroupMessage={type === "GROUP"}
+                isMyMessage={isMyMessage}
+                hideAvatar={isThereNextMessageFromTheSameUser}
+                hideName={isTherePreviousMessageFromTheSameuser}
+                handleShowChatBubbleMenu={handleShowChatBubbleMenu}
+                handleReply={handleReply}
+              />
+            </Fragment>
+          );
+        })
+      )}
+    </ul>
   );
 }

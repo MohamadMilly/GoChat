@@ -1,7 +1,7 @@
 import { SearchBar } from "../ui/SearchBar";
 import { Chats } from "./Chats";
 import { useMyConversations } from "../../hooks/me/useMyConversations";
-import { useContext, useEffect } from "react";
+import { memo, useContext, useEffect } from "react";
 import { socket } from "../../socket";
 import { useSearchParams } from "react-router";
 import { filterConversations } from "../../utils/filterConversations";
@@ -13,7 +13,7 @@ import Button from "../ui/Button";
 import { ArrowBigLeft, ArrowBigRight } from "lucide-react";
 import { ChatsListContext } from "../../routes/ChatsListPage";
 
-export function ChatsPanel() {
+export const ChatsPanel = memo(() => {
   const { isConnected } = useSocket();
   const { language } = useLanguage();
   const { isFetching, conversations, error } = useMyConversations();
@@ -85,4 +85,4 @@ export function ChatsPanel() {
       </div>
     </aside>
   );
-}
+});
