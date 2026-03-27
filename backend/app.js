@@ -501,7 +501,27 @@ io.on("connection", async (socket) => {
     );
 
     if (blockedSocket) {
-      blockedSocket.emit("block user", userId, conversationId);
+      blockedSocket.emit(
+        "block user",
+        socket.handshake.auth.userId,
+        conversationId,
+      );
+    } else {
+      return;
+    }
+  });
+  socket.on("unblock user", async (userId, conversationId) => {
+    const sockets = await io.fetchSockets();
+    const unBlockedSocket = sockets.find(
+      (s) => s.handshake.auth.userId == userId,
+    );
+
+    if (unBlockedSocket) {
+      unBlockedSocket.emit(
+        "unblock user",
+        socket.handshake.auth.userId,
+        conversationId,
+      );
     } else {
       return;
     }

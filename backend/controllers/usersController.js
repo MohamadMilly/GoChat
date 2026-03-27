@@ -341,10 +341,18 @@ const getSpecificUserGet = async (req, res) => {
         userId: parseInt(userId),
       },
     });
-
+    const userBannedList = await prisma.ban.findMany({
+      where: {
+        banningUserId: parseInt(userId),
+      },
+    });
+    const isBlockingCurrentUser = userBannedList.some(
+      (userBannedObj) => userBannedObj.bannedUserId === currentUser.id,
+    );
     const filteredUser = filterProfile(user, [userPreferences]);
     return res.json({
       user: filteredUser,
+      isBlocking: isBlockingCurrentUser,
     });
   } catch (err) {
     console.error(err);

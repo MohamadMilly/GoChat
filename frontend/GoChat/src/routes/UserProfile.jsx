@@ -17,7 +17,7 @@ export function UserProfile() {
   const PageTranslations = translations.Profile;
   const { userId } = useParams();
   const { connectedUsers } = useSocket();
-  const { user, isFetching, error } = useUser(userId);
+  const { user, isFetching, error, isBlocking } = useUser(userId);
   const navigate = useNavigate();
 
   if (error) return <p>Error: {error.message}</p>;
@@ -50,7 +50,8 @@ export function UserProfile() {
           <ProfileIdentity
             fullname={fullname}
             isConnected={isConnected}
-            lastSeen={user.profile.lastSeen}
+            lastSeen={user?.profile?.lastSeen}
+            isBlocking={isBlocking}
           />
           <section className="px-4 mt-4 py-2 bg-white dark:bg-gray-800 divide-y divide-gray-300 dark:divide-gray-700 shadow-sm rounded-md">
             <ProfileSection

@@ -1,11 +1,9 @@
-import { memo, useContext, useState } from "react";
+import { memo, useContext, useMemo, useState } from "react";
 import { useSocket } from "../../contexts/SocketContext";
 import { useNavigate } from "react-router";
 import { Avatar } from "./Avatar";
-import { useAuth } from "../../contexts/AuthContext";
 import { getTypingUsers } from "../../utils/getTypingUsers";
 import { ChatPageContext } from "../../routes/ChatPage";
-import { getChatInfo } from "../../utils/getChatInfo";
 import { getConnectedUsers } from "../../utils/getConnectedUsers";
 import { TransitionLink } from "../ui/TransitionLink";
 import Button from "../ui/Button";
@@ -22,6 +20,12 @@ export function ChatHeader() {
     isFetchingConversation,
     membersCount,
     isAdmin,
+    chatAvatar,
+    chatPartner,
+    color,
+    isBlockingMe,
+    isGroup,
+    chatTitle,
     conversationId,
   } = useContext(ChatPageContext);
 
@@ -33,6 +37,12 @@ export function ChatHeader() {
       membersCount={membersCount}
       isAdmin={isAdmin}
       conversationId={conversationId}
+      chatAvatar={chatAvatar}
+      chatTitle={chatTitle}
+      color={color}
+      isGroup={isGroup}
+      chatPartner={chatPartner}
+      isBlockingMe={isBlockingMe}
     />
   );
 }
@@ -41,29 +51,27 @@ export const ChatHeaderContent = memo((props) => {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const { connectedUsers, typingUsers } = useSocket();
-  const { user } = useAuth();
   const conversation = props.conversation;
 
   const [transitionId, setTransitionId] = useState(null);
 
+  const thisChatConnectedUsers = useMemo(
+    () => getConnectedUsers(conversation?.participants || [], connectedUsers),
+    [connectedUsers, conversation?.participants],
+  );
+
   if (props.isFetchingConversation)
     return <ChatHeaderLoading isGroup={false} />;
 
-  const { chatTitle, chatAvatar, color, chatPartner, isGroup } = getChatInfo(
-    {
-      participants: conversation.participants,
-      title: conversation.title,
-      avatar: conversation.avatar,
-      type: conversation.type,
-    },
-    user.id,
-  );
-  const thisChatConnectedUsers = getConnectedUsers(
-    conversation.participants,
-    connectedUsers,
-  );
+  const isBlockingMe = props.isBlockingMe;
+  const isGroup = props.isGroup;
+  const chatPartner = props.chatPartner;
+  const chatAvatar = props.chatAvatar;
+  const chatTitle = props.chatTitle;
+  const color = props.color;
 
   const connectedUsersCount = thisChatConnectedUsers.length;
+
   const isOneToOneChatPartnerConnected = isGroup
     ? null
     : thisChatConnectedUsers.some((user) => user.userId == chatPartner.id);
@@ -147,6 +155,10 @@ export const ChatHeaderContent = memo((props) => {
                     )}
                   </div>
                 )
+              ) : isBlockingMe ? (
+                <span className="text-red-500 text-xs bg-red-100 dark:bg-red-200/10 p-0.5 rounded">
+                  Blocking you
+                </span>
               ) : thisChatTypingUsers.length > 0 ? (
                 translations.ChatHeader[language].TypingStandalone
               ) : isOneToOneChatPartnerConnected ? (

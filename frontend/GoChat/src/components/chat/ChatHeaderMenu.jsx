@@ -23,7 +23,11 @@ export function ChatHeaderMenu({ isGroup, chatPartnerId }) {
   const handleBlock = async (userId) => {
     try {
       await patch({ blockedUserId: userId });
-      socket.emit("block user", userId, conversationId);
+      if (isChatPartnerBlocked) {
+        socket.emit("unblock user", userId, conversationId);
+      } else {
+        socket.emit("block user", userId, conversationId);
+      }
     } catch (err) {
       console.error(err);
     }

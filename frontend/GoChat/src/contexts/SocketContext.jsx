@@ -2,6 +2,7 @@ import { createContext, useState, useEffect, useContext } from "react";
 import { socket } from "../socket";
 import { useAuth } from "./AuthContext";
 import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "react-toastify";
 
 const SocketContext = createContext(null);
 
@@ -217,28 +218,25 @@ export function SocketProvider({ children }) {
 
       queryClient.setQueryData(["conversations"], (old) => {
         if (!old?.conversations) return old;
-
+        console.log(old);
         return {
           ...old,
           conversations: old.conversations.map((c) => {
-            if (c.conversation.id === conversationId) {
+            if (c.id == conversationId) {
               return {
                 ...c,
-                conversation: {
-                  ...c.conversation,
-                  participants: updateParticipants(c.conversation.participants),
-                },
+                participants: updateParticipants(c.participants),
               };
             }
             return c;
           }),
         };
       });
-      queryClient.setQueryData(["user", userId], (old) => {
+      queryClient.setQueryData(["user", userId.toString()], (old) => {
         if (!old?.user) return old;
-
         return {
           ...old,
+          isBlocking: true,
           user: {
             ...old.user,
             profile: null,
@@ -246,7 +244,20 @@ export function SocketProvider({ children }) {
         };
       });
     }
-
+    function onReceiveUnBlock(userId, conversationId) {
+      queryClient.invalidateQueries({
+        queryKey: ["conversations"],
+        exact: true,
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["user", userId.toString()],
+        exact: true,
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["conversation", conversationId],
+        exact: true,
+      });
+    }
     socket.on("chat message", onReceiveMessage);
     socket.on("connect", onConnect);
     socket.on("disconnect", onDisconnect);
@@ -257,6 +268,7 @@ export function SocketProvider({ children }) {
     socket.on("delete message", onDeleteMessage);
     socket.on("edit message", onEditMessage);
     socket.on("block user", onRecieveBlock);
+    socket.on("unblock user", onReceiveUnBlock);
     return () => {
       socket.off("chat message", onReceiveMessage);
       socket.off("connect", onConnect);
@@ -268,6 +280,7 @@ export function SocketProvider({ children }) {
       socket.off("delete message", onDeleteMessage);
       socket.off("edit message", onEditMessage);
       socket.off("block user", onRecieveBlock);
+      socket.off("unblock user", onReceiveUnBlock);
     };
   }, [queryClient, user]);
   return (

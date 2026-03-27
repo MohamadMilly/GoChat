@@ -1,6 +1,6 @@
 import { Avatar } from "../chat/Avatar";
 
-export function ProfileHeader({ dynamicTransitionName, user }) {
+export function ProfileHeader({ dynamicTransitionName, user, isBlocking }) {
   const fullname = user.firstname + " " + user.lastname;
   return (
     <section
@@ -13,7 +13,7 @@ export function ProfileHeader({ dynamicTransitionName, user }) {
     >
       <Avatar
         avatar={null}
-        chatAvatar={user?.profile.avatar}
+        chatAvatar={user?.profile?.avatar}
         chatTitle={fullname}
         color={user?.accountColor || null}
         size="120px"

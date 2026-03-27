@@ -11,7 +11,9 @@ export function useUser(userId) {
     queryKey: ["user", userId],
     queryFn: () => fetchUser(userId),
     staleTime: 1000 * 60 * 5,
+    enabled: !!userId,
   });
   const user = data ? data.user : null;
-  return { user, isFetching, error };
+  const isBlocking = data ? data.isBlocking : null;
+  return { user, isBlocking, isFetching, error };
 }

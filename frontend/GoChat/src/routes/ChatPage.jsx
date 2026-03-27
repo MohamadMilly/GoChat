@@ -2,7 +2,7 @@ import { useParams } from "react-router";
 import { SendMessageForm } from "../components/chat/SendMessageForm";
 import { ChatHeader } from "../components/chat/ChatHeader";
 import { MessagesList } from "../components/chat/MessagesList";
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { socket } from "../socket";
 import { useSocket } from "../contexts/SocketContext";
 import Button from "../components/ui/Button";
@@ -12,6 +12,9 @@ import { useLanguage } from "../contexts/LanguageContext";
 import { EditMessageDialog } from "../components/chat/EditMessageDialog";
 import { usePermissions } from "../hooks/usePermissions";
 import { useConversation } from "../hooks/useConversation";
+import { getChatInfo } from "../utils/getChatInfo";
+import { useAuth } from "../contexts/AuthContext";
+import { useUser } from "../hooks/useUser";
 
 export const ChatPageContext = createContext({
   conversationId: null,
@@ -20,19 +23,41 @@ export const ChatPageContext = createContext({
 
 export function ChatPage() {
   const { id } = useParams();
+  const { user } = useAuth();
+  /* Chat permissions for controlling users activity in the chat page */
   const {
     permissions,
     isFetching: isFetchingPermissions,
     error: fetchingPermissionsError,
   } = usePermissions(id);
+  /* Core conversation data which contain the partnerId for the next query if the conversation is a DIRECT */
   const {
     conversation,
     membersCount,
-    isBlocked,
-    isBlocking,
+    partnerId,
     isFetching: isFetchingConversation,
     error: conversationError,
   } = useConversation(id);
+
+  const { chatTitle, chatAvatar, color, chatPartner, isGroup } = useMemo(
+    () =>
+      getChatInfo(
+        {
+          participants: conversation?.participants || [],
+          title: conversation?.title,
+          avatar: conversation?.avatar,
+          type: conversation?.type,
+        },
+        user.id,
+      ),
+    [conversation, user.id],
+  );
+  /* Fetch the data of the partner only if chatPartner is not undefined which applies the conversation to DIRECT */
+  const {
+    isBlocking,
+    isFetching: isFetchingPartner,
+    error: partnerDataError,
+  } = useUser(partnerId?.toString());
 
   const { isConnected } = useSocket();
   const [isInPreviewMode, setIsInPreviewMode] = useState(false);
@@ -50,8 +75,13 @@ export function ChatPage() {
   return (
     <ChatPageContext
       value={{
-        isBlocked,
-        isBlocking,
+        isFetchingPartner,
+        chatTitle,
+        chatAvatar,
+        color,
+        chatPartner,
+        isBlockingMe: isBlocking,
+        isGroup,
         conversationId: id,
         isInPreview: false,
         conversation,

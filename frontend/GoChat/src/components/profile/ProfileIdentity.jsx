@@ -1,7 +1,13 @@
+import { CircleAlert } from "lucide-react";
 import { useLanguage } from "../../contexts/LanguageContext";
 import translations from "../../translations";
 
-export function ProfileIdentity({ fullname, isConnected, lastSeen }) {
+export function ProfileIdentity({
+  fullname,
+  isConnected,
+  lastSeen,
+  isBlocking = false,
+}) {
   const { language } = useLanguage();
   return (
     <section className="text-center mt-12">
@@ -9,7 +15,12 @@ export function ProfileIdentity({ fullname, isConnected, lastSeen }) {
       <p
         className={`text-sm ${isConnected ? "text-cyan-600 dark:text-cyan-400" : "text-gray-500 dark:text-gray-200"}  `}
       >
-        {isConnected ? (
+        {isBlocking ? (
+          <div className="text-red-600 flex items-center justify-center gap-2 p-1 bg-red-100 rounded">
+            <CircleAlert size={20} />
+            <span>This User has blocked you from seeing profile.</span>
+          </div>
+        ) : isConnected ? (
           translations.Profile[language].OnlineLabel
         ) : (
           <>

@@ -140,6 +140,10 @@ const getSpecificConversationGet = async (req, res) => {
       membersCount,
       isJoined: isCurrentUserParticipant,
       isAdmin: isCurrentUserAdmin,
+      partnerId:
+        conversation.type === "DIRECT"
+          ? conversation.participants.find((p) => p.userId !== userId)?.userId
+          : null,
     });
   } catch (err) {
     console.error(err);
