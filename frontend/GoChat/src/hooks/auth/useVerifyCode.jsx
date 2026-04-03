@@ -1,3 +1,9 @@
+/* 
+
+REMOVED DUE TO RENDER POLICIES 
+
+
+
 import { useMutation } from "@tanstack/react-query";
 import { api } from "../../utils/api";
 import { useAuth } from "../../contexts/AuthContext";
@@ -23,3 +29,5 @@ export function useVerifyCode() {
     },
   });
 }
+
+*/

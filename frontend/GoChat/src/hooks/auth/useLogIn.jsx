@@ -1,4 +1,5 @@
 import { useAuth } from "../../contexts/AuthContext";
+import { socket } from "../../socket";
 import { api } from "../../utils/api";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "react-toastify";
@@ -16,6 +17,8 @@ export function useLogIn() {
     onSuccess: (data) => {
       loginInLocalStorage(data.token, data.user);
       api.defaults.headers.common["authorization"] = `Bearer ${data.token}`;
+      socket.auth.userId = data.user.id;
+      socket.auth.serverOffset = {};
     },
     onError: (_err, args, context) => {
       toast.error(_err?.response?.data?.message || _err.message);
