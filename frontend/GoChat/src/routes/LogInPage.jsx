@@ -119,6 +119,7 @@ export function LogInPage() {
               onChange={(e) => onFieldChange("password", e)}
             />
             <Button
+              disabled={isLoggingIn}
               type="submit"
               className={
                 "flex items-center gap-2 mx-auto mt-6 border border-cyan-600 px-4 dark:border-cyan-400 text-base text-cyan-600 dark:text-cyan-400!"

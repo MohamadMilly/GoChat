@@ -141,6 +141,7 @@ export function SignUpPage() {
               />
               <div className="mt-6 mx-auto text-center">
                 <Button
+                  disabled={isSigningUp}
                   type="submit"
                   className={
                     "border mx-auto flex items-center gap-2 px-4 border-cyan-600 text-base text-cyan-600"
