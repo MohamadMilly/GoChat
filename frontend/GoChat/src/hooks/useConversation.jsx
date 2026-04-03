@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { api } from "../utils/api";
 import { useAuth } from "../contexts/AuthContext";
 
@@ -18,6 +18,9 @@ export function useConversation(conversationId) {
     queryFn: () => getConversation(conversationId, user?.id || null),
     enabled: !!conversationId,
     staleTime: 1000 * 60 * 5,
+    placeholderData: {
+      keepPreviousData: true,
+    },
   });
 
   return { isFetching, error, ...data };
