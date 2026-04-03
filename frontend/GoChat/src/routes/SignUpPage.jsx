@@ -88,7 +88,7 @@ export function SignUpPage() {
           </p>
         </article>
       </section>
-      <section className="basis-xl px-4 flex flex-1 flex-col items-center mb-10">
+      <section className="basis-xl px-4 flex flex-1 flex-col items-center mb-10 md:mb-0">
         <h2 className="font-rubik text-4xl font-bold text-center my-10 tracking-tight text-cyan-800 dark:text-cyan-400 ">
           {PageTranslations[language].SignUpButton}
         </h2>
