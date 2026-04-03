@@ -86,7 +86,7 @@ export function MyProfile() {
             <ProfileSection
               isHidden={preferences.isBirthdayHidden}
               title={PageTranslations[language].Birthday}
-              value={user.profile?.bidthday}
+              value={new Date(user.profile?.birthday).toDateString()}
             />
           </section>
         </>

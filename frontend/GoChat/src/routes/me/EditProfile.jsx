@@ -468,8 +468,12 @@ export function EditProfilePage() {
           isFetchingProfile={isFetchingProfile}
         />
         <ProfileInputField
-          value={newProfileData.birthday}
-          onChange={(e) => onFieldChange(e.target.value, "birthday")}
+          value={
+            newProfileData.birthday
+              ? new Date(newProfileData.birthday).toISOString().split("T")[0]
+              : ""
+          }
+          onChange={(e) => onFieldChange(new Date(e.target.value), "birthday")}
           id="birthday"
           label={translations.Profile[language].Birthday}
           type="date"
