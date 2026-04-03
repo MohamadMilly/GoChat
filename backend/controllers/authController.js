@@ -24,7 +24,7 @@ const signupPost = async (req, res) => {
   const { firstname, lastname, username, password, passwordConfirmation } =
     req.body;
   const randomColor =
-    accountColors[Math.floor(Math.random() * (accountColors.length + 1))];
+    accountColors[Math.floor(Math.random() * accountColors.length)];
   try {
     const previousUser = await prisma.user.findUnique({
       where: {

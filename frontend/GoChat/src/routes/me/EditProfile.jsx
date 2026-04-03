@@ -3,13 +3,14 @@ import { useMe } from "../../hooks/me/useMe";
 import { useEditProfile } from "../../hooks/me/useEditProfile";
 import Button from "../../components/ui/Button";
 import { ArrowBigLeft, Check } from "lucide-react";
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useMemo } from "react";
 import { Avatar } from "../../components/chat/Avatar";
 import { useAuth } from "../../contexts/AuthContext";
 import { supabase } from "../../utils/supabase";
 import { toast } from "react-toastify";
 import translations from "../../translations";
 import { useLanguage } from "../../contexts/LanguageContext";
+import { usePatchUser } from "../../hooks/me/usePatchUser";
 
 function ProfileInputField({
   value,
@@ -301,14 +302,50 @@ function AvatarBackgroundFileField({
   );
 }
 
+function AccountColorField({
+  isFetchingProfile,
+  accountColor,
+  setAccountColor,
+}) {
+  const colors = useMemo(
+    () => ["#16a34a", "#a855f7", "#d97706", "#1e40af", "#ff4d91"],
+    [],
+  );
+  if (isFetchingProfile) return <p>Loading...</p>;
+  return (
+    <div className="flex flex-col gap-1 px-4 py-2 my-4 rounded">
+      <span className="text-sm text-cyan-600/80 dark:text-cyan-400/80">
+        Account color
+      </span>
+      <ul className="overflow-x-auto flex items-center gap-2 my-4 p-2">
+        {colors.map((color) => {
+          const isSelected = color === accountColor;
+          return (
+            <li key={color}>
+              <button
+                onClick={() => setAccountColor(color)}
+                className={`w-12 h-12 rounded-full ${isSelected ? "outline-2 outline-offset-2" : "offset-none"}`}
+                style={{
+                  backgroundColor: color,
+                  outlineColor: color,
+                }}
+              ></button>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  );
+}
+
 export function EditProfilePage() {
   const { language } = useLanguage();
   const {
-    mutate: put,
+    mutate: putProfile,
     isPending: areChangesPending,
     error: putError,
   } = useEditProfile();
-
+  const { mutate: patchUser } = usePatchUser();
   const { user, isFetching: isFetchingProfile, error: profileError } = useMe();
   const { user: currentUserIdentity } = useAuth();
   const [newProfileData, setNewProfileData] = useState({
@@ -318,6 +355,9 @@ export function EditProfilePage() {
     phoneNumber: "",
     email: "",
     birthday: "",
+  });
+  const [userData, setUserData] = useState({
+    accountColor: "",
   });
   const navigate = useNavigate();
 
@@ -331,16 +371,23 @@ export function EditProfilePage() {
             return prev;
           }
         });
+
+        setUserData({
+          accountColor: user?.accountColor,
+        });
       }
     }
     setInitialUser();
   }, [isFetchingProfile, user]);
 
-  const onFieldChange = (value, key) => {
-    setNewProfileData((prev) => ({ ...prev, [key]: value }));
+  const onFieldChange = (value, key, setter = setNewProfileData) => {
+    setter((prev) => ({ ...prev, [key]: value }));
   };
   const handleConfirmEdit = () => {
-    put(newProfileData);
+    putProfile(newProfileData);
+    patchUser({
+      accountColor: userData.accountColor,
+    });
     navigate("/users/me/profile");
   };
 
@@ -380,7 +427,7 @@ export function EditProfilePage() {
           fullname={
             currentUserIdentity.firstname + " " + currentUserIdentity.lastname
           }
-          color={user?.accountColor || ""}
+          color={userData?.accountColor || ""}
           isFetchingProfile={isFetchingProfile}
         />
         <AvatarBackgroundFileField
@@ -389,6 +436,13 @@ export function EditProfilePage() {
           }
           avatarBackgroundURL={newProfileData.avatarBackground}
           isFetchingProfile={isFetchingProfile}
+        />
+        <AccountColorField
+          isFetchingProfile={isFetchingProfile}
+          setAccountColor={(color) =>
+            onFieldChange(color, "accountColor", setUserData)
+          }
+          accountColor={userData?.accountColor}
         />
         <BioTextAreaField
           value={newProfileData.bio}
