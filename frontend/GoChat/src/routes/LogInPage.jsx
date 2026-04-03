@@ -135,6 +135,15 @@ export function LogInPage() {
             </Button>
           </section>
         </form>
+        <p className="text-xs text-gray-300 mt-6 md:hidden">
+          {translations.LogInPage[language].DontHaveAccount}{" "}
+          <Link
+            className="text-xs text-cyan-200  bg-white/5 rounded"
+            route={"/auth/signup"}
+          >
+            {PageTranslations[language].SignUp}
+          </Link>
+        </p>
       </section>
     </main>
   );

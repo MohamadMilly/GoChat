@@ -205,7 +205,6 @@ io.on("connection", async (socket) => {
                 : -1,
             },
           });
-
           if (
             conversationData.participants.some(
               (p) =>

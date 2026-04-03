@@ -88,7 +88,7 @@ export function SignUpPage() {
           </p>
         </article>
       </section>
-      <section className="basis-xl px-4 flex flex-1 flex-col items-center">
+      <section className="basis-xl px-4 flex flex-1 flex-col items-center mb-10">
         <h2 className="font-rubik text-4xl font-bold text-center my-10 tracking-tight text-cyan-800 dark:text-cyan-400 ">
           {PageTranslations[language].SignUpButton}
         </h2>
@@ -159,6 +159,12 @@ export function SignUpPage() {
             </section>
           )}
         </form>
+        <p className="text-xs text-gray-300 mt-6 md:hidden">
+          {PageTranslations[language].AlreadyHaveAccount}{" "}
+          <Link className="text-xs text-cyan-200 rounded" route={"/auth/login"}>
+            {PageTranslations[language].LogIn}
+          </Link>
+        </p>
       </section>
     </main>
   );
