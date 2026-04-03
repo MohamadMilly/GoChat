@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useLogIn } from "../hooks/auth/useLogIn";
-import { useVerifyCode } from "../hooks/auth/useVerifyCode";
 import { Navigate } from "react-router";
 
 import { InputField } from "../components/ui/InputField";
