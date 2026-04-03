@@ -195,12 +195,14 @@ io.on("connection", async (socket) => {
         const socketInConversations = await io.in(convId).fetchSockets();
 
         if (conversationData.type === "DIRECT") {
-          const chatPartnerId = socketInConversations.find(
+          const chatPartnerSocket = socketInConversations.find(
             (socket) => socket.handshake.auth.userId !== parseInt(userId),
           );
           const chatPartnerBanningUsers = await prisma.ban.findMany({
             where: {
-              banningUserId: chatPartnerId,
+              banningUserId: chatPartnerSocket
+                ? chatPartnerSocket.handshake.auth.userId
+                : -1,
             },
           });
 
@@ -269,7 +271,7 @@ io.on("connection", async (socket) => {
             createdMessage.id,
             message.createdAt, // This date for the optimistic message replacement logic
           );
-          callback({
+          return callback({
             status: "ok",
           });
         } else if (conversationData.type === "GROUP") {
