@@ -104,30 +104,32 @@ io.on("connection", async (socket) => {
       console.error("recovery error:", err);
     }
   });
+
   socket.on(
     "chat message",
     async (message, conversationId, clientOffset, callback) => {
       const convId = String(conversationId);
       const userId = socket.handshake.auth.userId;
-      const conversationData = await prisma.conversation.findUnique({
-        where: {
-          id: parseInt(convId),
-        },
-        include: {
-          participants: true,
-        },
-      });
-      if (!conversationData) {
-        throw new Error("conversation does not exist");
-      }
-
-      const userPreferences = await prisma.preferences.findUnique({
-        where: {
-          userId: userId,
-        },
-      });
-      let createdMessage;
       try {
+        const conversationData = await prisma.conversation.findUnique({
+          where: {
+            id: parseInt(convId),
+          },
+          include: {
+            participants: true,
+          },
+        });
+        if (!conversationData) {
+          throw new Error("conversation does not exist");
+        }
+
+        const userPreferences = await prisma.preferences.findUnique({
+          where: {
+            userId: userId,
+          },
+        });
+        let createdMessage;
+
         const permissions = await prisma.permissions.findUnique({
           where: {
             conversationId: parseInt(conversationId),
@@ -153,14 +155,11 @@ io.on("connection", async (socket) => {
           !message.mimeType.includes("text") &&
           !(message.type === "TEXT")
         ) {
-          callback({
-            status: "401",
+          return callback({
+            status: 401,
             error:
               "Sending media messages is not allowed due to permissions restrictions.",
           });
-          throw new Error(
-            "Sending media messages is not allowed due to permissions restrictions.",
-          );
         }
 
         /*
@@ -215,14 +214,11 @@ io.on("connection", async (socket) => {
                 ),
             )
           ) {
-            callback({
-              status: "401",
+            return callback({
+              status: 401,
               error:
                 "one of the chat partners banned the other from sending messages",
             });
-            throw new Error(
-              "one of the chat partners banned the other from sending messages",
-            );
           }
           createdMessage = await prisma.message.create({
             data: {
@@ -319,9 +315,8 @@ io.on("connection", async (socket) => {
             ...createdMessage,
             sender: filterProfile(createdMessage.sender, [userPreferences]),
           };
-          socketInConversations.forEach(async (socket) => {
+          socketInConversations.forEach((socket) => {
             const socketUserId = socket.handshake.auth.userId;
-
             if (senderBannedUsersIds.includes(Number(socketUserId))) {
               socket.emit(
                 "chat message",
@@ -336,9 +331,6 @@ io.on("connection", async (socket) => {
                 createdMessage.id,
                 message.createdAt,
               );
-              callback({
-                status: "ok",
-              });
             } else {
               socket.emit(
                 "chat message",
@@ -347,10 +339,10 @@ io.on("connection", async (socket) => {
                 createdMessage.id,
                 message.createdAt, // This date for the optimistic message replacement logic
               );
-              callback({
-                status: "ok",
-              });
             }
+          });
+          callback({
+            status: "ok",
           });
         }
       } catch (err) {

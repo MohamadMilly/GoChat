@@ -146,6 +146,7 @@ export const SendMessageForm = memo(() => {
         String(conversationId),
         client_offset,
         (response) => {
+          console.log(response);
           if (response?.status !== "ok") {
             console.error(`Error: (${response?.status}) ` + response?.error);
           }
