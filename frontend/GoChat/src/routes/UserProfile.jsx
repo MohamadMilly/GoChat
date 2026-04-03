@@ -78,7 +78,7 @@ export function UserProfile() {
             {user.profile?.birthday && (
               <ProfileSection
                 title={PageTranslations[language].Birthday}
-                value={new Date(user.profile?.bidthday).toDateString()}
+                value={new Date(user.profile?.birthday).toDateString()}
               />
             )}
           </section>
