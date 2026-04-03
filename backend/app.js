@@ -106,8 +106,7 @@ io.on("connection", async (socket) => {
   });
   socket.on(
     "chat message",
-
-    async (message, conversationId, clientOffset) => {
+    async (message, conversationId, clientOffset, callback) => {
       const convId = String(conversationId);
       const userId = socket.handshake.auth.userId;
       const conversationData = await prisma.conversation.findUnique({
@@ -147,12 +146,18 @@ io.on("connection", async (socket) => {
             "Sending messages is not allowed due to permissions restrictions.",
           );
         }
+
         if (
           !permissions.sendingMedia &&
           !admin &&
           !message.mimeType.includes("text") &&
           !(message.type === "TEXT")
         ) {
+          callback({
+            status: "401",
+            error:
+              "Sending media messages is not allowed due to permissions restrictions.",
+          });
           throw new Error(
             "Sending media messages is not allowed due to permissions restrictions.",
           );
@@ -210,6 +215,11 @@ io.on("connection", async (socket) => {
                 ),
             )
           ) {
+            callback({
+              status: "401",
+              error:
+                "one of the chat partners banned the other from sending messages",
+            });
             throw new Error(
               "one of the chat partners banned the other from sending messages",
             );
@@ -263,6 +273,9 @@ io.on("connection", async (socket) => {
             createdMessage.id,
             message.createdAt, // This date for the optimistic message replacement logic
           );
+          callback({
+            status: "ok",
+          });
         } else if (conversationData.type === "GROUP") {
           createdMessage = await prisma.message.create({
             data: {
@@ -323,6 +336,9 @@ io.on("connection", async (socket) => {
                 createdMessage.id,
                 message.createdAt,
               );
+              callback({
+                status: "ok",
+              });
             } else {
               socket.emit(
                 "chat message",
@@ -331,11 +347,18 @@ io.on("connection", async (socket) => {
                 createdMessage.id,
                 message.createdAt, // This date for the optimistic message replacement logic
               );
+              callback({
+                status: "ok",
+              });
             }
           });
         }
       } catch (err) {
         console.error("socket error: ", err);
+        callback({
+          status: 500,
+          error: err.message,
+        });
         if (err.code === "P2002") {
         }
         return;

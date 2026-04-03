@@ -129,7 +129,7 @@ export const SendMessageForm = memo(() => {
         finalFileURL = publicUrlData.publicUrl;
       }
 
-      socket.emit(
+      socket.timeout(5000).emit(
         "chat message",
         {
           createdAt: optimisticMessage.createdAt,
@@ -145,6 +145,11 @@ export const SendMessageForm = memo(() => {
         },
         String(conversationId),
         client_offset,
+        (response) => {
+          if (response?.status !== "ok") {
+            console.error(`Error: (${response?.status}) ` + response?.error);
+          }
+        },
       );
     } catch (err) {
       console.error("Upload failed:", err);
