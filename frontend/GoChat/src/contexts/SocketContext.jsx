@@ -258,6 +258,13 @@ export function SocketProvider({ children }) {
         exact: true,
       });
     }
+    function onEditPermissions(conversationId) {
+      queryClient.invalidateQueries({
+        queryKey: ["conversation", conversationId, "permissions"],
+        exact: true,
+      });
+    }
+
     socket.on("chat message", onReceiveMessage);
     socket.on("connect", onConnect);
     socket.on("disconnect", onDisconnect);
@@ -269,6 +276,7 @@ export function SocketProvider({ children }) {
     socket.on("edit message", onEditMessage);
     socket.on("block user", onRecieveBlock);
     socket.on("unblock user", onReceiveUnBlock);
+    socket.on("edit permissions", onEditPermissions);
     return () => {
       socket.off("chat message", onReceiveMessage);
       socket.off("connect", onConnect);
@@ -281,6 +289,7 @@ export function SocketProvider({ children }) {
       socket.off("edit message", onEditMessage);
       socket.off("block user", onRecieveBlock);
       socket.off("unblock user", onReceiveUnBlock);
+      socket.off("edit permissions", onEditPermissions);
     };
   }, [queryClient, user]);
   return (

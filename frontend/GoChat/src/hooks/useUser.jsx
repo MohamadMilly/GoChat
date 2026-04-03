@@ -10,7 +10,7 @@ export function useUser(userId) {
   const { data, isFetching, error } = useQuery({
     queryKey: ["user", userId],
     queryFn: () => fetchUser(userId),
-    staleTime: 1000 * 60 * 5,
+    staleTime: 1000 * 60 * 10,
     enabled: !!userId,
   });
   const user = data ? data.user : null;

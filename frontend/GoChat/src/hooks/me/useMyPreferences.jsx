@@ -11,6 +11,7 @@ export function useMyPrefrences() {
   const { data, error, isFetching } = useQuery({
     queryKey: ["preferences"],
     queryFn: fetchPreferences,
+    staleTime: 1000 * 6 * 30,
   });
   const preferences = data ? data.preferences : null;
 

@@ -526,6 +526,13 @@ io.on("connection", async (socket) => {
       return;
     }
   });
+  socket.on("edit permissions", (conversationId) => {
+    if (!conversationId) {
+      return;
+    } else {
+      socket.broadcast.emit("edit permissions", conversationId);
+    }
+  });
 });
 
 app.use(

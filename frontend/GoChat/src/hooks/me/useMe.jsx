@@ -10,7 +10,7 @@ export function useMe() {
   const { data, error, isFetching } = useQuery({
     queryKey: ["me"],
     queryFn: fetchCurrentUserData,
-    staleTime: 1000 * 60 * 5,
+    staleTime: 1000 * 60 * 30,
   });
   const user = data ? data.user : null;
   const preferences = data ? data.preferences : null;

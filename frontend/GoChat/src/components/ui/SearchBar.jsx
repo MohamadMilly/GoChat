@@ -5,6 +5,7 @@ export function SearchBar({ query = "", name = "query", label }) {
   const submit = useSubmit();
   const location = useLocation();
   const { language } = useLanguage();
+
   return (
     <Form
       dir={language === "Arabic" ? "rtl" : "ltr"}

@@ -14,7 +14,7 @@ export function useGroups(query) {
   const { data, error, isFetching } = useQuery({
     queryKey: ["groups", query],
     queryFn: () => fetchGroups(query),
-    staleTime: 1000 * 60,
+    staleTime: 1000 * 60 * 5,
     enabled: !!query,
   });
 

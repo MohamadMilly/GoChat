@@ -13,10 +13,12 @@ export function useJoinGroup() {
   const navigate = useNavigate();
   return useMutation({
     mutationFn: joinGroup,
-
     mutationKey: ["join group"],
     onSettled: (data, _err, args, context) => {
-      queryClient.invalidateQueries(["conversations"]);
+      queryClient.invalidateQueries({
+        queryKey: ["conversations"],
+        exact: true,
+      });
     },
     onSuccess: (data, conversationId, context) => {
       navigate(`/chats/group/${conversationId}`);

@@ -10,7 +10,7 @@ export function useMyConversations() {
   const { data, isFetching, error, refetch } = useQuery({
     queryKey: ["conversations"],
     queryFn: fetchConversations,
-    staleTime: 1000 * 60 * 2,
+    staleTime: 1000 * 60 * 10,
     select: (data) => data ?? [],
   });
 

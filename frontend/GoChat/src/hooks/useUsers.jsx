@@ -13,6 +13,7 @@ export function useUsers(query) {
     queryKey: ["search", "users", query],
     queryFn: () => fetchUsers(query),
     enabled: !!query,
+    staleTime: 1000 * 60 * 5,
   });
   const users = data ? data.users : [];
   return { users, error, isFetching };

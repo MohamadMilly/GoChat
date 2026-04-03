@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../utils/api";
+import { socket } from "../socket";
 
 const editPermssions = async ({ conversationId, data }) => {
   const response = await api.put(
@@ -39,5 +40,13 @@ export function useEditPermissions() {
       const queryKey = ["conversation", "permissions", args.conversationId];
       queryClient.setQueryData(queryKey, context.previousPermissions);
     },
+    onSuccess: (data, args, context) => {
+      socket.emit("edit permissions", args.conversationId);
+    },
   });
 }
+
+/* 
+TODO :
+When the permission edit process succeeds , an event will be fired to let all the connected users refetch the new permissions 
+*/

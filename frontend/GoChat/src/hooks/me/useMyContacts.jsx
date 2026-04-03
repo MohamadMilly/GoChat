@@ -10,6 +10,7 @@ export function useMyContacts() {
   const { data, isFetching, error } = useQuery({
     queryKey: ["contacts"],
     queryFn: fetchContacts,
+    staleTime: 1000 * 60 * 10,
   });
   const users = data ? data.users : [];
   return { users, isFetching, error };

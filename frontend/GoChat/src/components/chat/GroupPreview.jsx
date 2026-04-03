@@ -10,6 +10,8 @@ import translations from "../../translations";
 import { useLanguage } from "../../contexts/LanguageContext";
 import { LoadingLayer } from "../ui/LoadingLayer";
 import { useConversation } from "../../hooks/useConversation";
+import { useMemo } from "react";
+import { getChatInfo } from "../../utils/getChatInfo";
 
 function GroupPreviewFooter({ isJoined, isFetchingConversation }) {
   const { id } = useParams();
@@ -63,7 +65,7 @@ function GroupPreviewFooter({ isJoined, isFetchingConversation }) {
 export function GroupPreview() {
   const { id } = useParams();
   const naviagte = useNavigate();
-
+  const { user } = useAuth();
   const {
     conversation,
     membersCount,
@@ -72,7 +74,10 @@ export function GroupPreview() {
     isFetching: isFetchingConversation,
     error: conversationFecthingError,
   } = useConversation(id);
-
+  const chatData = useMemo(() => {
+    if (isFetchingConversation) return;
+    return getChatInfo(conversation, user.id);
+  }, [user.id, conversation, isFetchingConversation]);
   return (
     <>
       <div className="inset-0 bg-gray-600/20 backdrop-blur-xs absolute"></div>
@@ -89,7 +94,10 @@ export function GroupPreview() {
           isFetchingConversation={isFetchingConversation}
           membersCount={membersCount}
           isAdmin={isAdmin}
+          isGroup={true}
           conversationId={id}
+          chatAvatar={chatData?.chatAvatar}
+          chatTitle={chatData?.chatTitle}
         />
         <div
           className="flex flex-col flex-1 relative h-[70vh] bg-white bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] 
