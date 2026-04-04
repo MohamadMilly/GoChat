@@ -25,7 +25,7 @@ export const ChatsPanel = memo(() => {
   const query = searchParams.get("name");
 
   useEffect(() => {
-    if (isFetching || conversations.length === 0 || !isConnected) return;
+    if (isFetching || conversations.length === 0) return;
     conversations.forEach((c) => {
       socket.auth.serverOffset[c.id.toString()] =
         c.messages[c.messages.length - 1]?.id || 0;
@@ -33,7 +33,7 @@ export const ChatsPanel = memo(() => {
 
       socket.emit("join chat", String(c.id));
     });
-  }, [conversations, isFetching, isConnected]);
+  }, [conversations, isFetching]);
 
   const filteredConversations = filterConversations(conversations, query);
   return (

@@ -153,6 +153,7 @@ io.on("connection", async (socket) => {
         };
         socket.emit("chat message", filtered, convId, message.id);
       }
+      socket.join(convId);
     }
   });
   socket.on(

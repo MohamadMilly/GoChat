@@ -12,4 +12,5 @@ provider to the items and also use useCallback hook instead of calling useContex
   3- use exact to invalidate queries with all the keys in the query key only
 
   4- giving socket object to prisma causes infinite loop
+
   
