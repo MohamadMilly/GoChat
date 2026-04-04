@@ -31,6 +31,9 @@ export function SocketProvider({ children }) {
 
     function onDisconnect(reason) {
       setIsConnected(false);
+      if (reason === "io server disconnect") {
+        socket.connect();
+      }
     }
     function onUserConnect(users) {
       setConnectedUsers(users);
