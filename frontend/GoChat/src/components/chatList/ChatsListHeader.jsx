@@ -1,10 +1,7 @@
-import { Menu, PanelRight } from "lucide-react";
+import { PanelRight } from "lucide-react";
 import { useSocket } from "../../contexts/SocketContext";
 import translations from "../../translations";
 import { useLanguage } from "../../contexts/LanguageContext";
-import { Link } from "../ui/Link";
-import Button from "../ui/Button";
-import { socket } from "../../socket";
 
 export function ChatsListHeader() {
   const { isConnected } = useSocket();
@@ -34,17 +31,6 @@ export function ChatsListHeader() {
                 : translations.Common[language].Connecting}
             </div>
           </div>
-          <Button
-            onClick={() => {
-              if (socket.connected) {
-                socket.disconnect();
-              } else {
-                socket.connect();
-              }
-            }}
-          >
-            {socket.connected ? "disconnect" : "connect"}
-          </Button>
         </div>
         <button
           command="show-modal"
