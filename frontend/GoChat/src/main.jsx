@@ -18,17 +18,15 @@ import { LanguageProvider } from "./contexts/LanguageContext.jsx";
 const router = createBrowserRouter(routes);
 
 createRoot(document.getElementById("root")).render(
-  <StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <SocketProvider>
-          <LanguageProvider>
-            <ThemeProvider>
-              <RouterProvider router={router} />
-            </ThemeProvider>
-          </LanguageProvider>
-        </SocketProvider>
-      </AuthProvider>
-    </QueryClientProvider>
-  </StrictMode>,
+  <QueryClientProvider client={queryClient}>
+    <AuthProvider>
+      <SocketProvider>
+        <LanguageProvider>
+          <ThemeProvider>
+            <RouterProvider router={router} />
+          </ThemeProvider>
+        </LanguageProvider>
+      </SocketProvider>
+    </AuthProvider>
+  </QueryClientProvider>,
 );

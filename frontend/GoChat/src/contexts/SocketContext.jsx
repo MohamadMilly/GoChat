@@ -2,7 +2,6 @@ import { createContext, useState, useEffect, useContext } from "react";
 import { socket } from "../socket";
 import { useAuth } from "./AuthContext";
 import { useQueryClient } from "@tanstack/react-query";
-import { toast } from "react-toastify";
 
 const SocketContext = createContext(null);
 
@@ -23,15 +22,15 @@ export function SocketProvider({ children }) {
 
   useEffect(() => {
     function onConnect() {
+      if (!socket.recovered) {
+        const offsets = socket.auth.serverOffset;
+        socket.emit("recover", offsets);
+      }
       setIsConnected(true);
     }
 
     function onDisconnect(reason) {
-      if (reason === "io server disconnect") {
-        setIsConnected(false);
-        return;
-      }
-      socket.connect();
+      setIsConnected(false);
     }
     function onUserConnect(users) {
       setConnectedUsers(users);
