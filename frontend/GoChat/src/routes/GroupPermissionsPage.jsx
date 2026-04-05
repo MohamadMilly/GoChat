@@ -52,7 +52,7 @@ export function GroupPermisstionsPage() {
     setNewPermissions((prev) => ({ ...prev, [key]: value }));
   };
   return (
-    <main className="max-w-200 pb-4 mx-auto bg-white dark:bg-gray-900 font-rubik relative">
+    <main className="max-w-200 pb-4 mx-auto bg-gray-50 dark:bg-gray-900 font-rubik relative">
       <div className="flex justify-between items-center p-2 bg-gray-50/30 dark:bg-gray-800/80 rounded-lg my-2">
         <Button
           onClick={() => navigate(-1)}
@@ -79,7 +79,7 @@ export function GroupPermisstionsPage() {
             What people can do in the group?
           </p>
         </div>
-        <div className="bg-gray-50 dark:bg-gray-800 shadow-xs border border-gray-100 dark:border-gray-700 p-4 rounded">
+        <div className="bg-white dark:bg-gray-800 shadow-xs border border-gray-100 dark:border-gray-700 p-4 rounded">
           <div className="flex items-center justify-between my-3">
             <span className="text-sm dark:text-gray-100 grow">
               Sending messages

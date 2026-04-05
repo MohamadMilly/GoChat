@@ -14,10 +14,9 @@ const translations = {
       gochat: "غو تشات",
       ErrorPrefix: "خطأ:",
       Connecting: "جاري الاتصال...",
-
+      Add: "أضف",
       Optional: "(اختياري)",
       Enabled: "مُفعل",
-
       Disabled: "معطّل",
     },
     English: {
@@ -33,6 +32,7 @@ const translations = {
       Connecting: "Connecting...",
       NoPrefix: "No",
       OnlyVisibleToYou: "(Only visible to you)",
+      Add: "Add",
       Optional: "(optional)",
       Enabled: "Enabled",
       Disabled: "Disabled",

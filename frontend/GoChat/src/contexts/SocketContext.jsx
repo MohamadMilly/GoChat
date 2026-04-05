@@ -150,7 +150,7 @@ export function SocketProvider({ children }) {
         return {
           ...old,
           conversations: old.conversations.map((c) => {
-            if (c.id == conversationId && c.messages[0].id === messageId) {
+            if (c.id == conversationId && c.messages[0]?.id === messageId) {
               return { ...c, messages: [newMessages[newMessages.length - 1]] };
             } else {
               return c;

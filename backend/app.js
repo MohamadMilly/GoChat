@@ -483,11 +483,19 @@ io.on("connection", async (socket) => {
         });
         return;
       }
-      if (message.senderId !== userId) {
-        callback({
+      const userAdminData = await prisma.conversationAdmin.findUnique({
+        where: {
+          conversationId_userId: {
+            userId: Number(userId),
+            conversationId: Number(conversationId),
+          },
+        },
+      });
+
+      if (message.senderId !== userId && !userAdminData) {
+        return callback({
           status: 401,
         });
-        return;
       }
       const deletedReadersPromise = prisma.messageOnReader.deleteMany({
         where: {
@@ -497,7 +505,7 @@ io.on("connection", async (socket) => {
       const deletedMessagePromise = prisma.message.delete({
         where: {
           id: messageId,
-          senderId: userId,
+          senderId: message.senderId,
         },
       });
       await prisma.$transaction([deletedReadersPromise, deletedMessagePromise]);

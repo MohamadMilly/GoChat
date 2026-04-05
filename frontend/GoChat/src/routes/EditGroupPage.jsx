@@ -237,7 +237,7 @@ function ParticipantCard({
           </div>
         </div>
         {menuOpen && (
-          <div className="absolute flex flex-col right-12 bottom-4 p-2 rounded bg-gray-700 animate-pop">
+          <div className="absolute flex flex-col right-12 bottom-4 w-40 p-1 gap-1 rounded dark:bg-gray-700 bg-gray-100 animate-pop">
             {user.id !== participant.userId && (
               <>
                 <Button
@@ -319,7 +319,7 @@ function ParticipantsList({ participants, setParticipants, language }) {
           onClick={() => setIsAddingParticipant(!isAddingParticipant)}
           className={"relative group"}
         >
-          <span className="text-xs absolute -top-8 -right-8 bg-gray-700/20 p-1 rounded w-30 group-hover:opacity-100 transition-all duration-300 opacity-0">
+          <span className="text-xs absolute -top-8 -right-8 dark:bg-gray-700/20 bg-gray-100  p-1 rounded w-30 group-hover:opacity-100 transition-all duration-300 opacity-0">
             {translations.Common[language]?.Add || "Add"}
           </span>
           <UserRoundPlus size={20} />
@@ -455,7 +455,7 @@ export function EditGroupPage() {
   if (error) return <p>Error: {error.message}</p>;
 
   return (
-    <main className="max-w-200 pb-4 mx-auto bg-white dark:bg-gray-900 font-rubik relative">
+    <main className="max-w-200 pb-4 mx-auto bg-gray-50 dark:bg-gray-900 font-rubik relative">
       <div className="flex justify-between items-center p-2 bg-gray-50/30 dark:bg-gray-800/80 rounded-lg my-2">
         <Button
           onClick={() => navigate(-1)}

@@ -16,7 +16,7 @@ import { ChatBubbleMenu } from "./ChatBubbleMenu";
 import { useMemo } from "react";
 
 /*
-TO DO :
+TO DO : (DONE)
 ChatBubbleMenuContainer is a layer in messages list which will receive a message and pass it via context (which is stored in a state) to the ChatBubbleMenu 
 it will contain the messages and one menu component that will flow depending on where the user clicks
 this created an isolated place for the flow between ChatBubble and its Menu
@@ -27,12 +27,14 @@ export const ChatBubbleContainerContext = createContext({ message: null });
 function ChatBubbleMenuContainer({ children }) {
   const [message, setMessage] = useState(null);
   const [clickCoords, setClickCoords] = useState({ x: null, y: null });
+  const { isCurrentUserAdmin } = useContext(ChatPageContext);
   const menuRef = useRef(null);
   const { user } = useAuth();
-
+  const isCurrentUserMessage = message ? user.id === message?.senderId : false;
   useEffect(() => {
     const menu = menuRef.current;
     const handleClickOutSide = (e) => {
+      if (!menu) return;
       if (message && !menu.contains(e.target)) {
         setMessage(null);
       }
@@ -49,12 +51,14 @@ function ChatBubbleMenuContainer({ children }) {
   );
   return (
     <ChatBubbleContainerContext value={contextValue}>
-      {message && message.senderId === user.id && (
+      {message && (message.senderId === user.id || isCurrentUserAdmin) && (
         <div className="text-white w-full h-full inset-0 bg-gray-700/30 z-100 absolute">
           <ChatBubbleMenu
+            setMessage={setMessage}
             message={message}
             clickCoords={clickCoords}
             menuRef={menuRef}
+            isCurrentUserMessage={isCurrentUserMessage}
           />
         </div>
       )}{" "}

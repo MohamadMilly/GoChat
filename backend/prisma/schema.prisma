@@ -128,7 +128,7 @@ model ConversationAdmin {
   assignedBy ConversationAdmin? @relation("admins assigned",fields: [assigningUserId],references: [id])
   assigningUserId Int?
   assignedAdmins ConversationAdmin[] @relation("admins assigned")
-
+  
   @@unique([conversationId,userId])
 }
 
