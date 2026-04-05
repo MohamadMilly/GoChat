@@ -124,6 +124,10 @@ export function SocketProvider({ children }) {
           };
         },
       );
+      const chatBubbleAudio = new Audio("/sounds/chatBubble_soundeffect.mp3");
+      chatBubbleAudio.play().catch((error) => {
+        console.error("Error playing audio: ", error);
+      });
       socket.auth.serverOffset = {
         ...socket.auth.serverOffset,
         [conversationId]: serverOffset,

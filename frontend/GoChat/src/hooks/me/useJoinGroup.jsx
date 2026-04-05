@@ -30,6 +30,10 @@ export function useJoinGroup() {
         conversationId,
         `${user.firstname} ${user.lastname}`,
       );
+      queryClient.invalidateQueries({
+        queryKey: ["conversation", conversationId],
+        exact: true,
+      });
     },
   });
 }
