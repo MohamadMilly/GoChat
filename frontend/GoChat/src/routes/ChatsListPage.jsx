@@ -5,6 +5,7 @@ import { ChatsPanel } from "../components/chatList/ChatsPanel";
 import { SideDrawer } from "../components/ui/SideDrawer";
 import { createContext, useState } from "react";
 import { useLanguage } from "../contexts/LanguageContext";
+import { ToastContainer } from "react-toastify";
 
 const storedChatsPanelStatus = JSON.parse(
   localStorage.getItem("isChatsPanelCollapsed"),
@@ -27,6 +28,11 @@ export function ChatsListPage() {
       value={{ isChatsPanelCollapsed, handleChatsPanelCollapse }}
     >
       <div className="flex flex-col h-full md:h-screen">
+        <ToastContainer
+          position="top-right"
+          draggable={true}
+          autoClose={3000}
+        />
         <SideDrawer />
         <ChatsListHeader />
         <main

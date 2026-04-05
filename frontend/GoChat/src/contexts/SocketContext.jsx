@@ -124,6 +124,8 @@ export function SocketProvider({ children }) {
           };
         },
       );
+
+      /* Whenever a message receieved , an effect will be triggered */
       const chatBubbleAudio = new Audio("/sounds/chatBubble_soundeffect.mp3");
       chatBubbleAudio.play().catch((error) => {
         console.error("Error playing audio: ", error);

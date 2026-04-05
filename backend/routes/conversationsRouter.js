@@ -82,4 +82,9 @@ conversationsRouter.put(
   conversationsController.conversationPermissionsPut,
 );
 
+conversationsRouter.delete(
+  "/:conversationId",
+  conversationsController.leaveOrDeleteConversationDelete,
+);
+
 module.exports = conversationsRouter;

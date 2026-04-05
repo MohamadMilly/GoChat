@@ -546,6 +546,119 @@ const conversationPermissionsPut = async (req, res) => {
     });
   }
 };
+/* 
+ TODO : 
+ if the conversation is direct => delete it from both partners 
+ if the conversation is group => is the user the owner ? => yes delete the group entirely 
+ if the user is admin => delete the user admin record and just leave
+ if the user is just a member just leave (delete conversationParticipant record)
+ */
+
+async function deleteConversation(conversationId) {
+  const deletePartnersPromise = prisma.conversationParticipant.deleteMany({
+    where: {
+      conversationId: conversationId,
+    },
+  });
+  const deleteAdminsPromise = prisma.conversationAdmin.deleteMany({
+    where: {
+      conversationId: conversationId,
+    },
+  });
+  const deletePermissionsPromise = prisma.permissions.delete({
+    where: {
+      conversationId: conversationId,
+    },
+  });
+  const deleteConversationPromise = prisma.conversation.delete({
+    where: {
+      id: conversationId,
+    },
+  });
+  /* Delete all previous in order by transaction */
+  await prisma.$transaction([
+    deletePartnersPromise,
+    deleteAdminsPromise,
+    deletePermissionsPromise,
+    deleteConversationPromise,
+  ]);
+}
+
+const leaveOrDeleteConversationDelete = async (req, res) => {
+  const currentUser = req.currentUser;
+  const conversationId = Number(req.params.conversationId);
+  try {
+    const conversationData = await prisma.conversation.findUnique({
+      where: {
+        id: conversationId,
+      },
+    });
+    if (!conversationData)
+      return res.status(404).json({
+        message: "Conversation is not found.",
+      });
+    switch (conversationData.type) {
+      case "DIRECT":
+        await deleteConversation(conversationId);
+        return res.json({
+          message: "Conversation is deleted sucessfully.",
+        });
+      case "GROUP":
+        const userRoleRecord = await prisma.conversationAdmin.findUnique({
+          where: {
+            conversationId_userId: {
+              conversationId: conversationId,
+              userId: currentUser.id,
+            },
+          },
+        });
+        if (!userRoleRecord) {
+          await prisma.conversationParticipant.delete({
+            where: {
+              conversationId_userId: {
+                conversationId: conversationId,
+                userId: currentUser.id,
+              },
+            },
+          });
+          return res.json({
+            message: "Left the conversation successfully.",
+          });
+        } else if (userRoleRecord.isOwner) {
+          await deleteConversation(conversationId);
+          return res.json({
+            message: "Conversation is deleted successfully.",
+          });
+        } else {
+          await prisma.conversationAdmin.delete({
+            where: {
+              conversationId_userId: {
+                conversationId: conversationId,
+                userId: currentUser.id,
+              },
+            },
+          });
+          await prisma.conversationParticipant.delete({
+            where: {
+              conversationId_userId: {
+                conversationId: conversationId,
+                userId: currentUser.id,
+              },
+            },
+          });
+          return res.json({
+            message: "Left the conversation successfully.",
+          });
+        }
+    }
+  } catch (err) {
+    return res.status(500).json({
+      message:
+        "Unexpected error happened while deleting or leaving this conversation.",
+      error: err.stack,
+    });
+  }
+};
 
 module.exports = {
   createNewConversationPost,
@@ -555,4 +668,5 @@ module.exports = {
   editGroupPut,
   conversationPermissionsGet,
   conversationPermissionsPut,
+  leaveOrDeleteConversationDelete,
 };

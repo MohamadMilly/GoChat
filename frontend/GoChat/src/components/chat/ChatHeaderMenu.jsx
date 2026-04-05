@@ -6,12 +6,35 @@ import { ChatPageContext } from "../../routes/ChatPage";
 import { socket } from "../../socket";
 import { useQueryClient } from "@tanstack/react-query";
 import { useMe } from "../../hooks/me/useMe";
+import { useLeaveConversation } from "../../hooks/useLeaveConversation";
+import { useNavigate } from "react-router";
+import { toast } from "react-toastify";
+
+/* 
+TO DO :
+When the conversation is a group => if the current user is the owner hide it and move it to the edit  group page 
+when the conversation  is a direct one => put it in the ChatHeader 
+*/
+function LeaveConversationButton({ isGroup, conversationId }) {
+  const { mutate: leave, isPending, error } = useLeaveConversation();
+  const navigate = useNavigate();
+  const handleLeaveGroup = (conversationId) => {
+    leave(conversationId);
+    navigate("/chats");
+    toast.success("Chat removed successfully.");
+  };
+  return (
+    <Button onClick={() => handleLeaveGroup(conversationId)}>
+      {isGroup ? "Leave group" : "Delete chat"}
+    </Button>
+  );
+}
 
 export function ChatHeaderMenu({ isGroup, chatPartnerId }) {
   const queryClient = useQueryClient();
   const [isOpen, setIsOpen] = useState(false);
   const { mutateAsync: patch, error, isPending } = usePatchUser();
-  const { conversationId } = useContext(ChatPageContext);
+  const { conversationId, isCurrentUserAdmin } = useContext(ChatPageContext);
   const { user, isFetching } = useMe();
   const isChatPartnerBlocked =
     !isFetching &&
@@ -44,10 +67,11 @@ export function ChatHeaderMenu({ isGroup, chatPartnerId }) {
               {isChatPartnerBlocked ? "UnBlock" : "Block"}
             </Button>
           )}
-          {isGroup && (
-            <p className="text-xs text-balance">
-              This Menu is under development
-            </p>
+          {!isCurrentUserAdmin && (
+            <LeaveConversationButton
+              conversationId={conversationId}
+              isGroup={isGroup}
+            />
           )}
         </div>
       )}
