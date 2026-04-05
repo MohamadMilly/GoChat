@@ -566,7 +566,7 @@ async function deleteConversation(conversationId) {
       },
     },
   });
-  const deleteMessagesPromise = prisma.conversationParticipant.deleteMany({
+  const deleteMessagesPromise = prisma.message.deleteMany({
     where: {
       conversationId: conversationId,
     },
