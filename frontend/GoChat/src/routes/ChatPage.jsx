@@ -36,6 +36,7 @@ export function ChatPage() {
     membersCount,
     partnerId,
     isAdmin,
+    isOwner,
     isFetching: isFetchingConversation,
     error: conversationError,
   } = useConversation(id);
@@ -97,6 +98,7 @@ export function ChatPage() {
         isFetchingPermissions,
         membersCount,
         isCurrentUserAdmin: isAdmin,
+        isCurrentUserOwner: isOwner,
       }}
     >
       <section

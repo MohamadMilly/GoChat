@@ -107,6 +107,9 @@ const getSpecificConversationGet = async (req, res) => {
     const isCurrentUserAdmin = conversation.admins.some(
       (admin) => admin.userId === userId,
     );
+    const isCurrentUserOwner = conversation.admins.some(
+      (admin) => admin.userId === userId && admin.isOwner,
+    );
     const membersCount = await prisma.conversationParticipant.count({
       where: {
         conversationId: parseInt(conversationId),
@@ -140,6 +143,7 @@ const getSpecificConversationGet = async (req, res) => {
       membersCount,
       isJoined: isCurrentUserParticipant,
       isAdmin: isCurrentUserAdmin,
+      isOwner: isCurrentUserOwner,
       partnerId:
         conversation.type === "DIRECT"
           ? conversation.participants.find((p) => p.userId !== userId)?.userId
@@ -555,6 +559,18 @@ const conversationPermissionsPut = async (req, res) => {
  */
 
 async function deleteConversation(conversationId) {
+  const deleteMessagesReadersPromise = prisma.messageOnReader.deleteMany({
+    where: {
+      message: {
+        conversationId: conversationId,
+      },
+    },
+  });
+  const deleteMessagesPromise = prisma.conversationParticipant.deleteMany({
+    where: {
+      conversationId: conversationId,
+    },
+  });
   const deletePartnersPromise = prisma.conversationParticipant.deleteMany({
     where: {
       conversationId: conversationId,
@@ -577,6 +593,8 @@ async function deleteConversation(conversationId) {
   });
   /* Delete all previous in order by transaction */
   await prisma.$transaction([
+    deleteMessagesReadersPromise,
+    deleteMessagesPromise,
     deletePartnersPromise,
     deleteAdminsPromise,
     deletePermissionsPromise,

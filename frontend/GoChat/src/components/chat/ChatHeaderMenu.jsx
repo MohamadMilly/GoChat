@@ -34,7 +34,7 @@ export function ChatHeaderMenu({ isGroup, chatPartnerId }) {
   const queryClient = useQueryClient();
   const [isOpen, setIsOpen] = useState(false);
   const { mutateAsync: patch, error, isPending } = usePatchUser();
-  const { conversationId, isCurrentUserAdmin } = useContext(ChatPageContext);
+  const { conversationId, isCurrentUserOwner } = useContext(ChatPageContext);
   const { user, isFetching } = useMe();
   const isChatPartnerBlocked =
     !isFetching &&
@@ -67,7 +67,7 @@ export function ChatHeaderMenu({ isGroup, chatPartnerId }) {
               {isChatPartnerBlocked ? "UnBlock" : "Block"}
             </Button>
           )}
-          {!isCurrentUserAdmin && (
+          {(!isGroup || !isCurrentUserOwner) && (
             <LeaveConversationButton
               conversationId={conversationId}
               isGroup={isGroup}
