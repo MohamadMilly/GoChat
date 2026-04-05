@@ -7,6 +7,7 @@ export function About() {
   const t = translations.AboutPage;
   return (
     <main
+      dir="auto"
       className="max-w-200 mx-auto p-6  bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] 
              dark:bg-[radial-gradient(#1e293b_1px,transparent_1px)] 
              [background-size:16px_16px] h-full border-x border-[#e5e7eb] dark:border-[#1e293b]"

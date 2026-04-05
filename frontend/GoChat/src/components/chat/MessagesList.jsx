@@ -14,6 +14,8 @@ import { useMessages } from "../../hooks/useMessages";
 import { MessagesListLoading } from "../skeletonLoadingComponents/MessagesListLoading";
 import { ChatBubbleMenu } from "./ChatBubbleMenu";
 import { useMemo } from "react";
+import { socket } from "../../socket";
+import { useQueryClient } from "@tanstack/react-query";
 
 /*
 TO DO : (DONE)
@@ -79,6 +81,7 @@ export function MessagesList() {
 
 export function MessagesListContent(props) {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const messagesListRef = useRef(null);
   const { setMessage, setClickCoords } = useContext(ChatBubbleContainerContext);
   const { setRepliedMessage } = useContext(ChatPageContext);
@@ -96,7 +99,27 @@ export function MessagesListContent(props) {
       messagesListRef.current.scrollTop = messagesListRef.current.scrollHeight;
     }
   }, [messages]);
+  useEffect(() => {
+    function onUserJoin(conversationId, fullname) {
+      const messageList = messagesListRef.current;
+      if (!messageList) return;
+      const newMemberNotification = document.createElement("span");
+      newMemberNotification.textContent = `${fullname} joined the conversation`;
+      newMemberNotification.className =
+        "p-0.5 bg-gray-200/15 backdrop-blur-md dark:bg-gray-700/15 text-gray-600 dark:text-gray-100 rounded text-sm mx-auto text-center block my-3";
+      messageList.appendChild(newMemberNotification);
+      /* update conversation data */
+      queryClient.invalidateQueries({
+        queryKey: ["conversation", conversationId],
+        exact: true,
+      });
+    }
+    socket.on("join conversation", onUserJoin);
 
+    return () => {
+      socket.off("join conversation", onUserJoin);
+    };
+  });
   const handleShowChatBubbleMenu = useCallback(
     (message, x, y) => {
       setClickCoords({ x: x, y: y });

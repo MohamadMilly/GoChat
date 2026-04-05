@@ -605,7 +605,17 @@ io.on("connection", async (socket) => {
     if (!conversationId) {
       return;
     } else {
-      socket.broadcast.emit("edit permissions", conversationId);
+      io.to(conversationId).emit("edit permissions", conversationId);
+    }
+  });
+
+  socket.on("join conversation", (conversationId, fullname) => {
+    if (!conversationId) {
+      return;
+    } else {
+      socket.broadcast
+        .to(conversationId)
+        .emit("join conversation", conversationId, fullname);
     }
   });
 });
