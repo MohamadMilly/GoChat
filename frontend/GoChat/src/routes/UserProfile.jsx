@@ -22,6 +22,7 @@ export function UserProfile() {
 
   if (error) return <p>Error: {error.message}</p>;
 
+  /*  Derived values */
   const fullname = user && !isFetching && user.firstname + " " + user.lastname;
   const isConnected = connectedUsers.find((id) => id == userId);
   const transitionId = getGenertedTransitionId();
@@ -29,11 +30,11 @@ export function UserProfile() {
     ? `${fullname.replaceAll(" ", "-")}-${transitionId}`
     : null;
   return (
-    <main className="max-w-200 mx-auto dark:bg-gray-900 font-rubik relative">
-      <div className="flex justify-start items-center p-2 bg-gray-50/30 dark:bg-gray-800/80 rounded-lg my-2">
+    <main className="max-w-3xl mx-auto dark:bg-gray-900 font-rubik relative px-4 pb-6">
+      <div className="flex justify-start items-center p-2 bg-white/60 dark:bg-gray-800/60 rounded-md my-4 shadow-sm">
         <Button
           onClick={() => navigate(-1)}
-          className="text-gray-600 dark:text-gray-300"
+          className="text-gray-600 dark:text-gray-300 p-2"
         >
           <p className="sr-only">{translations.Common[language].GoBackSR}</p>
           <ArrowBigLeft size={20} />
@@ -53,7 +54,7 @@ export function UserProfile() {
             lastSeen={user?.profile?.lastSeen}
             isBlocking={isBlocking}
           />
-          <section className="px-4 mt-4 py-2 bg-white dark:bg-gray-800 divide-y divide-gray-300 dark:divide-gray-700 shadow-sm rounded-md">
+          <section className="px-4 mt-4 py-4 bg-white/60 dark:bg-gray-800 divide-y divide-gray-300 dark:divide-gray-700 shadow-sm rounded-md">
             <ProfileSection
               title={PageTranslations[language].Username}
               value={user.username}

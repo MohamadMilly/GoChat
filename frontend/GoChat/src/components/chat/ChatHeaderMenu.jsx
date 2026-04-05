@@ -9,23 +9,44 @@ import { useMe } from "../../hooks/me/useMe";
 import { useLeaveConversation } from "../../hooks/useLeaveConversation";
 import { useNavigate } from "react-router";
 import { toast } from "react-toastify";
+import { useAuth } from "../../contexts/AuthContext";
 
 /* 
 TO DO :
 When the conversation is a group => if the current user is the owner hide it and move it to the edit  group page 
 when the conversation  is a direct one => put it in the ChatHeader 
 */
-function LeaveConversationButton({ isGroup, conversationId }) {
-  const { mutate: leave, isPending, error } = useLeaveConversation();
+export function LeaveConversationButton({
+  isGroup,
+  conversationId,
+  isCurrentUserOwner,
+  customText = "",
+  className = "",
+}) {
+  const { user } = useAuth();
+  const { mutateAsync: leave, isPending, error } = useLeaveConversation();
   const navigate = useNavigate();
-  const handleLeaveGroup = (conversationId) => {
-    leave(conversationId);
+  const handleLeaveGroup = async (conversationId) => {
+    await leave(conversationId);
+    const withDelete = isGroup ? (isCurrentUserOwner ? true : false) : true;
+    const fullname = `${user.firstname} ${user.lastname}`;
+    socket.emit(
+      "leave conversation",
+      withDelete,
+      fullname,
+      user.id,
+      conversationId,
+    );
     navigate("/chats");
     toast.success("Chat removed successfully.");
   };
+
   return (
-    <Button onClick={() => handleLeaveGroup(conversationId)}>
-      {isGroup ? "Leave group" : "Delete chat"}
+    <Button
+      className={className}
+      onClick={() => handleLeaveGroup(conversationId)}
+    >
+      {customText ? customText : isGroup ? "Leave group" : "Delete chat"}
     </Button>
   );
 }
@@ -69,6 +90,7 @@ export function ChatHeaderMenu({ isGroup, chatPartnerId }) {
           )}
           {(!isGroup || !isCurrentUserOwner) && (
             <LeaveConversationButton
+              isCurrentUserOwner={isCurrentUserOwner}
               conversationId={conversationId}
               isGroup={isGroup}
             />

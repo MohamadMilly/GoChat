@@ -394,8 +394,8 @@ export function EditProfilePage() {
   if (profileError) return <p>Error: {profileError.message}</p>;
 
   return (
-    <main className="max-w-200 mx-auto dark:bg-gray-900 font-rubik relative">
-      <div className="flex justify-between items-center p-2 bg-gray-50/30 dark:bg-gray-800/80 rounded-lg my-2">
+    <main className="max-w-3xl mx-auto dark:bg-gray-900 font-rubik relative px-4 pb-6">
+      <div className="flex justify-between items-center p-2 bg-white/60 dark:bg-gray-800/60 rounded-md my-4 shadow-sm">
         <Button
           onClick={() => navigate(-1)}
           className="text-gray-600 dark:text-gray-300"
@@ -406,7 +406,9 @@ export function EditProfilePage() {
         <Button
           disabled={isFetchingProfile}
           onClick={handleConfirmEdit}
-          className={"text-gray-600 dark:text-gray-300"}
+          className={
+            "flex items-center gap-2 bg-cyan-600 hover:bg-cyan-700 text-white dark:bg-cyan-500 dark:hover:bg-cyan-600 p-2 rounded"
+          }
         >
           <p className="sr-only">
             {translations.EditProfilePage[language].ConfirmEditsSR}
@@ -420,66 +422,69 @@ export function EditProfilePage() {
         action="
       "
       >
-        {" "}
-        <AvatarFileField
-          setAvatarURL={(value) => onFieldChange(value, "avatar")}
-          avatarURL={newProfileData.avatar}
-          fullname={
-            currentUserIdentity.firstname + " " + currentUserIdentity.lastname
-          }
-          color={userData?.accountColor || ""}
-          isFetchingProfile={isFetchingProfile}
-        />
-        <AvatarBackgroundFileField
-          setAvatarBackgroundURL={(value) =>
-            onFieldChange(value, "avatarBackground")
-          }
-          avatarBackgroundURL={newProfileData.avatarBackground}
-          isFetchingProfile={isFetchingProfile}
-        />
-        <AccountColorField
-          isFetchingProfile={isFetchingProfile}
-          setAccountColor={(color) =>
-            onFieldChange(color, "accountColor", setUserData)
-          }
-          accountColor={userData?.accountColor}
-        />
-        <BioTextAreaField
-          value={newProfileData.bio}
-          onChange={(e) => onFieldChange(e.target.value, "bio")}
-          isFetchingProfile={isFetchingProfile}
-        />
-        <ProfileInputField
-          value={newProfileData.phoneNumber}
-          onChange={(e) => onFieldChange(e.target.value, "phoneNumber")}
-          id="phoneNumber"
-          label={translations.Profile[language].Phone}
-          type="phone"
-          name={"phoneNumber"}
-          isFetchingProfile={isFetchingProfile}
-        />
-        <ProfileInputField
-          value={newProfileData.email}
-          onChange={(e) => onFieldChange(e.target.value, "email")}
-          id="email"
-          label={translations.Profile[language].Email}
-          type="email"
-          name={"bio"}
-          isFetchingProfile={isFetchingProfile}
-        />
-        <ProfileInputField
-          value={
-            newProfileData.birthday
-              ? new Date(newProfileData.birthday).toISOString().split("T")[0]
-              : ""
-          }
-          onChange={(e) => onFieldChange(new Date(e.target.value), "birthday")}
-          id="birthday"
-          label={translations.Profile[language].Birthday}
-          type="date"
-          name={"birthday"}
-          isFetchingProfile={isFetchingProfile}
-        />
+        <div className="space-y-4">
+          <AvatarFileField
+            setAvatarURL={(value) => onFieldChange(value, "avatar")}
+            avatarURL={newProfileData.avatar}
+            fullname={
+              currentUserIdentity.firstname + " " + currentUserIdentity.lastname
+            }
+            color={userData?.accountColor || ""}
+            isFetchingProfile={isFetchingProfile}
+          />
+          <AvatarBackgroundFileField
+            setAvatarBackgroundURL={(value) =>
+              onFieldChange(value, "avatarBackground")
+            }
+            avatarBackgroundURL={newProfileData.avatarBackground}
+            isFetchingProfile={isFetchingProfile}
+          />
+          <AccountColorField
+            isFetchingProfile={isFetchingProfile}
+            setAccountColor={(color) =>
+              onFieldChange(color, "accountColor", setUserData)
+            }
+            accountColor={userData?.accountColor}
+          />
+          <BioTextAreaField
+            value={newProfileData.bio}
+            onChange={(e) => onFieldChange(e.target.value, "bio")}
+            isFetchingProfile={isFetchingProfile}
+          />
+          <ProfileInputField
+            value={newProfileData.phoneNumber}
+            onChange={(e) => onFieldChange(e.target.value, "phoneNumber")}
+            id="phoneNumber"
+            label={translations.Profile[language].Phone}
+            type="phone"
+            name={"phoneNumber"}
+            isFetchingProfile={isFetchingProfile}
+          />
+          <ProfileInputField
+            value={newProfileData.email}
+            onChange={(e) => onFieldChange(e.target.value, "email")}
+            id="email"
+            label={translations.Profile[language].Email}
+            type="email"
+            name={"bio"}
+            isFetchingProfile={isFetchingProfile}
+          />
+          <ProfileInputField
+            value={
+              newProfileData.birthday
+                ? new Date(newProfileData.birthday).toISOString().split("T")[0]
+                : ""
+            }
+            onChange={(e) =>
+              onFieldChange(new Date(e.target.value), "birthday")
+            }
+            id="birthday"
+            label={translations.Profile[language].Birthday}
+            type="date"
+            name={"birthday"}
+            isFetchingProfile={isFetchingProfile}
+          />
+        </div>
       </form>
     </main>
   );

@@ -15,6 +15,7 @@ import translations from "../translations";
 import { useLanguage } from "../contexts/LanguageContext";
 import { useEditGroup } from "../hooks/useEditGroup";
 import { useAuth } from "../contexts/AuthContext";
+import { LeaveConversationButton } from "../components/chat/ChatHeaderMenu";
 
 function GroupInputField({
   value,
@@ -420,7 +421,13 @@ export function EditGroupPage() {
     isPending,
     isSuccess,
   } = useEditGroup();
-  const { conversation, isFetching, error } = useConversation(conversationId);
+  const {
+    conversation,
+    isFetching,
+    error,
+    isAdmin: isCurrentUserAdmin,
+    isOwner: isCurrentUserOwner,
+  } = useConversation(conversationId);
   const [groupMetaData, setGroupMetaData] = useState({
     title: "",
     description: "",
@@ -453,80 +460,131 @@ export function EditGroupPage() {
   };
 
   if (error) return <p>Error: {error.message}</p>;
-
   return (
-    <main className="max-w-200 pb-4 mx-auto bg-gray-50 dark:bg-gray-900 font-rubik relative">
-      <div className="flex justify-between items-center p-2 bg-gray-50/30 dark:bg-gray-800/80 rounded-lg my-2">
-        <Button
-          onClick={() => navigate(-1)}
-          className="text-gray-600 dark:text-gray-300"
-        >
-          <p className="sr-only">{translations.Common[language].GoBackSR}</p>
-          <ArrowBigLeft size={20} />
-        </Button>
-        <Button
-          disabled={isFetching}
-          onClick={handleConfirm}
-          className={"text-gray-600 dark:text-gray-300"}
-        >
-          <p className="sr-only">Confirm edits</p>
-          <Check size={20} />
-        </Button>
-      </div>
+    <main className="max-w-3xl pb-6 mx-auto bg-gray-50 dark:bg-gray-900 font-rubik relative px-4">
+      <header className="flex items-center justify-between gap-4 p-3 my-4 bg-white/60 dark:bg-gray-800/60 rounded-md shadow-sm">
+        <div className="flex items-center gap-3">
+          <Button
+            onClick={() => navigate(-1)}
+            className="text-gray-600 dark:text-gray-300 p-2"
+          >
+            <p className="sr-only">{translations.Common[language].GoBackSR}</p>
+            <ArrowBigLeft size={20} />
+          </Button>
+          <div>
+            <h1 className="text-md font-semibold text-gray-800 dark:text-gray-100">
+              Edit Group
+            </h1>
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              Update group details, members and permissions
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Button
+            disabled={isFetching}
+            onClick={handleConfirm}
+            className={"text-gray-600 dark:text-gray-300"}
+          >
+            <Check size={20} />
+            <p className="sr-only">
+              {translations.EditProfilePage[language].ConfirmEditsSR}
+            </p>
+          </Button>
+        </div>
+      </header>
+
       <section>
         <form
           dir={language === "Arabic" ? "rtl" : "ltr"}
           onSubmit={(e) => e.preventDefault()}
         >
-          <AvatarFileField
-            setAvatarURL={(value) => onFieldChange(value, "avatar")}
-            avatarURL={groupMetaData.avatar}
-            title={
-              groupMetaData.title || translations.NewGroupPage[language].Title
-            }
-            isFetching={isFetching}
-          />
-          <GroupInputField
-            value={groupMetaData.title}
-            onChange={(e) => onFieldChange(e.target.value, "title")}
-            id="groupTitle"
-            label={translations.NewGroupPage[language].Title}
-            name="title"
-            isFetching={isFetching}
-          />
-          <DescriptionTextArea
-            value={groupMetaData.description}
-            onChange={(e) => onFieldChange(e.target.value, "description")}
-            isFetching={isFetching}
-          />
-          <ParticipantsList
-            language={language}
-            participants={groupMetaData.participants}
-            setParticipants={(updater) => {
-              setGroupMetaData((prev) => {
-                const next =
-                  typeof updater === "function"
-                    ? updater(prev.participants)
-                    : (updater ?? []);
-                return { ...prev, participants: next };
-              });
-            }}
-          />
+          <div className="grid md:grid-cols-3 gap-6 items-start">
+            <div className="md:col-span-1">
+              <AvatarFileField
+                setAvatarURL={(value) => onFieldChange(value, "avatar")}
+                avatarURL={groupMetaData.avatar}
+                title={
+                  groupMetaData.title ||
+                  translations.NewGroupPage[language].Title
+                }
+                isFetching={isFetching}
+              />
+            </div>
+
+            <div className="md:col-span-2">
+              <div className="bg-white/60 dark:bg-gray-800/60 rounded-md p-4 shadow-sm">
+                <GroupInputField
+                  value={groupMetaData.title}
+                  onChange={(e) => onFieldChange(e.target.value, "title")}
+                  id="groupTitle"
+                  label={translations.NewGroupPage[language].Title}
+                  name="title"
+                  isFetching={isFetching}
+                />
+
+                <DescriptionTextArea
+                  value={groupMetaData.description}
+                  onChange={(e) => onFieldChange(e.target.value, "description")}
+                  isFetching={isFetching}
+                />
+              </div>
+
+              <ParticipantsList
+                language={language}
+                participants={groupMetaData.participants}
+                setParticipants={(updater) => {
+                  setGroupMetaData((prev) => {
+                    const next =
+                      typeof updater === "function"
+                        ? updater(prev.participants)
+                        : (updater ?? []);
+                    return { ...prev, participants: next };
+                  });
+                }}
+              />
+            </div>
+          </div>
         </form>
       </section>
-      <section className="p-4 mt-4 bg-white dark:bg-gray-800/30 shadow-sm rounded-md">
-        <div className="flex flex-col gap-1">
-          <Link
-            route={`/chats/groups/${conversationId}/permissions`}
-            className={
-              "w-full py-3 text-start flex items-center gap-2 rounded-md"
+
+      <div className="grid md:grid-cols-2 gap-4 mt-6">
+        <section className="p-4 bg-white dark:bg-gray-800/60 shadow-sm rounded-md flex items-center gap-3">
+          <KeyRound size={20} className="text-cyan-600" />
+          <div className="flex flex-col gap-1">
+            <Link
+              route={`/chats/groups/${conversationId}/permissions`}
+              className={"font-medium text-cyan-600 dark:text-cyan-400 rounded"}
+            >
+              Permissions
+            </Link>
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              Manage who can edit or post in this group
+            </p>
+          </div>
+        </section>
+
+        <section className="p-4 bg-red-50 dark:bg-red-900/10 shadow-sm rounded-md flex items-center justify-between">
+          <div>
+            <p className="font-medium text-red-600 dark:text-red-300">
+              Danger zone
+            </p>
+            <p className="text-xs text-gray-400 dark:text-gray-200">
+              Leave or delete this group , Owner can delete the group.
+            </p>
+          </div>
+          <LeaveConversationButton
+            className="px-3 py-2 rounded bg-red-200 text-red-700 dark:bg-red-700 dark:text-red-100"
+            isGroup={true}
+            conversationId={conversationId}
+            isCurrentUserOwner={isCurrentUserOwner}
+            customText={
+              isCurrentUserOwner ? "Delete and leave group" : "Leave group"
             }
-          >
-            <KeyRound size={20} />
-            <span>Permissions</span>
-          </Link>
-        </div>
-      </section>
+          />
+        </section>
+      </div>
     </main>
   );
 }

@@ -110,6 +110,7 @@ const getSpecificConversationGet = async (req, res) => {
     const isCurrentUserOwner = conversation.admins.some(
       (admin) => admin.userId === userId && admin.isOwner,
     );
+
     const membersCount = await prisma.conversationParticipant.count({
       where: {
         conversationId: parseInt(conversationId),

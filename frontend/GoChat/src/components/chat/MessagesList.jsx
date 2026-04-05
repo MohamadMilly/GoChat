@@ -16,6 +16,7 @@ import { ChatBubbleMenu } from "./ChatBubbleMenu";
 import { useMemo } from "react";
 import { socket } from "../../socket";
 import { useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "react-router";
 
 /*
 TO DO : (DONE)
@@ -83,6 +84,7 @@ export function MessagesListContent(props) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const messagesListRef = useRef(null);
+  const navigate = useNavigate();
   const { setMessage, setClickCoords } = useContext(ChatBubbleContainerContext);
   const { setRepliedMessage } = useContext(ChatPageContext);
   const { setIsInPreviewMode, setPreviewImageURL } =
@@ -119,7 +121,54 @@ export function MessagesListContent(props) {
     return () => {
       socket.off("join conversation", onUserJoin);
     };
-  });
+  }, [queryClient]);
+  useEffect(() => {
+    function onUserLeave(withDelete, fullname, userId, conversationId) {
+      const messageList = messagesListRef.current;
+      if (withDelete) {
+        queryClient.setQueryData(["conversations"], (old) => {
+          if (!old?.conversations) return old;
+          return {
+            ...old,
+            conversations: old.conversations.filter(
+              (c) => c.id != conversationId,
+            ),
+          };
+        });
+        navigate("/chats");
+      } else {
+        if (!messageList) return;
+        const leftMemberNotification = document.createElement("span");
+        leftMemberNotification.textContent = `${fullname} left the conversation`;
+        leftMemberNotification.className =
+          "p-0.5 bg-gray-200/15 backdrop-blur-md dark:bg-gray-700/15 text-gray-600 dark:text-gray-100 rounded text-sm mx-auto text-center block my-3";
+        messageList.appendChild(leftMemberNotification);
+        /* update conversation data */
+        queryClient.setQueryData(["conversation", conversationId], (old) => {
+          if (!old?.conversation) return old;
+          return {
+            ...old,
+            membersCount: old.membersCount - 1,
+            conversation: {
+              ...old.conversation,
+              participants: old.conversation.participants.filter(
+                (p) => p.userId != userId,
+              ),
+            },
+          };
+        });
+      }
+    }
+    socket.on("leave conversation", onUserLeave);
+
+    return () => {
+      socket.off("leave conversation", onUserLeave);
+    };
+  }, [queryClient, navigate]);
+  /* TO DO :
+  if the conversation going to be deleted , then remove it ! ,
+  or if it is not going to be deleted create a notification 
+  */
   const handleShowChatBubbleMenu = useCallback(
     (message, x, y) => {
       setClickCoords({ x: x, y: y });

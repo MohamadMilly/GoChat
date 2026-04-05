@@ -618,7 +618,32 @@ io.on("connection", async (socket) => {
         .emit("join conversation", conversationId, fullname);
     }
   });
+  socket.on(
+    "leave conversation",
+    (withDelete, fullname, userId, conversationId) => {
+      if (!conversationId) {
+        return;
+      } else {
+        socket.broadcast
+          .to(conversationId)
+          .emit(
+            "leave conversation",
+            withDelete,
+            fullname,
+            userId,
+            conversationId,
+          );
+      }
+    },
+  );
 });
+/* 
+TO DO :
+Whenever someone leave a conversation i should emit the conversationId 
+and the server gets this event and emits it to all connected users in this conversation 
+now , if the conversation is a group => if the left member is the owner (withDelete true) or it is a direct conversation => remove the group entirely 
+if not append a notification 
+*/
 
 app.use(
   cors({
