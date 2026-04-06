@@ -361,7 +361,9 @@ const joinConversationPost = async (req, res) => {
     });
   }
 };
-
+/* 
+No one can remove the owner , so if the owner does not exists in the new participants , reject 
+*/
 const editGroupPut = async (req, res) => {
   const currentUser = req.currentUser;
   const { conversationId } = req.params;
@@ -377,9 +379,18 @@ const editGroupPut = async (req, res) => {
     const currentUserAdminObj = groupAdmins.find(
       (admin) => admin.userId === currentUser.id,
     );
+
     if (!currentUserAdminObj) {
       return res.status(401).json({
         message: "editing the group is only permissible by admins ",
+      });
+    }
+    const doesOwnerExistAndAdmin = newGroupAdmins.some(
+      (admin) => admin.isOwner && admin.isAdmin,
+    );
+    if (!doesOwnerExistAndAdmin) {
+      return res.status(401).json({
+        message: "Conversation should not be without an owner.",
       });
     }
     const updatedGroup = await prisma.conversation.update({

@@ -2,7 +2,7 @@ export function getChatInfo(conversation, currentUserId) {
   const isGroup = conversation.type === "GROUP";
   const messages = conversation?.messages || [];
   const GroupMembers = isGroup ? conversation.paricipants : null;
-  console.log(conversation);
+
   const chatPartner = isGroup
     ? null
     : conversation?.participants.filter((p) => p.userId !== currentUserId)[0]
