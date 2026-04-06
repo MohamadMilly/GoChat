@@ -18,7 +18,7 @@ export const ChatEntry = memo(
     color,
   }) => {
     const base_class =
-      "w-full flex items-center gap-x-3 p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-150";
+      "w-full flex items-center gap-x-2 p-3 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-150";
     const initialReadersIds = lastMessage.readers
       ? lastMessage.readers.map((reader) => reader.readerId)
       : [];
@@ -59,23 +59,23 @@ export const ChatEntry = memo(
             <Avatar avatar={chatAvatar} chatTitle={chatTitle} color={color} />
             {!isGroup && (
               <span
-                className={`absolute w-3 h-3 bottom-0 right-0 rounded-full ${isConnected ? "bg-cyan-600 dark:bg-cyan-400" : "bg-gray-400 dark:bg-gray-300"}`}
+                className={`absolute w-3 h-3 bottom-0 right-0 rounded-full ${isConnected ? "bg-cyan-600 dark:bg-cyan-300" : "bg-gray-400 dark:bg-gray-500"}`}
               ></span>
             )}
           </div>
 
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between gap-x-2">
-              <strong className="text-gray-900 dark:text-gray-50 truncate">
+              <strong className="text-gray-800 dark:text-gray-50 truncate">
                 {chatTitle}
               </strong>
-              <span className="text-xs text-gray-400 dark:text-gray-200">
+              <span className="text-xs text-gray-500 dark:text-gray-300">
                 {lastMessage?.createdAt
                   ? new Date(lastMessage.createdAt).toLocaleTimeString()
                   : ""}
               </span>
             </div>
-            <div className="text-gray-600 dark:text-gray-200 text-sm  text-left mt-1 flex items-center justify-between">
+            <div className="text-gray-600 dark:text-gray-300 text-sm text-left mt-1 flex items-center justify-between">
               {typingUsers.length > 0 ? (
                 isGroup ? (
                   <span className="truncate">

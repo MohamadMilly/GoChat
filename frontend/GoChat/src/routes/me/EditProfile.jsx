@@ -407,7 +407,7 @@ export function EditProfilePage() {
           disabled={isFetchingProfile}
           onClick={handleConfirmEdit}
           className={
-            "flex items-center gap-2 bg-cyan-600 hover:bg-cyan-700 text-white dark:bg-cyan-500 dark:hover:bg-cyan-600 p-2 rounded"
+            "flex items-center gap-2 bg-cyan-600! hover:bg-cyan-700! text-white! dark:bg-cyan-500! dark:hover:bg-cyan-600! p-2 rounded"
           }
         >
           <p className="sr-only">

@@ -12,7 +12,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url = env("DATABASE_URL")
+   url = env("DATABASE_URL")
    directUrl = env("DIRECT_URL")
 }
 
@@ -50,7 +50,7 @@ datasource db {
   
   @@map("users")
   }
-
+  
   /* 
     Each profile should have:
 - unique id 

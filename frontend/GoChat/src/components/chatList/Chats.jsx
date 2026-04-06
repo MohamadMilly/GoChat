@@ -9,8 +9,8 @@ export function Chats({ chatsEntries }) {
   const { user } = useAuth();
   const { connectedUsers, typingUsers } = useSocket();
   return (
-    <section className="pt-2 max-h-full">
-      <ul className="divide-y divide-gray-100 dark:divide-gray-700 overflow-y-auto scrollbar-custom h-[calc(100vh-200px)]">
+    <section className="pt-1 max-h-full">
+      <ul className="divide-y divide-gray-200 dark:divide-gray-800 overflow-y-auto scrollbar-custom h-[calc(100vh-200px)]">
         {chatsEntries.map((chatEntry) => {
           const { chatAvatar, lastMessage, chatTitle, isGroup, color } =
             getChatInfo(chatEntry, user.id);
