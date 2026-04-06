@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../utils/api";
+import { socket } from "../socket";
 
 const createConversation = async ({
   participants,
@@ -20,12 +21,17 @@ const createConversation = async ({
 
 export function useCreateConversation() {
   const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: createConversation,
     onSuccess: (data) => {
       queryClient.setQueryData(
         ["conversation", data.conversation.id],
         data.conversation,
+      );
+      socket.emit(
+        "create conversation",
+        data.conversation.participants.map((p) => p.userId),
       );
     },
     onError: (error) => {

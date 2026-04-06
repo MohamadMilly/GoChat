@@ -26,9 +26,11 @@ export function UserProfile() {
   const fullname = user && !isFetching && user.firstname + " " + user.lastname;
   const isConnected = connectedUsers.find((id) => id == userId);
   const transitionId = getGenertedTransitionId();
+
   const dynamicTransitionName = fullname
     ? `${fullname.replaceAll(" ", "-")}-${transitionId}`
     : null;
+
   return (
     <main className="max-w-3xl mx-auto dark:bg-gray-900 font-rubik relative px-4 pb-6">
       <div className="flex justify-start items-center p-2 bg-white/60 dark:bg-gray-800/60 rounded-md my-4 shadow-sm">

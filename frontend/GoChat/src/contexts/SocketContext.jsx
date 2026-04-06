@@ -272,7 +272,13 @@ export function SocketProvider({ children }) {
         exact: true,
       });
     }
-
+    function onCreateConversation() {
+      queryClient.invalidateQueries({
+        queryKey: ["conversations"],
+        exact: true,
+      });
+    }
+    socket.on("create conversation", onCreateConversation);
     socket.on("chat message", onReceiveMessage);
     socket.on("connect", onConnect);
     socket.on("disconnect", onDisconnect);
@@ -285,7 +291,9 @@ export function SocketProvider({ children }) {
     socket.on("block user", onRecieveBlock);
     socket.on("unblock user", onReceiveUnBlock);
     socket.on("edit permissions", onEditPermissions);
+
     return () => {
+      socket.off("create conversation", onCreateConversation);
       socket.off("chat message", onReceiveMessage);
       socket.off("connect", onConnect);
       socket.off("disconnect", onDisconnect);

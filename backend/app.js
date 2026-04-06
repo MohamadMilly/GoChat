@@ -636,6 +636,17 @@ io.on("connection", async (socket) => {
       }
     },
   );
+  socket.on("create conversation", async (participantsIds) => {
+    if (!Array.isArray(participantsIds)) return;
+    /* O(n^2) i will fix it when the app gets larger */
+    const participantsSockets = await io.fetchSockets();
+    participantsSockets.forEach((socket) => {
+      const userId = socket.handshake.auth.userId;
+      if (participantsIds.includes(userId)) {
+        socket.emit("create conversation");
+      }
+    });
+  });
 });
 /* 
 TO DO :
