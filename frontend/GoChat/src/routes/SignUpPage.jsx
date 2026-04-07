@@ -6,7 +6,6 @@ import { Link } from "../components/ui/Link";
 import Button from "../components/ui/Button";
 import { useSignUp } from "../hooks/auth/useSignUp";
 import { Navigate } from "react-router";
-import { useAuth } from "../contexts/AuthContext";
 import translations from "../translations";
 import { useLanguage } from "../contexts/LanguageContext";
 import { useTheme } from "../contexts/ThemeContext";
@@ -15,6 +14,7 @@ import { Spinner } from "../components/ui/Spinner";
 export function SignUpPage() {
   const { language } = useLanguage();
   const { theme } = useTheme();
+
   const PageTranslations = translations.SignUpPage;
   const [signupData, setSignupData] = useState({
     firstname: "",
@@ -88,7 +88,7 @@ export function SignUpPage() {
           </p>
         </article>
       </section>
-      <section className="basis-xl px-4 flex flex-1 flex-col items-center mb-10 md:mb-0">
+      <section className="basis-xl md:h-dvh px-4 flex flex-1 flex-col items-center mb-10 md:mb-0 md:overflow-y-auto">
         <h2 className="font-rubik text-4xl font-bold text-center my-10 tracking-tight text-cyan-800 dark:text-cyan-400 ">
           {PageTranslations[language].SignUpButton}
         </h2>
@@ -97,6 +97,20 @@ export function SignUpPage() {
           className="shadow px-6 py-12 rounded-md w-full max-w-85 border dark:border-gray-800 border-gray-100"
           action="POST"
         >
+          {" "}
+          <ul className="mx-auto">
+            {error?.response?.data?.errors.length > 0 &&
+              error.response.data.errors.map((error, index) => {
+                return (
+                  <li
+                    className="text-sm my-0.5 bg-gray-100 dark:bg-gray-800 p-1 rounded list-inside list-disc text-red-600 dark:text-red-500"
+                    key={index}
+                  >
+                    {error.msg}
+                  </li>
+                );
+              })}
+          </ul>
           {step === 1 && (
             <section>
               <InputField

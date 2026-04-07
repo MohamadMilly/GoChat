@@ -3,10 +3,11 @@ const verifyToken = require("../middlewares/verifyToken");
 const authRouter = express.Router();
 
 const authController = require("../controllers/authController");
+const validateSignUp = require("../middlewares/validateSignUp");
 
 authRouter.post("/login", authController.loginPost);
 authRouter.post("/login/verification", authController.verifyPost);
-authRouter.post("/signup", authController.signupPost);
+authRouter.post("/signup", validateSignUp, authController.signupPost);
 
 authRouter.use(verifyToken, (req, res, next) => {
   const token = req.token;
@@ -21,6 +22,7 @@ authRouter.use(verifyToken, (req, res, next) => {
     });
   }
 });
+
 authRouter.patch("/me/password", authController.changePasswordPatch);
 
 module.exports = authRouter;

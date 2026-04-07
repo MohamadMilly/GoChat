@@ -1,5 +1,7 @@
 const jwt = require("jsonwebtoken");
 
+const { validationResult, matchedData } = require("express-validator");
+
 // import enviroment variables
 require("dotenv").config();
 
@@ -21,16 +23,24 @@ const {
 const accountColors = ["#16a34a", "#a855f7", "#d97706", "#1e40af", "#ff4d91"];
 
 const signupPost = async (req, res) => {
-  const { firstname, lastname, username, password, passwordConfirmation } =
-    req.body;
   const randomColor =
     accountColors[Math.floor(Math.random() * accountColors.length)];
   try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        errors: errors.array(),
+      });
+    }
+    const { firstname, lastname, username, password, passwordConfirmation } =
+      matchedData(req);
+
     const previousUser = await prisma.user.findUnique({
       where: {
         username: username,
       },
     });
+
     if (previousUser) {
       return res.status(401).json({
         message: "Username is already used.",

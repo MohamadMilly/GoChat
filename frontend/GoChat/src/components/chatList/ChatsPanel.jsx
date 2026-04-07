@@ -56,11 +56,11 @@ export const ChatsPanel = memo(() => {
   return (
     <aside
       dir={language === "Arabic" ? "rtl" : "ltr"}
-      className={`z-100 md:z-0 bg-white h-full dark:bg-gray-900 group ${isChatsPanelCollapsed ? "absolute top-0 bottom-0 ltr:left-0 rtl:right-0 ltr:-translate-x-full rtl:translate-x-full " : language === "Arabic" ? "md:col-start-2 md:col-end-3 relative" : "md:col-start-1 md:col-end-2 relative"}`}
+      className={`z-20 bg-white h-full dark:bg-gray-900 group ${isChatsPanelCollapsed ? "absolute top-0 bottom-0 ltr:left-0 rtl:right-0 ltr:-translate-x-full rtl:translate-x-full " : language === "Arabic" ? "md:col-start-2 md:col-end-3 relative" : "md:col-start-1 md:col-end-2 relative"}`}
     >
       <NewChatLink />
       <Button
-        className={`absolute z-2 hidden md:flex ${isChatsPanelCollapsed ? "opacity-100" : "opacity-0"} text-gray-600 dark:text-gray-100 border border-gray-200 dark:border-gray-600 dark:bg-gray-800 top-1/2 ltr:right-0 rtl:left-0  -translate-y-1/2 transition-all duration-300 group-hover:opacity-100 ltr:translate-x-full rtl:-translate-x-full w-11 h-11 justify-center items-center rounded-full!`}
+        className={`absolute z-20 hidden md:flex ${isChatsPanelCollapsed ? "opacity-100" : "opacity-0"} text-gray-600 dark:text-gray-100 border border-gray-200 dark:border-gray-600 dark:bg-gray-800 top-1/2 ltr:right-0 rtl:left-0  -translate-y-1/2 transition-all duration-300 group-hover:opacity-100! ltr:translate-x-full rtl:-translate-x-full w-11 h-11 justify-center items-center rounded-full!`}
         onClick={() => handleChatsPanelCollapse(!isChatsPanelCollapsed)}
       >
         {isChatsPanelCollapsed ? (
