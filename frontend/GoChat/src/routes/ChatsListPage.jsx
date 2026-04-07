@@ -1,4 +1,4 @@
-import { Outlet } from "react-router";
+import { Navigate, Outlet } from "react-router";
 
 import { ChatsListHeader } from "../components/chatList/ChatsListHeader";
 import { ChatsPanel } from "../components/chatList/ChatsPanel";
@@ -6,6 +6,7 @@ import { SideDrawer } from "../components/ui/SideDrawer";
 import { createContext, useState } from "react";
 import { useLanguage } from "../contexts/LanguageContext";
 import { ToastContainer } from "react-toastify";
+import { useAuth } from "../contexts/AuthContext";
 
 const storedChatsPanelStatus = JSON.parse(
   localStorage.getItem("isChatsPanelCollapsed"),
@@ -14,10 +15,14 @@ const storedChatsPanelStatus = JSON.parse(
 export const ChatsListContext = createContext({ isChatsPanelCollapsed: false });
 
 export function ChatsListPage() {
+  const { user, token } = useAuth();
+
   const [isChatsPanelCollapsed, setIsChatsPanelCollapsed] = useState(
     storedChatsPanelStatus ?? false,
   );
   const { language } = useLanguage();
+
+  if (!user || !token) return <Navigate to={"/"} />;
   const handleChatsPanelCollapse = (value) => {
     setIsChatsPanelCollapsed(value);
     localStorage.setItem("isChatsPanelCollapsed", value);

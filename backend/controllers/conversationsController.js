@@ -175,76 +175,80 @@ const createNewConversationPost = async (req, res) => {
   const participantsWithMe = [currentUser, ...participants];
   const membersCount = participantsWithMe.length;
   const isOnetoOneChat = membersCount === 2 && type === "DIRECT";
+  try {
+    if (isOnetoOneChat) {
+      const [userAId, userBId] = participantsWithMe.map((p) => p.id);
 
-  if (isOnetoOneChat) {
-    const [userAId, userBId] = participantsWithMe.map((p) => p.id);
-
-    const oneToOneChat = await prisma.conversation.findFirst({
-      where: {
-        AND: [
-          {
-            participants: {
-              some: {
-                userId: userAId,
+      const oneToOneChat = await prisma.conversation.findFirst({
+        where: {
+          AND: [
+            {
+              participants: {
+                some: {
+                  userId: userAId,
+                },
               },
             },
-          },
-          {
-            participants: {
-              some: {
-                userId: userBId,
+            {
+              participants: {
+                some: {
+                  userId: userBId,
+                },
               },
             },
-          },
-          {
-            participants: {
-              every: {
-                userId: {
-                  in: [userAId, userBId],
+            {
+              participants: {
+                every: {
+                  userId: {
+                    in: [userAId, userBId],
+                  },
+                },
+              },
+            },
+          ],
+          type: "DIRECT",
+        },
+        include: {
+          participants: {
+            include: {
+              user: {
+                include: {
+                  profile: true,
                 },
               },
             },
           },
-        ],
-        type: "DIRECT",
-      },
-      include: {
-        participants: {
-          include: {
-            user: {
-              include: {
-                profile: true,
-              },
+          messages: true,
+        },
+      });
+      if (oneToOneChat) {
+        const participantsPreferences = await prisma.preferences.findMany({
+          where: {
+            userId: {
+              in: oneToOneChat.participants.map((p) => p.userId),
             },
           },
-        },
-        messages: true,
-      },
-    });
-    if (oneToOneChat) {
-      const participantsPreferences = await prisma.preferences.findMany({
-        where: {
-          userId: {
-            in: oneToOneChat.participants.map((p) => p.userId),
-          },
-        },
-      });
-      const filteredParticipants = oneToOneChat.participants.map(
-        (participant) => ({
-          ...participant,
-          user: filterProfile(participant.user, participantsPreferences),
-        }),
-      );
+        });
+        const filteredParticipants = oneToOneChat.participants.map(
+          (participant) => ({
+            ...participant,
+            user: filterProfile(participant.user, participantsPreferences),
+          }),
+        );
 
-      return res.json({
-        conversation: {
-          ...oneToOneChat,
-          participants: filteredParticipants,
-        },
+        return res.json({
+          conversation: {
+            ...oneToOneChat,
+            participants: filteredParticipants,
+          },
+        });
+      }
+    }
+    if (type === "GROUP" && !title) {
+      return res.status(400).json({
+        message: "Group should have a title.",
       });
     }
-  }
-  try {
     let createdConversation = await prisma.conversation.create({
       data: {
         avatar: avatar || undefined,
