@@ -41,6 +41,9 @@ export function ChatPage() {
     error: conversationError,
   } = useConversation(id);
 
+  if (conversationError) {
+    throw new Error(conversationError);
+  }
   const { chatTitle, chatAvatar, color, chatPartner, isGroup } = useMemo(
     () =>
       getChatInfo(

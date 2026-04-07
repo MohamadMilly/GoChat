@@ -11,10 +11,8 @@ import { ChatEntriesLoading } from "../skeletonLoadingComponents/ChatEntriesLoad
 import Button from "../ui/Button";
 import {
   ArrowBigLeft,
-  CirclePlus,
   ArrowBigRight,
   MessagesSquare,
-  PlusCircle,
   Plus,
 } from "lucide-react";
 import { ChatsListContext } from "../../routes/ChatsListPage";
@@ -58,7 +56,7 @@ export const ChatsPanel = memo(() => {
   return (
     <aside
       dir={language === "Arabic" ? "rtl" : "ltr"}
-      className={`md:z-100 bg-white h-full dark:bg-gray-900 group ${isChatsPanelCollapsed ? "absolute top-0 bottom-0 ltr:left-0 rtl:right-0 ltr:-translate-x-full rtl:translate-x-full " : language === "Arabic" ? "md:col-start-2 md:col-end-3 relative" : "md:col-start-1 md:col-end-2 relative"}`}
+      className={`z-100 md:z-0 bg-white h-full dark:bg-gray-900 group ${isChatsPanelCollapsed ? "absolute top-0 bottom-0 ltr:left-0 rtl:right-0 ltr:-translate-x-full rtl:translate-x-full " : language === "Arabic" ? "md:col-start-2 md:col-end-3 relative" : "md:col-start-1 md:col-end-2 relative"}`}
     >
       <NewChatLink />
       <Button

@@ -13,6 +13,17 @@ const getSpecificConversationGet = async (req, res) => {
   const { userId: userIdString } = req.query;
   const userId = parseInt(userIdString);
   try {
+    let conversation;
+    conversation = await prisma.conversation.findUnique({
+      where: {
+        id: parseInt(conversationId),
+      },
+    });
+    if (!conversation) {
+      return res.status(404).json({
+        message: "Conversation not found.",
+      });
+    }
     const participantsIds = await prisma.conversationParticipant.findMany({
       where: {
         conversationId: parseInt(conversationId),
@@ -58,7 +69,7 @@ const getSpecificConversationGet = async (req, res) => {
       });
     }
 
-    let conversation = await prisma.conversation.findUnique({
+    conversation = await prisma.conversation.findUnique({
       where: {
         id: parseInt(conversationId),
       },
@@ -361,7 +372,7 @@ const joinConversationPost = async (req, res) => {
     });
   }
 };
-/* 
+/*
 No one can remove the owner , so if the owner does not exists in the new participants , reject 
 */
 const editGroupPut = async (req, res) => {

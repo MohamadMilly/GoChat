@@ -21,6 +21,7 @@ import { useDeleteAccount } from "../../hooks/me/useDeleteAccount";
 import { useState } from "react";
 import { useLanguage } from "../../contexts/LanguageContext";
 import { useQueryClient } from "@tanstack/react-query";
+import { toast, ToastContainer } from "react-toastify";
 
 const PageTranslations = {
   Arabic: {
@@ -76,7 +77,7 @@ function ThemeButton() {
     <Button
       onClick={handleToggleTheme}
       className={
-        "text-sm py-2 w-full text-start my-2 flex items-center justify-between dark:text-gray-100  text-gray-500"
+        "text-sm py-2 w-full text-start my-2 flex items-center justify-between dark:text-gray-100  text-gray-500 border border-dashed border-gray-200 dark:border-gray-700"
       }
     >
       {" "}
@@ -173,7 +174,7 @@ function DeleteAccountButton() {
       <Button
         onClick={() => setOpen(true)}
         className={
-          "text-sm py-2 w-full text-start my-2 flex items-center gap-2 dark:text-gray-100 text-gray-500"
+          "text-sm py-2 w-full text-start my-2 flex items-center gap-2 dark:text-gray-100 text-gray-500 border border-dashed border-gray-200 dark:border-gray-700"
         }
       >
         <Trash size={18} />
@@ -191,7 +192,7 @@ function LanguageButton() {
       <Button
         onClick={() => setOpen(!open)}
         className={
-          "text-sm py-2 w-full text-start my-2 flex items-center justify-between dark:text-gray-100 text-gray-500"
+          "text-sm py-2 w-full text-start my-2 flex items-center justify-between dark:text-gray-100 text-gray-500 border border-dashed border-gray-200 dark:border-gray-700"
         }
       >
         <div className="flex items-center gap-2">
@@ -234,6 +235,7 @@ export function Settings() {
 
   return (
     <main className="max-w-200 mx-auto dark:bg-gray-900 font-rubik relative p-1">
+      <ToastContainer position="top-right" draggable={true} autoClose={3000} />
       <div className="flex justify-start items-center p-2 bg-gray-50/30 dark:bg-gray-800/80 rounded-lg my-2">
         <Button
           onClick={() => navigate(-1)}
@@ -253,7 +255,7 @@ export function Settings() {
           </h3>
           <Button
             className={
-              "text-sm w-full text-start my-2 flex items-center gap-2 dark:text-gray-100 text-gray-500"
+              "text-sm w-full text-start my-2 flex items-center gap-2 dark:text-gray-100 text-gray-500 border border-dashed border-gray-200 dark:border-gray-700"
             }
             onClick={() => {
               logout();
@@ -264,8 +266,9 @@ export function Settings() {
             <span>{PageTranslations[language].logOutButtonText}</span>
           </Button>
           <Button
+            onClick={() => toast.warning("This feature is under development.")}
             className={
-              "text-sm py-2 w-full text-start my-2 flex items-center gap-2 dark:text-gray-100 text-gray-500"
+              "text-sm py-2 w-full text-start my-2 flex items-center gap-2 dark:text-gray-100 text-gray-500 border border-dashed border-gray-200 dark:border-gray-700"
             }
           >
             <RotateCcwKey size={18} />

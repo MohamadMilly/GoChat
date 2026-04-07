@@ -1,6 +1,7 @@
 // pages
 import App from "./App";
 import { GroupPreview } from "./components/chat/GroupPreview";
+import { ErrorPage } from "./components/errorElements/ErrorPage";
 import { About } from "./routes/About";
 import { ChatDetails } from "./routes/ChatDetails";
 import { ChatPageWrapper } from "./routes/ChatPageWrapper";
@@ -43,6 +44,7 @@ export const routes = [
       {
         path: "/chats/groups/:id/preview",
         element: <GroupPreview />,
+        errorElement: <ErrorPage backRoute={-1} embedded={true} />,
       },
     ],
   },
@@ -50,6 +52,7 @@ export const routes = [
   {
     path: "/chats",
     element: <ChatsListPage />,
+    errorElement: <ErrorPage backRoute={"/"} />,
     children: [
       {
         index: true,
@@ -77,10 +80,12 @@ export const routes = [
   {
     path: "/users/:userId",
     element: <UserProfile />,
+    errorElement: <ErrorPage backRoute={-1} />,
   },
   {
     path: "/users/me/profile",
     element: <MyProfile />,
+    errorElement: <ErrorPage embedded={true} />,
   },
   {
     path: "/users/me/settings",
@@ -89,21 +94,37 @@ export const routes = [
   {
     path: "/users/me/profile/edit",
     element: <EditProfilePage />,
+    errorElement: <ErrorPage embedded={true} />,
   },
   {
     path: "/users/me/preferences",
     element: <MyPreferences />,
+    errorElement: <ErrorPage embedded={true} backRoute={-1} />,
   },
   {
     path: "/chats/:id/details",
     element: <ChatDetails />,
+    errorElement: <ErrorPage backRoute={-1} />,
   },
   {
     path: "/chats/groups/:id/edit",
     element: <EditGroupPage />,
+    errorElement: <ErrorPage backRoute={-1} />,
   },
   {
     path: "/chats/groups/:id/permissions",
     element: <GroupPermisstionsPage />,
+    errorElement: <ErrorPage backRoute={-1} />,
+  },
+  {
+    path: "*",
+    element: (
+      <ErrorPage
+        title={"Page not found"}
+        message={"Sorry, we couldn’t find the page you’re looking for."}
+        status={"404"}
+        backRoute={-1}
+      />
+    ),
   },
 ];

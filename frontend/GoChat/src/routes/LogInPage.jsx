@@ -69,21 +69,21 @@ export function LogInPage() {
           backgroundImage: `url(${theme === "light" ? chatBackground : darkChatBackground})`,
         }}
       >
-        <div className="inset-0 z-1 absolute bg-gray-800/60 backdrop-blur-xs"></div>
+        <div className="inset-0 z-1 absolute bg-gray-600/60 backdrop-blur-xs"></div>
         <article className="z-10 relative top-1/3">
           <h2
             dir="auto"
-            className="text-5xl font-bold tracking-tight text-cyan-200 mb-6 text-shadow-xs text-shadow-cyan-100"
+            className="text-5xl font-bold tracking-tight dark:text-cyan-200 text-cyan-100 mb-6 text-shadow-xs dark:text-shadow-cyan-100"
           >
             {PageTranslations[language].Welcome}
           </h2>
-          <p className="max-w-120 text-sm text-gray-200">
+          <p className="max-w-120 text-sm text-gray-100">
             {PageTranslations[language].Description}
           </p>
-          <p className="text-xs text-gray-300 mt-6">
+          <p className="text-xs text-gray-200 mt-6">
             {translations.LogInPage[language].DontHaveAccount}{" "}
             <Link
-              className="text-xs text-cyan-200 border-2 border-cyan-200 bg-white/5 rounded"
+              className="text-xs text-cyan-200! border-2 border-cyan-200! bg-white/5! rounded"
               route={"/auth/signup"}
             >
               {PageTranslations[language].SignUp}
@@ -134,10 +134,10 @@ export function LogInPage() {
             </Button>
           </section>
         </form>
-        <p className="text-xs text-gray-300 mt-6 md:hidden">
+        <p className="text-xs dark:text-gray-300 text-gray-600 mt-6 md:hidden">
           {translations.LogInPage[language].DontHaveAccount}{" "}
           <Link
-            className="text-xs text-cyan-200  bg-white/5 rounded"
+            className="text-xs dark:text-cyan-200 text-cyan-600  bg-white/5 rounded"
             route={"/auth/signup"}
           >
             {PageTranslations[language].SignUp}

@@ -11,7 +11,7 @@ export function ChatHeaderLoading() {
   return (
     <header
       dir={language === "Arabic" ? "rtl" : "ltr"}
-      className="sticky top-0 z-20 border-b-2 dark:border-gray-700 border-gray-100 px-4 py-2 shadow-lg bg-white dark:bg-gray-800 flex items-center gap-2"
+      className="sticky top-0 z-20 border-b-2 dark:border-gray-700 border-gray-100 px-4 py-2 shadow-xs bg-white dark:bg-gray-800 flex items-center gap-2"
     >
       <Button
         onClick={() => navigate("/chats", { viewTransition: true })}

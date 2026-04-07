@@ -15,6 +15,7 @@ import { TransitionLink } from "./TransitionLink";
 import { IdentityLoading } from "../skeletonLoadingComponents/IdentityLoading";
 import translations from "../../translations";
 import { useLanguage } from "../../contexts/LanguageContext";
+
 export function SideDrawer() {
   const { user, isFetching, error } = useMe();
   const { language } = useLanguage();
@@ -76,9 +77,14 @@ export function SideDrawer() {
                       color={user?.accountColor || null}
                       dynamicTransitionId={transitionId}
                     />
-                    <strong className="text-sm text-gray-700 dark:text-gray-200">
-                      {fullname}
-                    </strong>
+                    <div>
+                      <strong className="text-sm text-gray-700 dark:text-gray-200">
+                        {fullname}
+                      </strong>
+                      <span className="block text-xs text-gray-500 dark:text-gray-300">
+                        @{user.username}
+                      </span>
+                    </div>
                   </div>
                 ) : error ? (
                   <p>Error: {error.message}</p>
@@ -86,7 +92,7 @@ export function SideDrawer() {
               </div>
               <div className="relative mt-6 flex-1 px-4 sm:px-6">
                 <TransitionLink
-                  className="flex w-full items-center gap-x-2 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800/90 py-2 text-sm px-3 rounded-md hover:scale-105 dark:bg-gray-800/70 shadow dark:shadow-white/5 dark:shadow-inner transition-all duration-300"
+                  className="flex w-full items-center gap-x-2 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800/90 py-2 text-sm px-3 rounded-md hover:scale-105 dark:bg-gray-800/70 shadow-xs dark:shadow-white/5 dark:shadow-inner transition-all duration-300 border border-dashed border-gray-200 dark:border-gray-700"
                   route={"/users/me/profile"}
                   setDynamicTransitionId={setTransitionId}
                 >
@@ -95,11 +101,11 @@ export function SideDrawer() {
                 </TransitionLink>
                 <Line />
                 <div className="flex flex-col gap-2">
-                  <h3 className="text-lg font-bold tracking-tight text-cyan-600 dark:text-cyan-400">
+                  <h3 className="text-base font-extralight tracking-widest text-cyan-600 dark:text-cyan-400">
                     {translations.SideDrawer[language].AccountHeading}
                   </h3>
                   <Link
-                    className="flex items-center gap-x-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800/90 py-2 px-3 rounded-md hover:scale-105 dark:bg-gray-800/70 shadow dark:shadow-white/5 dark:shadow-inner transition-all duration-300"
+                    className="flex items-center gap-x-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800/90 py-2 px-3 rounded-md hover:scale-105 dark:bg-gray-800/70 shadow-xs dark:shadow-white/5 dark:shadow-inner transition-all duration-300 border border-dashed border-gray-200 dark:border-gray-700"
                     route={"/users/me/preferences"}
                   >
                     <Heart size={20} />
@@ -108,7 +114,7 @@ export function SideDrawer() {
                     </span>
                   </Link>
                   <Link
-                    className="flex items-center gap-x-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800/90 py-2 px-3 rounded-md hover:scale-105 dark:bg-gray-800/70 shadow dark:shadow-white/5 dark:shadow-inner transition-all duration-300"
+                    className="flex items-center gap-x-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800/90 py-2 px-3 rounded-md hover:scale-105 dark:bg-gray-800/70 shadow-xs dark:shadow-white/5 dark:shadow-inner transition-all duration-300 border border-dashed border-gray-200 dark:border-gray-700"
                     route={"/users/me/settings"}
                   >
                     <Settings size={20} />
@@ -117,11 +123,11 @@ export function SideDrawer() {
                 </div>
                 <Line />
                 <div className="flex flex-col gap-2">
-                  <h3 className="text-lg font-bold tracking-tight text-cyan-600 dark:text-cyan-400">
+                  <h3 className="text-base font-extralight tracking-widest text-cyan-600 dark:text-cyan-400">
                     {translations.SideDrawer[language].ChatsHeading}
                   </h3>
                   <Link
-                    className="flex items-center gap-x-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800/90 py-2 px-3 rounded-md hover:scale-105 dark:bg-gray-800/70 shadow dark:shadow-white/5 dark:shadow-inner transition-all duration-300"
+                    className="flex items-center gap-x-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800/90 py-2 px-3 rounded-md hover:scale-105 dark:bg-gray-800/70 shadow-xs dark:shadow-white/5 dark:shadow-inner transition-all duration-300 border border-dashed border-gray-200 dark:border-gray-700"
                     route={"/chats/group/new"}
                   >
                     <UsersRound size={20} />
@@ -129,14 +135,14 @@ export function SideDrawer() {
                   </Link>
                   <Link
                     route={"/chats/direct/new"}
-                    className="flex items-center gap-x-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800/90 py-2 px-3 rounded-md hover:scale-105 dark:bg-gray-800/70 shadow dark:shadow-white/5 dark:shadow-inner transition-all duration-300"
+                    className="flex items-center gap-x-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800/90 py-2 px-3 rounded-md hover:scale-105 dark:bg-gray-800/70 shadow-xs dark:shadow-white/5 dark:shadow-inner transition-all duration-300 border border-dashed border-gray-200 dark:border-gray-700"
                   >
                     <Plus size={20} />
                     <span>{translations.SideDrawer[language].NewChat}</span>
                   </Link>
                   <Link
                     route={"/chats/groups"}
-                    className="flex items-center gap-x-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800/90 py-2 px-3 rounded-md hover:scale-105 dark:bg-gray-800/70 shadow dark:shadow-white/5 dark:shadow-inner transition-all duration-300"
+                    className="flex items-center gap-x-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800/90 py-2 px-3 rounded-md hover:scale-105 dark:bg-gray-800/70 shadow-xs dark:shadow-white/5 dark:shadow-inner transition-all duration-300 border border-dashed border-gray-200 dark:border-gray-700"
                   >
                     <MessageCircle size={20} />
                     <span>{translations.SideDrawer[language].FindGroup}</span>
