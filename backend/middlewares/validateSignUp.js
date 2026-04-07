@@ -7,15 +7,11 @@ const prisma = require("../lib/prisma");
 const validateFirstName = body("firstname")
   .trim()
   .notEmpty()
-  .withMessage(`Firstname ${errorMessages.emptyErrorMessage}`)
-  .isAlpha()
-  .withMessage(`Firstname ${errorMessages.notAlphaErrorMessage}`);
+  .withMessage(`Firstname ${errorMessages.emptyErrorMessage}`);
 const validateLastName = body("lastname")
   .trim()
   .notEmpty()
-  .withMessage(`Lastname ${errorMessages.emptyErrorMessage}`)
-  .isAlpha()
-  .withMessage(`Lastname ${errorMessages.notAlphaErrorMessage}`);
+  .withMessage(`Lastname ${errorMessages.emptyErrorMessage}`);
 const validateUserName = body("username")
   .trim()
   .notEmpty()

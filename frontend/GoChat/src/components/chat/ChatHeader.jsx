@@ -12,6 +12,7 @@ import { ChatHeaderLoading } from "../skeletonLoadingComponents/ChatHeaderLoadin
 import translations from "../../translations";
 import { useLanguage } from "../../contexts/LanguageContext";
 import { ChatHeaderMenu } from "./ChatHeaderMenu";
+import { formatLastSeen } from "../../utils/formatLastSeen";
 
 export function ChatHeader() {
   const {
@@ -80,7 +81,10 @@ export const ChatHeaderContent = memo((props) => {
     typingUsers,
     props.conversationId,
   );
-
+  /* if the conversation is direct and partner is diconnected */
+  const lastSeenDate = !isGroup
+    ? formatLastSeen(chatPartner.profile.lastSeen)
+    : null;
   return (
     <header
       dir={language === "Arabic" ? "rtl" : "ltr"}
@@ -166,10 +170,7 @@ export const ChatHeaderContent = memo((props) => {
                   {translations.ChatHeader[language].Online}
                 </span>
               ) : (
-                <span>
-                  {translations.ChatHeader[language].LastSeenPrefix}{" "}
-                  {new Date(chatPartner.profile.lastSeen).toLocaleTimeString()}
-                </span>
+                <span>{lastSeenDate}</span>
               )}
             </span>
           </div>

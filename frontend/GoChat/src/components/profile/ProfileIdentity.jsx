@@ -23,12 +23,7 @@ export function ProfileIdentity({
         ) : isConnected ? (
           translations.Profile[language].OnlineLabel
         ) : (
-          <>
-            {translations.Profile[language].LastSeenPrefix}{" "}
-            {new Date(lastSeen).toLocaleTimeString(
-              language === "Arabic" ? "ar-EG" : "en-GB",
-            )}
-          </>
+          <>{lastSeen}</>
         )}
       </p>
     </section>

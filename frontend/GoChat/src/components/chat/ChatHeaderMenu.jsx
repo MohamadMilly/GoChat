@@ -82,7 +82,7 @@ export function ChatHeaderMenu({ isGroup, chatPartnerId }) {
         {isOpen ? <X size={20} /> : <EllipsisVertical size={20} />}
       </Button>
       {isOpen && (
-        <div className="absolute p-0.5 text-sm animate-pop w-32 shadow-xs border bg-gray-50 border-gray-100 dark:border-gray-800 dark:bg-gray-800 dark: rounded-lg flex flex-col ltr:right-0 rtl:left-0 translate-y-2">
+        <div className="absolute p-0.5 text-sm animate-pop w-32 shadow-xs border bg-gray-50 border-gray-100 dark:border-gray-800 dark:bg-gray-800 dark: rounded-lg flex flex-col gap-1 ltr:right-0 rtl:left-0 translate-y-2">
           {!isGroup && (
             <Button onClick={() => handleBlock(chatPartnerId)}>
               {isChatPartnerBlocked ? "UnBlock" : "Block"}

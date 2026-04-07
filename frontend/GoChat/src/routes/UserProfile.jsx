@@ -11,6 +11,7 @@ import { AtSign } from "lucide-react";
 import { UserProfileLoading } from "../components/skeletonLoadingComponents/UserProfileLoading";
 import translations from "../translations";
 import { useLanguage } from "../contexts/LanguageContext";
+import { formatLastSeen } from "../utils/formatLastSeen";
 
 export function UserProfile() {
   const { language } = useLanguage();
@@ -30,7 +31,8 @@ export function UserProfile() {
   const dynamicTransitionName = fullname
     ? `${fullname.replaceAll(" ", "-")}-${transitionId}`
     : null;
-
+  const lastSeenDate =
+    user && user?.profile && formatLastSeen(user?.profile?.lastSeen);
   return (
     <main className="max-w-3xl mx-auto dark:bg-gray-900 font-rubik relative px-4 pb-6">
       <div className="flex justify-start items-center p-2 bg-white/60 dark:bg-gray-800/60 rounded-md my-4 shadow-sm">
@@ -53,7 +55,7 @@ export function UserProfile() {
           <ProfileIdentity
             fullname={fullname}
             isConnected={isConnected}
-            lastSeen={user?.profile?.lastSeen}
+            lastSeen={lastSeenDate}
             isBlocking={isBlocking}
           />
           <section className="px-4 mt-4 py-4 bg-white/60 dark:bg-gray-800 divide-y divide-gray-300 dark:divide-gray-700 shadow-sm rounded-md">
