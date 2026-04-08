@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../utils/api";
+import { socket } from "../socket";
 
 const updateGroup = async ({ conversationId, data }) => {
   const response = await api.put(`/conversations/${conversationId}`, data);
@@ -33,7 +34,7 @@ export function useEditGroup() {
       });
 
       queryClient.setQueryData(["conversations"], (old) => {
-        if (!old.conversations) return old;
+        if (!old?.conversations) return old;
         return {
           ...old,
           conversations: old.conversations.map((c) => {
@@ -49,22 +50,43 @@ export function useEditGroup() {
       });
       return { previousConversationInfo, previousConversationInChatEntry };
     },
+
+    onSuccess: (data) => {
+      const participantsIds = data.conversation.participants.map(
+        (p) => p.userId,
+      );
+
+      const conversationId = data.conversation.id.toString();
+      socket
+        .timeout(4000)
+        .emit(
+          "edit conversation",
+          participantsIds,
+          conversationId,
+          (response) => {
+            if (response?.status !== "ok") {
+              console.error("Error emitting group event: ", response?.status);
+            }
+          },
+        );
+    },
     onError: (_err, args, context) => {
+      console.log(_err);
       const lastMessage = queryClient
         .getQueryData(["conversations"])
-        .conversations.find((c) => c.id == args.conversationId).messages[0];
+        ?.conversations.find((c) => c.id == args.conversationId).messages[0];
       queryClient.setQueryData(["conversation", args.conversationId], (old) => {
-        return context.previousConversationInfo;
+        return context?.previousConversationInfo;
       });
       queryClient.setQueryData(["conversaitons"], (old) => {
-        if (!old.conversations) return old;
+        if (!old?.conversations) return old;
 
         return {
           ...old,
           conversations: old.conversations.map((c) => {
             if (c.id == args.conversationId) {
               return {
-                ...context.previousConversationInChatEntry,
+                ...context?.previousConversationInChatEntry,
                 messages: [lastMessage],
               };
             } else {

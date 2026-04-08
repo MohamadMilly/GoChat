@@ -462,7 +462,7 @@ export function EditGroupPage() {
   if (error) return <p>Error: {error.message}</p>;
   return (
     <main className="max-w-3xl pb-6 mx-auto bg-gray-50 dark:bg-gray-900 font-rubik relative px-4">
-      <header className="flex items-center justify-between gap-4 p-3 my-4 bg-white/60 dark:bg-gray-800/60 rounded-md shadow-sm">
+      <header className="flex items-center justify-between gap-4 p-3 my-4 bg-white/60 dark:bg-gray-800/60 rounded-md shadow-xs">
         <div className="flex items-center gap-3">
           <Button
             onClick={() => navigate(-1)}

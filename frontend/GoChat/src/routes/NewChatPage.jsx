@@ -9,6 +9,7 @@ import { ArrowBigLeft } from "lucide-react";
 import translations from "../translations";
 import { useLanguage } from "../contexts/LanguageContext";
 import { LoadingLayer } from "../components/ui/LoadingLayer";
+import { useDebounce } from "../hooks/utils/useDebounce";
 
 export function NewChatPage() {
   const { language } = useLanguage();
@@ -16,11 +17,13 @@ export function NewChatPage() {
   const navigate = useNavigate();
   const query = searchParams.get("query");
   const { connectedUsers } = useSocket();
+  /*  deboncing the search with useDebounce */
+  const debouncedQuery = useDebounce(query, 500);
   const {
     users,
     isFetching: isFetchingUsers,
     error: usersError,
-  } = useUsers(query);
+  } = useUsers(debouncedQuery);
   const {
     mutate: createChat,
     data,
@@ -41,8 +44,8 @@ export function NewChatPage() {
     return <LoadingLayer className={"text-sm"} title={"Directing..."} />;
   }
   return (
-    <main className="max-w-200 mx-auto dark:bg-gray-900 font-rubik relative">
-      <div className="flex justify-start items-center p-2 bg-gray-50/30 dark:bg-gray-800/80 rounded-lg mt-2 mb-4">
+    <main className="max-w-200 mx-auto dark:bg-gray-900 font-rubik relative px-4 pb-6">
+      <div className="flex justify-start items-center p-2 bg-white dark:bg-gray-800/80 rounded-lg mt-2 mb-4 shadow-xs">
         <Button
           onClick={() => navigate(-1)}
           className="text-gray-600 dark:text-gray-300"
@@ -63,7 +66,7 @@ export function NewChatPage() {
           <p className="text-xs text-gray-400 dark:text-gray-200 text-center">
             {translations.NewChatPage[language].Loading}
           </p>
-        ) : !query ? (
+        ) : !debouncedQuery ? (
           <p className="text-xs text-gray-400 dark:text-gray-200 text-center">
             {translations.NewChatPage[language].SearchForUsers}
           </p>

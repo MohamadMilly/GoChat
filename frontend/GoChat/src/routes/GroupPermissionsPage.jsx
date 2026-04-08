@@ -52,8 +52,8 @@ export function GroupPermisstionsPage() {
     setNewPermissions((prev) => ({ ...prev, [key]: value }));
   };
   return (
-    <main className="max-w-200 pb-4 mx-auto bg-gray-50 dark:bg-gray-900 font-rubik relative">
-      <div className="flex justify-between items-center p-2 bg-gray-50/30 dark:bg-gray-800/80 rounded-lg my-2">
+    <main className="max-w-200 mx-auto bg-gray-50 dark:bg-gray-900 font-rubik relative pb-6">
+      <div className="flex justify-between items-center p-2 bg-white dark:bg-gray-800/80 rounded-lg my-2 shadow-xs">
         <Button
           onClick={() => navigate(-1)}
           className="text-gray-600 dark:text-gray-300"

@@ -278,6 +278,19 @@ export function SocketProvider({ children }) {
         exact: true,
       });
     }
+
+    function onEditConversation(withJoin, conversationId) {
+      queryClient.invalidateQueries({
+        queryKey: ["conversation", conversationId.toString()],
+        exact: true,
+      });
+      if (withJoin) {
+        queryClient.invalidateQueries({
+          queryKey: ["conversations"],
+          exact: true,
+        });
+      }
+    }
     socket.on("create conversation", onCreateConversation);
     socket.on("chat message", onReceiveMessage);
     socket.on("connect", onConnect);
@@ -291,7 +304,7 @@ export function SocketProvider({ children }) {
     socket.on("block user", onRecieveBlock);
     socket.on("unblock user", onReceiveUnBlock);
     socket.on("edit permissions", onEditPermissions);
-
+    socket.on("edit conversation", onEditConversation);
     return () => {
       socket.off("create conversation", onCreateConversation);
       socket.off("chat message", onReceiveMessage);
@@ -306,6 +319,7 @@ export function SocketProvider({ children }) {
       socket.off("block user", onRecieveBlock);
       socket.off("unblock user", onReceiveUnBlock);
       socket.off("edit permissions", onEditPermissions);
+      socket.off("edit conversation", onEditConversation);
     };
   }, [queryClient, user]);
   return (

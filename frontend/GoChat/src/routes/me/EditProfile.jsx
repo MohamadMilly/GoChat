@@ -395,7 +395,7 @@ export function EditProfilePage() {
 
   return (
     <main className="max-w-3xl mx-auto dark:bg-gray-900 font-rubik relative px-4 pb-6">
-      <div className="flex justify-between items-center p-2 bg-white/60 dark:bg-gray-800/60 rounded-md my-4 shadow-sm">
+      <div className="flex justify-between items-center p-2 bg-white/60 dark:bg-gray-800/60 rounded-md my-4 shadow-xs">
         <Button
           onClick={() => navigate(-1)}
           className="text-gray-600 dark:text-gray-300"

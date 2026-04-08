@@ -376,9 +376,11 @@ const joinConversationPost = async (req, res) => {
     });
   }
 };
+
 /*
 No one can remove the owner , so if the owner does not exists in the new participants , reject 
 */
+
 const editGroupPut = async (req, res) => {
   const currentUser = req.currentUser;
   const { conversationId } = req.params;
@@ -389,6 +391,7 @@ const editGroupPut = async (req, res) => {
         conversationId: parseInt(conversationId),
       },
     });
+
     const newGroupAdmins = participants.filter((p) => p.isAdmin);
     const groupParticipantsIds = participants.map((p) => p.userId);
     const currentUserAdminObj = groupAdmins.find(
@@ -470,6 +473,9 @@ const editGroupPut = async (req, res) => {
             };
           }),
         },
+      },
+      include: {
+        participants: true,
       },
     });
     return res.json({

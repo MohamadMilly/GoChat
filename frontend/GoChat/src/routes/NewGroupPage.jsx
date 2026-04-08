@@ -115,8 +115,8 @@ export function NewGroupPage() {
     return <Navigate to={`/chats/group/${data.conversation.id}`} />;
   }
   return (
-    <main className="max-w-200 mx-auto dark:bg-gray-900 font-rubik relative">
-      <div className="flex justify-between items-center p-2 bg-gray-50/30 dark:bg-gray-800/80 rounded-lg my-2">
+    <main className="max-w-200 mx-auto dark:bg-gray-900 font-rubik relative px-4 pb-6">
+      <div className="flex justify-between items-center p-2 bg-white dark:bg-gray-800/80 rounded-lg my-2 shadow-xs">
         <Button onClick={goBack} className="text-gray-600 dark:text-gray-300">
           <p className="text-xs">
             {step === 1

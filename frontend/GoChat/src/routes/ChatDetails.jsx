@@ -13,6 +13,7 @@ import translations from "../translations";
 import { useLanguage } from "../contexts/LanguageContext";
 import { useAuth } from "../contexts/AuthContext";
 import { usePermissions } from "../hooks/usePermissions";
+import { LoadingLayer } from "../components/ui/LoadingLayer";
 
 function ChatParticipant({ participant, isConnected, showOnlineStatus }) {
   const [transitionId, setTransitionId] = useState(null);
@@ -83,7 +84,7 @@ export function ParticipantsSection({
   return (
     <section
       dir={language === "Arabic" ? "rtl" : "ltr"}
-      className="p-4 mt-4 bg-white dark:bg-gray-800 shadow-sm rounded-md"
+      className="p-4 mt-4 bg-white dark:bg-gray-800 shadow-sm rounded-md mx-2 md:mx-0"
     >
       <h3 className="text-lg font-bold tracking-tight text-cyan-600 dark:text-cyan-400">
         {translations.ChatDetails[language].MembersHeading}
@@ -110,7 +111,12 @@ export function ParticipantsSection({
 
 export function ChatDetails() {
   const { id } = useParams();
-  const { conversation, membersCount, isFetching, error } = useConversation(id);
+  const {
+    conversation,
+    membersCount,
+    isFetching: isConversationFetching,
+    error: conversationFetchingError,
+  } = useConversation(id);
   const { connectedUsers } = useSocket();
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -120,13 +126,13 @@ export function ChatDetails() {
     isFetching: isFetchingPermissions,
     error: permissionsFetchingError,
   } = usePermissions(id);
-  if (isFetching) return <p>{translations.ChatDetails[language].Loading}</p>;
-  if (error)
-    return (
-      <p>
-        {translations.ChatDetails[language].ErrorPrefix} {error.message}
-      </p>
-    );
+  if (isConversationFetching) return <LoadingLayer title={"Loading..."} />;
+  if (permissionsFetchingError) {
+    throw new Error(permissionsFetchingError);
+  }
+  if (conversationFetchingError) {
+    throw new Error(conversationFetchingError);
+  }
 
   const { title, avatar, description, participants, createdAt, admins } =
     conversation;
@@ -141,10 +147,9 @@ export function ChatDetails() {
   const connectedUsersCount = thisChatConnectedUsers.length || 0;
   const transitionId = getGenertedTransitionId();
   const dynamicTransitionName = `${title.replaceAll(" ", "-")}-${transitionId}`;
-  console.log(permissions);
   return (
-    <main className="max-w-200 mx-auto dark:bg-gray-900 font-rubik relative">
-      <div className="flex justify-between items-center p-2 bg-gray-50/30 dark:bg-gray-800/80 rounded-lg my-2">
+    <main className="max-w-200 mx-auto dark:bg-gray-900 font-rubik relative pb-6">
+      <div className="flex justify-between items-center p-2 bg-white dark:bg-gray-800/80 rounded-lg my-2">
         <Button
           onClick={() => navigate(-1)}
           className="text-gray-600 dark:text-gray-300"
@@ -184,7 +189,7 @@ export function ChatDetails() {
       </section>
       <section
         dir={language === "Arabic" ? "rtl" : "ltr"}
-        className="px-4 mt-4 py-2 bg-white dark:bg-gray-800 shadow-sm rounded-md"
+        className="px-4 mx-2 md:mx-0 mt-4 py-2 bg-white dark:bg-gray-800 shadow-sm rounded-md"
       >
         <article className="py-1.5 my-2">
           <p className="text-gray-900 dark:text-gray-100 flex items-center gap-2">

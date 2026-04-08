@@ -10,7 +10,6 @@ const queryClient = new QueryClient();
 
 // contexts
 import { AuthProvider } from "./contexts/AuthContext.jsx";
-import { ConversationProvider } from "./contexts/ConversationContext.jsx";
 import { SocketProvider } from "./contexts/SocketContext.jsx";
 import { ThemeProvider } from "./contexts/ThemeContext.jsx";
 import { LanguageProvider } from "./contexts/LanguageContext.jsx";
@@ -18,15 +17,17 @@ import { LanguageProvider } from "./contexts/LanguageContext.jsx";
 const router = createBrowserRouter(routes);
 
 createRoot(document.getElementById("root")).render(
-  <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <SocketProvider>
-        <LanguageProvider>
-          <ThemeProvider>
-            <RouterProvider router={router} />
-          </ThemeProvider>
-        </LanguageProvider>
-      </SocketProvider>
-    </AuthProvider>
-  </QueryClientProvider>,
+  <StrictMode>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <SocketProvider>
+          <LanguageProvider>
+            <ThemeProvider>
+              <RouterProvider router={router} />
+            </ThemeProvider>
+          </LanguageProvider>
+        </SocketProvider>
+      </AuthProvider>
+    </QueryClientProvider>
+  </StrictMode>,
 );

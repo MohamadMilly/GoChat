@@ -24,8 +24,6 @@ export const formatLastSeen = (date) => {
   }
 
   if (diffInDays === 0) {
-    const hours = Math.floor(diffInMs / (1000 * 60 * 60));
-    if (hours < 1) return "just now";
     return `today at ${lastSeen.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: true })}`;
   }
 

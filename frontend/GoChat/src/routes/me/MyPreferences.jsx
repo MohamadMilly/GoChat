@@ -133,8 +133,8 @@ export function MyPreferences() {
   if (error) return <p>Error: {error.message}</p>;
 
   return (
-    <main className="max-w-200 mx-auto bg-white dark:bg-gray-900 font-rubik relative p-2">
-      <div className="flex justify-start items-center p-2 bg-gray-50/30 dark:bg-gray-800/80 rounded-lg my-2">
+    <main className="max-w-200 mx-auto bg-gray-50 dark:bg-gray-900 font-rubik relative p-2">
+      <div className="flex justify-start items-center p-2 bg-white dark:bg-gray-800/80 rounded-lg my-2">
         <Button
           onClick={() => navigate(-1)}
           className="text-gray-600 dark:text-gray-300"
@@ -147,7 +147,7 @@ export function MyPreferences() {
         dir={language === "Arabic" ? "rtl" : "ltr"}
         className="shadow-xs p-4 rounded-lg my-4 border border-gray-300/50 bg-gray-50 dark:bg-gray-800 dark:border-gray-700"
       >
-        <h2 className="text-lg font-bold tracking-tight text-cyan-600 dark:text-cyan-400 mb-4">
+        <h2 className="text-xl font-bold tracking-tight text-cyan-600 dark:text-cyan-400 mb-4">
           {translations.MyPreferences[language].Title}
         </h2>
         <PreferenceSectionToggle

@@ -637,6 +637,7 @@ io.on("connection", async (socket) => {
     },
   );
   socket.on("create conversation", async (participantsIds) => {
+    console.log(participantsIds);
     if (!Array.isArray(participantsIds)) return;
     /* O(n^2) i will fix it when the app gets larger */
     const participantsSockets = await io.fetchSockets();
@@ -647,6 +648,63 @@ io.on("connection", async (socket) => {
       }
     });
   });
+  socket.on(
+    "edit conversation",
+    async (participantsIds, conversationId, callback) => {
+      try {
+        const convIdInt = parseInt(conversationId);
+        console.log(participantsIds);
+        const conversation = await prisma.conversation.findUnique({
+          where: { id: convIdInt },
+          include: { participants: true },
+        });
+
+        if (!conversation) return callback({ status: 404 });
+
+        const sockets = await io.fetchSockets();
+
+        // 1. تحويل userId إلى Number لضمان المطابقة مع مصفوفة الأرقام
+        const socketMap = new Map(
+          sockets.map((s) => [Number(s.handshake.auth.userId), s]),
+        );
+
+        // 2. التأكد أن كل القيم أرقام (Numbers)
+        const participantsIdsSet = new Set(participantsIds.map(Number));
+        const databaseParticipantsIds = new Set(
+          conversation.participants.map((p) => Number(p.userId)),
+        );
+
+        // --- إبلاغ المغادرين
+        for (let pId of databaseParticipantsIds) {
+          if (!participantsIdsSet.has(pId)) {
+            socketMap
+              .get(pId)
+              ?.emit(
+                "leave conversation",
+                true,
+                "_",
+                "_",
+                convIdInt.toString(),
+              );
+          }
+        }
+
+        // --- إبلاغ الباقين والجدد
+        for (let pId of participantsIdsSet) {
+          const currentSocket = socketMap.get(pId);
+          if (!currentSocket) continue;
+
+          const isNew = !databaseParticipantsIds.has(pId);
+          currentSocket.emit("edit conversation", isNew, convIdInt);
+        }
+
+        callback({ status: "ok" });
+      } catch (err) {
+        console.error("Error in edit conversation:", err);
+        callback({ status: 500 });
+      }
+    },
+  );
 });
 /* 
 TO DO :

@@ -6,6 +6,7 @@ import { useGroups } from "../hooks/useGroups";
 import { Avatar } from "../components/chat/Avatar";
 import translations from "../translations";
 import { useLanguage } from "../contexts/LanguageContext";
+import { useDebounce } from "../hooks/utils/useDebounce";
 
 function GroupPreviewCard(props) {
   const navigate = useNavigate();
@@ -44,16 +45,24 @@ function GroupsList({ query }) {
   const { groups, error, isFetching } = useGroups(query);
   const { language } = useLanguage();
 
-  if (isFetching) return <p>Loading...</p>;
-  if (isFetching) return <p>{translations.FindGroupPage[language].Loading}</p>;
+  if (isFetching)
+    return (
+      <p className="text-sm text-center text-gray-600 dark:text-gray-200">
+        {translations.FindGroupPage[language].Loading}
+      </p>
+    );
   if (error)
     return (
-      <p>
+      <p className="text-red-500">
         {translations.FindGroupPage[language].ErrorPrefix} {error.message}
       </p>
     );
   if (query && groups.length <= 0)
-    return <p>{translations.FindGroupPage[language].NoGroupsFound}</p>;
+    return (
+      <p className="text-sm text-center text-gray-600 dark:text-gray-200">
+        {translations.FindGroupPage[language].NoGroupsFound}
+      </p>
+    );
   return (
     <ul className="w-full flex flex-col animate-slideup divide-gray-100 dark:divide-gray-700 divide-y">
       {groups.map((group) => {
@@ -75,11 +84,14 @@ export function FindGroupPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const query = searchParams.get("title");
+  /* Debouncing query with useDebounce */
+  const debouncedQuery = useDebounce(query, 500);
+
   const { language } = useLanguage();
   return (
     <>
-      <main className="max-w-200 mx-auto dark:bg-gray-900 font-rubik">
-        <div className="flex justify-start items-center p-2 bg-gray-50/30 dark:bg-gray-800/80 rounded-lg mt-2 mb-4">
+      <main className="max-w-200 mx-auto dark:bg-gray-900 font-rubik px-4 pb-6">
+        <div className="flex justify-start items-center p-2 bg-white dark:bg-gray-800/80 rounded-lg mt-2 mb-4">
           <Button
             onClick={() => navigate(-1)}
             className="text-gray-600 dark:text-gray-300"
@@ -97,7 +109,7 @@ export function FindGroupPage() {
           dir={language === "Arabic" ? "rtl" : "ltr"}
           className="p-2 mt-4"
         >
-          <GroupsList query={query} />
+          <GroupsList query={debouncedQuery} />
         </section>
       </main>
       <Outlet />
