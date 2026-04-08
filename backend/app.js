@@ -653,7 +653,7 @@ io.on("connection", async (socket) => {
     async (participantsIds, conversationId, callback) => {
       try {
         const convIdInt = parseInt(conversationId);
-        console.log(participantsIds);
+
         const conversation = await prisma.conversation.findUnique({
           where: { id: convIdInt },
           include: { participants: true },

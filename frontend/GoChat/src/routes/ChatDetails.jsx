@@ -175,9 +175,14 @@ export function ChatDetails() {
           backgroundPosition: "center",
           backgroundSize: "cover",
         }}
-        className="bg-gray-100  dark:bg-gray-800 p-4 min-h-70 flex flex-col justify-end items-start"
+        className="bg-gray-100  dark:bg-gray-800 p-4 min-h-70 flex flex-col flex-wrap justify-end items-start"
       >
-        <h2 className="text-xl text-gray-800 dark:text-gray-50">{title}</h2>
+        {" "}
+        <div className="w-full">
+          <h2 className="text-xl text-gray-800 dark:text-gray-50 wrap-break-word">
+            {title}
+          </h2>
+        </div>
         <p className="text-sm text-gray-500 dark:text-gray-300">
           {membersCount} {translations.ChatDetails[language].MembersLabel}{" "}
           {(permissions?.onlineMembers || isCurrentUserAdmin) &&
@@ -192,10 +197,8 @@ export function ChatDetails() {
         className="px-4 mx-2 md:mx-0 mt-4 py-2 bg-white dark:bg-gray-800 shadow-sm rounded-md"
       >
         <article className="py-1.5 my-2">
-          <p className="text-gray-900 dark:text-gray-100 flex items-center gap-2">
-            <span>
-              {description || translations.ChatDetails[language].NoDescription}
-            </span>
+          <p className="text-gray-900 dark:text-gray-100 text-balance wrap-break-word">
+            {description || translations.ChatDetails[language].NoDescription}
           </p>
           <h2 className="text-sm text-cyan-600/80 dark:text-cyan-400/80 mt-1">
             {translations.ChatDetails[language].DescriptionHeading}
