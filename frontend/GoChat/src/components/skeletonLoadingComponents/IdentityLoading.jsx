@@ -13,7 +13,7 @@ export function IdentityLoading({ isCurrentUserIdentity }) {
           {user.firstname + " " + user.lastname}
         </strong>
       ) : (
-        <span className="inline-block p-1.5 rounded w-20 bg-gray-200 dark:bg-gray-600 animate-pulse"></span>
+        <span className="inline-block my-1.5 p-2 rounded w-20 bg-gray-200 dark:bg-gray-600 animate-pulse"></span>
       )}
     </div>
   );

@@ -110,11 +110,7 @@ export function MessagesListContent(props) {
       newMemberNotification.className =
         "p-0.5 bg-gray-200/15 backdrop-blur-md dark:bg-gray-700/15 text-gray-600 dark:text-gray-100 rounded text-sm mx-auto text-center block my-3";
       messageList.appendChild(newMemberNotification);
-      /* update conversation data */
-      queryClient.invalidateQueries({
-        queryKey: ["conversation", conversationId],
-        exact: true,
-      });
+      /* update conversation data is in socketContext*/
     }
     socket.on("join conversation", onUserJoin);
 
@@ -126,15 +122,7 @@ export function MessagesListContent(props) {
     function onUserLeave(withDelete, fullname, userId, conversationId) {
       const messageList = messagesListRef.current;
       if (withDelete) {
-        queryClient.setQueryData(["conversations"], (old) => {
-          if (!old?.conversations) return old;
-          return {
-            ...old,
-            conversations: old.conversations.filter(
-              (c) => c.id != conversationId,
-            ),
-          };
-        });
+        // Navigate to main menu if 'leave' event involves deletion.
         navigate("/chats");
       } else {
         if (!messageList) return;
@@ -143,20 +131,7 @@ export function MessagesListContent(props) {
         leftMemberNotification.className =
           "p-0.5 bg-gray-200/15 backdrop-blur-md dark:bg-gray-700/15 text-gray-600 dark:text-gray-100 rounded text-sm mx-auto text-center block my-3";
         messageList.appendChild(leftMemberNotification);
-        /* update conversation data */
-        queryClient.setQueryData(["conversation", conversationId], (old) => {
-          if (!old?.conversation) return old;
-          return {
-            ...old,
-            membersCount: old.membersCount - 1,
-            conversation: {
-              ...old.conversation,
-              participants: old.conversation.participants.filter(
-                (p) => p.userId != userId,
-              ),
-            },
-          };
-        });
+        /* update conversation data is in the context */
       }
     }
     socket.on("leave conversation", onUserLeave);

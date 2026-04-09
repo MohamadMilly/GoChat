@@ -2,6 +2,7 @@ import { createContext, useState, useEffect, useContext } from "react";
 import { socket } from "../socket";
 import { useAuth } from "./AuthContext";
 import { useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "react-router";
 
 const SocketContext = createContext(null);
 
@@ -291,7 +292,41 @@ export function SocketProvider({ children }) {
         });
       }
     }
-    socket.on("create conversation", onCreateConversation);
+    function onJoinConversation(conversationId, fullname) {
+      queryClient.invalidateQueries({
+        queryKey: ["conversation", conversationId],
+        exact: true,
+      });
+    }
+    function onLeaveConversation(withDelete, fullname, userId, conversationId) {
+      if (withDelete) {
+        queryClient.setQueryData(["conversations"], (old) => {
+          if (!old?.conversations) return old;
+          return {
+            ...old,
+            conversations: old.conversations.filter(
+              (c) => c.id != conversationId,
+            ),
+          };
+        });
+      } else {
+        /* update conversation data */
+        queryClient.setQueryData(["conversation", conversationId], (old) => {
+          if (!old?.conversation) return old;
+          return {
+            ...old,
+            membersCount: old.membersCount - 1,
+            conversation: {
+              ...old.conversation,
+              participants: old.conversation.participants.filter(
+                (p) => p.userId != userId,
+              ),
+            },
+          };
+        });
+      }
+    }
+
     socket.on("chat message", onReceiveMessage);
     socket.on("connect", onConnect);
     socket.on("disconnect", onDisconnect);
@@ -305,8 +340,11 @@ export function SocketProvider({ children }) {
     socket.on("unblock user", onReceiveUnBlock);
     socket.on("edit permissions", onEditPermissions);
     socket.on("edit conversation", onEditConversation);
+    socket.on("create conversation", onCreateConversation);
+    socket.on("join conversation", onJoinConversation);
+    socket.on("leave conversation", onLeaveConversation);
+
     return () => {
-      socket.off("create conversation", onCreateConversation);
       socket.off("chat message", onReceiveMessage);
       socket.off("connect", onConnect);
       socket.off("disconnect", onDisconnect);
@@ -320,6 +358,9 @@ export function SocketProvider({ children }) {
       socket.off("unblock user", onReceiveUnBlock);
       socket.off("edit permissions", onEditPermissions);
       socket.off("edit conversation", onEditConversation);
+      socket.off("create conversation", onCreateConversation);
+      socket.off("join conversation", onJoinConversation);
+      socket.off("leave conversation", onLeaveConversation);
     };
   }, [queryClient, user]);
   return (

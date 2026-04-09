@@ -637,20 +637,23 @@ io.on("connection", async (socket) => {
     },
   );
   socket.on("create conversation", async (participantsIds) => {
-    console.log(participantsIds);
     if (!Array.isArray(participantsIds)) return;
-    /* O(n^2) i will fix it when the app gets larger */
+    /* O(n) look up */
     const participantsSockets = await io.fetchSockets();
+    const participantsIdsSocketsMap = new Map(
+      participantsSockets.map((s) => [Number(s.handshake.auth.userId), s]),
+    );
     participantsSockets.forEach((socket) => {
       const userId = socket.handshake.auth.userId;
-      if (participantsIds.includes(userId)) {
+      if (participantsIdsSocketsMap.has(userId)) {
         socket.emit("create conversation");
       }
     });
   });
+
   socket.on(
     "edit conversation",
-    async (participantsIds, conversationId, callback) => {
+    async (participantsIds, prevParticipantsIds, conversationId, callback) => {
       try {
         const convIdInt = parseInt(conversationId);
 
@@ -663,19 +666,14 @@ io.on("connection", async (socket) => {
 
         const sockets = await io.fetchSockets();
 
-        // 1. تحويل userId إلى Number لضمان المطابقة مع مصفوفة الأرقام
         const socketMap = new Map(
           sockets.map((s) => [Number(s.handshake.auth.userId), s]),
         );
 
-        // 2. التأكد أن كل القيم أرقام (Numbers)
         const participantsIdsSet = new Set(participantsIds.map(Number));
-        const databaseParticipantsIds = new Set(
-          conversation.participants.map((p) => Number(p.userId)),
-        );
+        const prevParticipantsIdsSet = new Set(prevParticipantsIds.map(Number));
 
-        // --- إبلاغ المغادرين
-        for (let pId of databaseParticipantsIds) {
+        for (let pId of prevParticipantsIds) {
           if (!participantsIdsSet.has(pId)) {
             socketMap
               .get(pId)
@@ -689,12 +687,11 @@ io.on("connection", async (socket) => {
           }
         }
 
-        // --- إبلاغ الباقين والجدد
         for (let pId of participantsIdsSet) {
           const currentSocket = socketMap.get(pId);
           if (!currentSocket) continue;
 
-          const isNew = !databaseParticipantsIds.has(pId);
+          const isNew = !prevParticipantsIdsSet.has(pId);
           currentSocket.emit("edit conversation", isNew, convIdInt);
         }
 
@@ -707,7 +704,7 @@ io.on("connection", async (socket) => {
   );
 });
 /* 
-TO DO :
+TO DO (DONE):
 Whenever someone leave a conversation i should emit the conversationId 
 and the server gets this event and emits it to all connected users in this conversation 
 now , if the conversation is a group => if the left member is the owner (withDelete true) or it is a direct conversation => remove the group entirely 

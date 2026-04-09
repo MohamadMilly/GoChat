@@ -1,5 +1,5 @@
 import { api } from "../../utils/api";
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 
 const fetchConversations = async () => {
   const response = await api.get("/users/me/conversations");

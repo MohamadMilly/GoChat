@@ -59,7 +59,7 @@ export function MyProfile() {
             isConnected={isConnected}
             lastSeen={user.profile.lastSeen}
           />
-          <section className="px-4 mt-4 py-2 bg-white dark:bg-gray-800 divide-y divide-gray-300 dark:divide-gray-700 shadow-sm rounded-md">
+          <section className="px-4 mt-4 py-2 bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700 shadow-sm rounded-md">
             <ProfileSection
               value={user.username}
               title={PageTranslations[language].Username}

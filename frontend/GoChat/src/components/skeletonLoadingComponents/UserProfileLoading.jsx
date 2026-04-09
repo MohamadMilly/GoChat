@@ -23,7 +23,7 @@ export function UserProfileLoading({ isCurrentUserProfile }) {
               {isConnected ? (
                 "Online"
               ) : (
-                <span className="inline-block p-1.5 w-20 rounded bg-gray-100 dark:bg-gray-600 animate-pulse"></span>
+                <span className="inline-block my-1.5 p-2 w-20 rounded bg-gray-100 dark:bg-gray-600 animate-pulse"></span>
               )}
             </p>
           </>
@@ -34,21 +34,20 @@ export function UserProfileLoading({ isCurrentUserProfile }) {
           </>
         )}
       </section>
-      <section className="px-4 mt-4 py-2 bg-white dark:bg-gray-800 divide-y divide-gray-300 dark:divide-gray-700 shadow-sm rounded-md">
+      <section className="px-4 mt-4 py-2 bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700 shadow-sm rounded-md">
         <article className="p-1 my-2">
           <span className="block w-35 p-2.5 rounded bg-gray-100 dark:bg-gray-600 animate-pulse"></span>
 
-          <h2 className="mt-1 w-20 p-2 rounded bg-gray-100 dark:bg-gray-600 animate-pulse"></h2>
+          <h2 className="mt-2 w-20 p-2 rounded bg-gray-100 dark:bg-gray-600 animate-pulse"></h2>
         </article>
         <article className="p-1 my-2">
           <span className="block w-35 p-2.5 rounded bg-gray-100 dark:bg-gray-600 animate-pulse"></span>
 
-          <h2 className="mt-1 w-20 p-2 rounded  dark:bg-gray-600 animate-pulse"></h2>
+          <h2 className="mt-2 w-20 p-2 rounded  dark:bg-gray-600 animate-pulse"></h2>
         </article>
         <article className="p-1 my-2">
           <span className="block w-35 p-2.5 rounded bg-gray-100 dark:bg-gray-600 animate-pulse"></span>
-
-          <h2 className="mt-1 w-20 p-2 rounded dark:bg-gray-600 animate-pulse"></h2>
+          <h2 className="mt-2 w-20 p-2 rounded dark:bg-gray-600 animate-pulse"></h2>
         </article>
       </section>
     </>

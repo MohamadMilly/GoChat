@@ -58,7 +58,7 @@ export function UserProfile() {
             lastSeen={lastSeenDate}
             isBlocking={isBlocking}
           />
-          <section className="px-4 mt-4 py-4 bg-white/60 dark:bg-gray-800 divide-y divide-gray-300 dark:divide-gray-700 shadow-sm rounded-md">
+          <section className="px-4 mt-4 py-4 bg-white/60 dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700 shadow-sm rounded-md">
             <ProfileSection
               title={PageTranslations[language].Username}
               value={user.username}

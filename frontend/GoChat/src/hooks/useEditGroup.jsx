@@ -50,18 +50,23 @@ export function useEditGroup() {
       });
       return { previousConversationInfo, previousConversationInChatEntry };
     },
-    /* 
-    BIG CHALLENGE HERE , PROBABLY I WILL TACKLE IT LATER */
-    /*
+
     onSuccess: (data, args, context) => {
-      const participantsIds = args.data.participants.map((p) => p.userId);
-      console.log(participantsIds);
+      const participantsIds = data.conversation.participants.map(
+        (p) => p.userId,
+      );
+
+      const prevParticipantsIds =
+        context?.previousConversationInfo.conversation.participants.map(
+          (p) => p.userId,
+        );
       const conversationId = data.conversation.id.toString();
       socket
         .timeout(4000)
         .emit(
           "edit conversation",
           participantsIds,
+          prevParticipantsIds,
           conversationId,
           (response) => {
             if (response?.status !== "ok") {
@@ -70,7 +75,7 @@ export function useEditGroup() {
           },
         );
     },
-    */
+
     onError: (_err, args, context) => {
       console.log(_err);
       const lastMessage = queryClient
