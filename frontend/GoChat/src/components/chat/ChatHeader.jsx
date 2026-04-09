@@ -125,7 +125,7 @@ export const ChatHeaderContent = memo((props) => {
             >
               {isGroup ? (
                 thisChatTypingUsers.length > 0 ? (
-                  <span className="text-cyan-600 animate-pulse">
+                  <span className="text-cyan-600 animate-pulse line-clamp-1">
                     {thisChatTypingUsers
                       .map((u) => u.user.firstname)
                       .join(", ")}{" "}
