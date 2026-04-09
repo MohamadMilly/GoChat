@@ -13,6 +13,7 @@ import translations from "../../translations";
 import { useLanguage } from "../../contexts/LanguageContext";
 import { ChatHeaderMenu } from "./ChatHeaderMenu";
 import { formatLastSeen } from "../../utils/formatLastSeen";
+import { printGroupTypingUsers } from "../../utils/printGroupTypingUsers";
 
 export function ChatHeader() {
   const {
@@ -85,6 +86,11 @@ export const ChatHeaderContent = memo((props) => {
   const lastSeenDate = !isGroup
     ? formatLastSeen(chatPartner.profile.lastSeen)
     : null;
+
+  const typingUsersFormatted =
+    thisChatConnectedUsers.length > 0
+      ? printGroupTypingUsers(thisChatConnectedUsers)
+      : "";
   return (
     <header
       dir={language === "Arabic" ? "rtl" : "ltr"}
@@ -123,14 +129,7 @@ export const ChatHeaderContent = memo((props) => {
             >
               {isGroup ? (
                 thisChatTypingUsers.length > 0 ? (
-                  thisChatTypingUsers.map((userData) => {
-                    return (
-                      <span>
-                        {userData.user.firstname +
-                          translations.ChatHeader[language].TypingSuffix}
-                      </span>
-                    );
-                  })
+                  <span>{typingUsersFormatted}</span>
                 ) : (
                   <div className="flex items-center text-xs text-gray-700 dark:text-gray-200">
                     <div className="flex items-center">
