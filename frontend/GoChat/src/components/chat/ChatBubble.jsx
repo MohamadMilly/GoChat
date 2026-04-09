@@ -471,6 +471,19 @@ export const ChatBubble = memo(
       };
     }, [message, handleReply]);
 
+    const scrollToMessage = (messageId, e) => {
+      e.stopPropagation();
+      const chatBubble = document.getElementById(messageId);
+      if (chatBubble) {
+        chatBubble.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+
+        chatBubble.classList.add("highlight");
+        setTimeout(() => chatBubble.classList.remove("highlight"), 3000);
+      }
+    };
     return (
       <ChatBubbleContext
         value={{
@@ -480,8 +493,9 @@ export const ChatBubble = memo(
         }}
       >
         <li
+          id={message.id}
           ref={messagesContainerRef}
-          className={`my-1 will-change-auto relative flex items-end gap-1 text-sm md:text-base animate-pop transition-all duration-300 ${hideAvatar && isGroupMessage ? "pl-12" : ""} ${isReadersVisible && "bg-cyan-300/40"}`}
+          className={`my-1 will-change-auto relative flex items-end gap-1 text-sm md:text-base animate-pop transition-all duration-300 ${hideAvatar && isGroupMessage ? "pl-12" : ""}`}
         >
           {isGroupMessage && !isMyMessage && !hideAvatar && (
             <TransitionLink
@@ -524,24 +538,27 @@ export const ChatBubble = memo(
                   </p>
                 )}
                 {message.repliedMessage && (
-                  <div
-                    className={`px-2 border-l-5 dark:text-gray-300 border-[var(--accountColor)] max-w-80 min-w-50 py-0.5 my-0.5 rounded flex flex-col gap-0.5 ${isMyMessage ? "bg-[var(--accountColor)]/20" : "bg-[var(--accountColor)]/10"} shadow-[var(--accountColor)]/40 shadow-inner`}
+                  <button
+                    onClick={(e) =>
+                      scrollToMessage(message.repliedMessage.id, e)
+                    }
+                    className={`px-2 border-l-5 dark:text-gray-300 border-[var(--accountColor)] w-full min-w-50 py-0.5 my-0.5 rounded flex flex-col items-start gap-0.5 ${isMyMessage ? "bg-[var(--accountColor)]/20" : "bg-[var(--accountColor)]/10"} shadow-[var(--accountColor)]/40 shadow-inner`}
                     style={{
                       "--accountColor":
                         message.repliedMessage.sender?.accountColor,
                     }}
                   >
-                    <strong className="text-sm">
+                    <strong className="text-sm text-clamp-1 w-full text-start">
                       {message.repliedMessage.sender.id === user.id
                         ? translations.ChatBubble[language].YouLabel
                         : message.repliedMessage.sender.firstname +
                           " " +
                           message.repliedMessage.sender.lastname}
                     </strong>
-                    <p className="text-xs line-clamp-2">
+                    <p className="text-xs line-clamp-2 text-balance w-full text-start">
                       {message.repliedMessage.content}
                     </p>
-                  </div>
+                  </button>
                 )}
                 {message.content && (
                   <p

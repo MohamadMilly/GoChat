@@ -19,6 +19,9 @@
     background-color: #41c0d1;
     border-radius: 9999px;
   }
+  .highlight {
+    background-color: #a5f3fc66;
+  }
   .animate-slideup {
     animation: slideup 0.5s 1 forwards;
   }

@@ -3,7 +3,7 @@ import { socket } from "../../socket";
 import { useEffect } from "react";
 import { useRef } from "react";
 import { MediaDrawer } from "./MediaDrawer";
-import { Paperclip, Smile, Send, X } from "lucide-react";
+import { Paperclip, Smile, Send, X, Reply } from "lucide-react";
 import { ChatPageContext } from "../../routes/ChatPage";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "../../contexts/AuthContext";
@@ -183,21 +183,29 @@ export const SendMessageForm = memo(() => {
         <div
           style={{ "--color": repliedMessage.sender?.accountColor }}
           dir={"ltr"}
-          className="relative border-l-6 border-[var(--color)] px-4 py-3 bg-gray-50/50 dark:bg-gray-50/70 backdrop-blur-xs shadow-gray-100 shadow-inner m-2 rounded-lg animate-slideup "
+          className="relative border-l-6 border-[var(--color)] px-4 py-3 bg-gray-50/50 dark:bg-gray-600/20 backdrop-blur-xs shadow-gray-100 dark:shadow-gray-100/40 shadow-inner m-2 rounded-lg animate-slideup "
         >
-          <strong
+          <p
             style={{ "--color": repliedMessage.sender?.accountColor }}
-            className="text-[var(--color)]"
+            className="text-[var(--color)] flex items-center gap-0.5"
           >
-            {repliedMessage.sender.firstname +
-              " " +
-              repliedMessage.sender.lastname}
-          </strong>
-          <p className="text-sm text-gray-600 line-clamp-1">
+            <Reply size={18} className="inline" />
+            <span className="text-sm font-medium text-gray-500 dark:text-gray-300">
+              Reply to
+            </span>
+            <span className="font-medium">
+              {repliedMessage.sender.firstname +
+                " " +
+                repliedMessage.sender.lastname}
+            </span>
+          </p>
+          <p className="text-sm text-gray-600 dark:text-gray-300 line-clamp-1">
             {repliedMessage.content}
           </p>
           <button
-            className={"absolute top-2 right-2 text-gray-600 cursor-pointer"}
+            className={
+              "absolute top-2 right-2 text-gray-600 dark:text-gray-300 cursor-pointer"
+            }
             onClick={() => setRepliedMessage(null)}
           >
             <p className="sr-only">
