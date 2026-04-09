@@ -87,10 +87,6 @@ export const ChatHeaderContent = memo((props) => {
     ? formatLastSeen(chatPartner.profile.lastSeen)
     : null;
 
-  const typingUsersFormatted =
-    thisChatConnectedUsers.length > 0
-      ? printGroupTypingUsers(thisChatConnectedUsers)
-      : "";
   return (
     <header
       dir={language === "Arabic" ? "rtl" : "ltr"}
@@ -129,7 +125,12 @@ export const ChatHeaderContent = memo((props) => {
             >
               {isGroup ? (
                 thisChatTypingUsers.length > 0 ? (
-                  <span className="line-clamp-1">{typingUsersFormatted}</span>
+                  <span className="text-cyan-600 animate-pulse">
+                    {thisChatTypingUsers
+                      .map((u) => u.user.firstname)
+                      .join(", ")}{" "}
+                    {translations.ChatHeader[language].TypingSuffix}
+                  </span>
                 ) : (
                   <div className="flex items-center text-xs text-gray-700 dark:text-gray-200">
                     <div className="flex items-center">
