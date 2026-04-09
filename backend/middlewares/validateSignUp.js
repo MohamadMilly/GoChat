@@ -43,6 +43,7 @@ const validatePassword = body("password")
     minLowercase: 1,
     minNumbers: 1,
     minSymbols: 0,
+    minUppercase: 0,
   })
   .withMessage(errorMessages.weakPasswordErrorMessage);
 
