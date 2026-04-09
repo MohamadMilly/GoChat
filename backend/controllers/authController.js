@@ -63,6 +63,22 @@ const signupPost = async (req, res) => {
         accountColor: randomColor,
       },
     });
+    /*  Let the user join to a global chat */
+    const currentGroupGlobalParticipant =
+      await prisma.conversationParticipant.create({
+        data: {
+          user: {
+            connect: {
+              id: createdUser.id,
+            },
+          },
+          conversation: {
+            connect: {
+              id: 28,
+            },
+          },
+        },
+      });
     const payLoad = {
       user: {
         id: createdUser.id,
