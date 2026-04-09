@@ -129,7 +129,7 @@ export const ChatHeaderContent = memo((props) => {
             >
               {isGroup ? (
                 thisChatTypingUsers.length > 0 ? (
-                  <span>{typingUsersFormatted}</span>
+                  <span className="line-clamp-1">{typingUsersFormatted}</span>
                 ) : (
                   <div className="flex items-center text-xs text-gray-700 dark:text-gray-200">
                     <div className="flex items-center">
