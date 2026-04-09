@@ -110,9 +110,9 @@ function PreferenceSectionToggle({
       <h3 className="text-sm dark:text-gray-100">{preferenceTitle}</h3>
 
       {isFetching ? (
-        <div className="flex items-center">
+        <div className="flex gap-3 items-center">
           <div className="w-9 h-5 bg-gray-300 dark:bg-gray-600 rounded-full animate-pulse"></div>
-          <span className="w-10 ml-3 block py-1.5 rounded bg-gray-200 dark:bg-gray-600 animate-pulse"></span>
+          <span className="w-10 block py-1.5 rounded bg-gray-200 dark:bg-gray-600 animate-pulse"></span>
         </div>
       ) : typeof value === "boolean" ? (
         <ToggleInput

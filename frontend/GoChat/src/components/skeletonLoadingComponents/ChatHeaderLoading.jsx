@@ -26,15 +26,15 @@ export function ChatHeaderLoading() {
           <p className="w-20 p-2 bg-gray-200 dark:bg-gray-600 animate-pulse rounded"></p>
           {isGroup ? (
             <div className="flex items-center text-xs text-gray-700 dark:text-gray-100">
-              <div className="flex items-center">
-                <span className="inline-block p-1.5 rounded bg-gray-200 dark:bg-gray-600 animate-pulse mr-1"></span>
+              <div className="flex gap-1 items-center">
+                <span className="inline-block p-1.5 rounded bg-gray-200 dark:bg-gray-600 animate-pulse"></span>
                 <span>{translations.ChatHeader[language].MembersLabel}</span>
               </div>
               <span className="mx-1">|</span>
-              <div className="flex items-center">
+              <div className="flex gap-1 items-center">
                 <span
                   className="
-                inline-block p-1.5 rounded bg-gray-200 dark:bg-gray-600 animate-pulse mr-1"
+                inline-block p-1.5 rounded bg-gray-200 dark:bg-gray-600 animate-pulse"
                 ></span>
                 <span>{translations.ChatHeader[language].OnlineLabel}</span>
               </div>
