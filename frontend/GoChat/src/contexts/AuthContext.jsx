@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { socket } from "../socket";
 
 const initialToken = localStorage.getItem("token");
 const initialUser = JSON.parse(localStorage.getItem("user"));
@@ -25,6 +26,7 @@ export function AuthProvider({ children }) {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     queryClient.clear();
+    socket.disconnect();
   }, [queryClient]);
   const editUser = useCallback(
     (data = {}) => {

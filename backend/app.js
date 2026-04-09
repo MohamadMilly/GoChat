@@ -45,7 +45,7 @@ io.on("connection", async (socket) => {
   socket.on("join chat", async (conversationId) => {
     if (!conversationId) return;
     const convId = String(conversationId);
-
+    console.log("JOINED CHAT");
     socket.join(convId);
     /* try {
       const userId = socket.handshake.auth.userId;
@@ -107,6 +107,7 @@ io.on("connection", async (socket) => {
   });
   socket.on("recover", async (offsets) => {
     const userId = socket.handshake.auth.userId;
+    if (!userId) return;
     for (let [convId, lastId] of Object.entries(offsets)) {
       const missedMessagesInThisConversation = await prisma.message.findMany({
         where: {
@@ -161,6 +162,7 @@ io.on("connection", async (socket) => {
     async (message, conversationId, clientOffset, callback) => {
       const convId = String(conversationId);
       const userId = socket.handshake.auth.userId;
+      if (!userId) return;
       try {
         const conversationData = await prisma.conversation.findUnique({
           where: {

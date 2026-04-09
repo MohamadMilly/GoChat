@@ -74,7 +74,7 @@ const signupPost = async (req, res) => {
           },
           conversation: {
             connect: {
-              id: 28,
+              id: 53,
             },
           },
         },

@@ -99,7 +99,8 @@ export function SignUpPage() {
         >
           {" "}
           <ul className="mx-auto">
-            {error?.response?.data?.errors.length > 0 &&
+            {error?.response?.data?.errors &&
+              error?.response?.data?.errors.length > 0 &&
               error.response.data.errors.map((error, index) => {
                 return (
                   <li
