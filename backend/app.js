@@ -422,54 +422,57 @@ io.on("connection", async (socket) => {
     socket.broadcast.to(String(conversationId)).emit("stopped typing", userId);
   });
 
-  socket.on("read message", async (messageId, readerId, callback) => {
-    if (!messageId || !readerId) return;
-    try {
-      const messageOnReader = await prisma.messageOnReader.findUnique({
-        where: {
-          messageId_readerId: {
-            messageId: parseInt(messageId),
-            readerId: parseInt(readerId),
+  socket.on(
+    "read message",
+    async (conversationId, messageId, readerId, callback) => {
+      if (!messageId || !readerId || !conversationId) return;
+      try {
+        const messageOnReader = await prisma.messageOnReader.findUnique({
+          where: {
+            messageId_readerId: {
+              messageId: parseInt(messageId),
+              readerId: parseInt(readerId),
+            },
           },
-        },
-      });
-      if (messageOnReader) {
-        callback({
-          status: 401,
         });
-        return;
+        if (messageOnReader) {
+          callback({
+            status: 401,
+          });
+          return;
+        }
+        await prisma.messageOnReader.upsert({
+          where: {
+            messageId_readerId: {
+              messageId: parseInt(messageId),
+              readerId: parseInt(readerId),
+            },
+          },
+          create: {
+            message: {
+              connect: {
+                id: parseInt(messageId),
+              },
+            },
+            reader: {
+              connect: {
+                id: parseInt(readerId),
+              },
+            },
+          },
+          update: {},
+        });
+        io.emit("read message", conversationId, messageId, readerId);
+        callback({
+          status: "ok",
+        });
+      } catch (err) {
+        callback({
+          status: 500,
+        });
       }
-      await prisma.messageOnReader.upsert({
-        where: {
-          messageId_readerId: {
-            messageId: parseInt(messageId),
-            readerId: parseInt(readerId),
-          },
-        },
-        create: {
-          message: {
-            connect: {
-              id: parseInt(messageId),
-            },
-          },
-          reader: {
-            connect: {
-              id: parseInt(readerId),
-            },
-          },
-        },
-        update: {},
-      });
-      io.emit("read message", messageId, readerId);
-      callback({
-        status: "ok",
-      });
-    } catch (err) {
-      callback({
-        status: 500,
-      });
-    }
-  });
+    },
+  );
 
   socket.on("delete message", async (messageId, conversationId, callback) => {
     const userId = socket.handshake.auth.userId;

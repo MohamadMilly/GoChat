@@ -5,23 +5,21 @@ import {
   createContext,
   memo,
   useContext,
-  useCallback,
+  useMemo,
 } from "react";
 import { Avatar } from "./Avatar";
 import { TransitionLink } from "../ui/TransitionLink";
-import { Braces, FileText, FileArchive, CodeXml, File } from "lucide-react";
+import { Braces, FileText, FileArchive, File } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
 import { socket } from "../../socket";
 import { ChatBubbleStatus } from "./chatBubbleStatus";
-import { ReadersMenu } from "./ReadersMenu";
+
 import { ChatPageContext } from "../../routes/ChatPage";
-import Button from "../ui/Button";
-import { useParams, useSearchParams } from "react-router";
+
+import { useParams } from "react-router";
 import translations from "../../translations";
 import { useLanguage } from "../../contexts/LanguageContext";
 import { useQueryClient } from "@tanstack/react-query";
-import { EditMessageDialog } from "./EditMessageDialog";
-import { ChatBubbleContainerContext } from "./MessagesList";
 
 function VideoFile({ link }) {
   const { language } = useLanguage();
@@ -285,11 +283,13 @@ export const ChatBubble = memo(
     handlePreview,
   }) => {
     const { user } = useAuth();
-    const readersIds = message.readers
-      ? message.readers.map((reader) => reader.id)
-      : [];
+    /* Because the message comes from tanstack so the reference is not changing */
+    const readers = useMemo(
+      () => (message.readers ? message.readers.map((reader) => reader.id) : []),
+      [message.readers],
+    );
     const queryClient = useQueryClient();
-    const [readers, setReaders] = useState(readersIds);
+
     const [isReadersVisible, setIsReadersVisible] = useState(false);
 
     const [transitionId, setTransitionId] = useState(null);
@@ -303,6 +303,9 @@ export const ChatBubble = memo(
     const isThereAvatar = !!message.sender.profile?.avatar;
     const avatar = isThereAvatar && message.sender.profile?.avatar;
     const color = message.sender?.accountColor || "";
+    /* 
+    TODO :
+    lift this listener up in the components tree (SocketContext) to not to lose the events when the messagesList is unmounted */
 
     useEffect(() => {
       function onReadMessage(messageId, userId) {
@@ -358,7 +361,6 @@ export const ChatBubble = memo(
             }),
           };
         });
-        setReaders((prev) => [...prev, userId]);
       }
       socket.on("read message", onReadMessage);
 
@@ -371,8 +373,7 @@ export const ChatBubble = memo(
       if (!messagesContainerRef.current) return;
       const observer = new IntersectionObserver((entries) => {
         const observedMessage = entries[0];
-        const isReadByMe = readers.some((id) => id === user.id);
-
+        const isReadByMe = readers.some((id) => id == user.id);
         if (
           observedMessage.isIntersecting &&
           !isReadByMe &&
@@ -380,11 +381,17 @@ export const ChatBubble = memo(
         ) {
           socket
             .timeout(5000)
-            .emit("read message", message.id, user.id, (response) => {
-              if (response?.status !== "ok") {
-                console.error("Read message error:", response?.status);
-              }
-            });
+            .emit(
+              "read message",
+              conversationId,
+              message.id,
+              user.id,
+              (response) => {
+                if (response?.status !== "ok") {
+                  console.error("Read message error:", response?.status);
+                }
+              },
+            );
         }
       });
       const observedMessage = messagesContainerRef.current;
@@ -394,7 +401,7 @@ export const ChatBubble = memo(
         if (!observedMessage) return;
         observer.unobserve(observedMessage);
       };
-    }, [message.id, user.id, message.status, readers]);
+    }, [message.id, user.id, message.status, readers, conversationId]);
 
     useEffect(() => {
       let timer;

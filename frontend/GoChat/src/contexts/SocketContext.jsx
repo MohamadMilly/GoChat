@@ -327,6 +327,58 @@ export function SocketProvider({ children }) {
       }
     }
 
+    function onReadMessage(conversationId, messageId, userId) {
+      if (!conversationId || !messageId || !userId) return;
+      queryClient.setQueryData(
+        ["conversation", "messages", conversationId],
+        (old) => {
+          if (!old?.messages) return old;
+          return {
+            ...old,
+            messages: old.messages.map((message) => {
+              const previousReaders = message?.readers || [];
+              if (message.id == messageId && userId !== user.id) {
+                return {
+                  ...message,
+                  readers: [...previousReaders, { id: userId }],
+                };
+              } else {
+                return message;
+              }
+            }),
+          };
+        },
+      );
+      queryClient.setQueryData(["conversations"], (old) => {
+        if (!old?.conversations) return old;
+        return {
+          ...old,
+          conversations: old.conversations.map((c) => {
+            if (c.id == conversationId) {
+              const readMessage = c.messages.find((m) => m.id == messageId);
+              if (!readMessage) {
+                return c;
+              } else {
+                return {
+                  ...c,
+                  messages: [
+                    {
+                      ...readMessage,
+                      readers:
+                        userId == user.id && readMessage.senderId == user.id
+                          ? readMessage.readers
+                          : [...(readMessage.readers || []), { id: userId }],
+                    },
+                  ],
+                };
+              }
+            } else {
+              return c;
+            }
+          }),
+        };
+      });
+    }
     socket.on("chat message", onReceiveMessage);
     socket.on("connect", onConnect);
     socket.on("disconnect", onDisconnect);
@@ -336,6 +388,7 @@ export function SocketProvider({ children }) {
     socket.on("stopped typing", onUserStoppedTyping);
     socket.on("delete message", onDeleteMessage);
     socket.on("edit message", onEditMessage);
+    socket.on("read message", onReadMessage);
     socket.on("block user", onRecieveBlock);
     socket.on("unblock user", onReceiveUnBlock);
     socket.on("edit permissions", onEditPermissions);
@@ -354,6 +407,7 @@ export function SocketProvider({ children }) {
       socket.off("stopped typing", onUserStoppedTyping);
       socket.off("delete message", onDeleteMessage);
       socket.off("edit message", onEditMessage);
+      socket.off("read message", onReadMessage);
       socket.off("block user", onRecieveBlock);
       socket.off("unblock user", onReceiveUnBlock);
       socket.off("edit permissions", onEditPermissions);

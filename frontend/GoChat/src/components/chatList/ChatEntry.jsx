@@ -19,26 +19,9 @@ export const ChatEntry = memo(
   }) => {
     const base_class =
       "w-full flex items-center gap-x-2 p-3 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-150";
-    const initialReadersIds = lastMessage.readers
+    const readers = lastMessage.readers
       ? lastMessage.readers.map((reader) => reader.readerId)
       : [];
-    const [readers, setReaders] = useState(initialReadersIds);
-    const { user } = useAuth();
-    useEffect(() => {
-      function onReadMessage(messageId, readerId) {
-        if (messageId === lastMessage?.id) {
-          const isMyMessage = lastMessage.senderId === user.id;
-          if (readerId === user.id && isMyMessage) {
-            return;
-          }
-          setReaders((prev) => [...prev, readerId]);
-        }
-      }
-
-      socket.on("read message", onReadMessage);
-
-      return () => socket.off("read message", onReadMessage);
-    });
 
     return (
       <li>

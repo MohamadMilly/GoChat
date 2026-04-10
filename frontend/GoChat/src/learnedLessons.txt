@@ -13,4 +13,7 @@ provider to the items and also use useCallback hook instead of calling useContex
 
   4- giving socket object to prisma causes infinite loop
 
-  
+  5- Javascript files are not like React , u should initialize the variables and functions before using them , otherwise you will get an error that the variable is not defined.
+
+  6 - when i need to lift the listener up in the component tree not to lose events when the small low level components are unmounted
+      i can use a custom event and emit it to the app using window.dispatchEvent and listen for this event in those low level components for better performance.
