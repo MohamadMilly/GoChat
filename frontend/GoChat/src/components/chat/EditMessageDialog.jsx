@@ -1,7 +1,7 @@
 import { useLanguage } from "../../contexts/LanguageContext";
 import { MediaFilePreview } from "./ChatBubble";
 import translations from "../../translations";
-import { useContext, useState } from "react";
+import { useContext, useRef, useState } from "react";
 import { ChatPageContext } from "../../routes/ChatPage";
 import Button from "../ui/Button";
 import { ArrowLeft, Check } from "lucide-react";
@@ -124,7 +124,7 @@ export function EditMessageDialog() {
   return (
     <dialog
       open={!!editedMessage}
-      className="w-full py-6 z-100 h-full backdrop-blur-lg dark:bg-gray-700/50 bg-gray-400/50"
+      className="w-full py-6 z-100 h-full fixed inset-0 bg-white/20 backdrop-blur-sm dark:bg-gray-800/20"
     >
       <div className="px-4 mb-6">
         <Button
@@ -136,7 +136,7 @@ export function EditMessageDialog() {
         </Button>
       </div>
       <div
-        className={`my-1 pb-24 overflow-y-auto max-h-[calc(100%-50px)] bg-cyan-600/10 px-4 relative text-sm md:text-base animate-pop transition-all duration-300`}
+        className={`my-1 overflow-y-auto max-h-[calc(100%-50px)] bg-cyan-600/10 px-4 relative text-sm md:text-base animate-pop transition-all duration-300`}
       >
         <div className={`w-fit max-w-[85%] md:max-w-[75%]`}>
           {editedMessage.type !== "TEXT" && (
@@ -175,19 +175,12 @@ export function EditMessageDialog() {
       </div>
       <form
         onSubmit={handleEditSubmit}
-        className="max-w-200 z-10 dark:shadow shadow-inner dark:shadow-gray-600/20 shadow-gray-100/50 mx-auto flex! items-center justify-center gap-2 fixed bottom-4 sm:bottom-8 md:bottom-12 right-0 left-0 p-4 dark:bg-gray-800 rounded-xl bg-gray-100/50 backdrop-blur-xs border-gray-300 text-gray-700 dark:border-gray-700 border dark:text-gray-100 animate-slideup"
+        className="max-w-200 z-10 dark:shadow shadow-inner dark:shadow-gray-600/20 shadow-gray-100/50 md:mx-auto mx-3 flex! items-center justify-center gap-2 fixed bottom-4 sm:bottom-8 md:bottom-12 right-0 left-0 p-4 dark:bg-gray-800 rounded-xl bg-gray-100/50 backdrop-blur-xs border-gray-300 text-gray-700 dark:border-gray-700 border dark:text-gray-100 animate-slideup"
       >
         <label htmlFor="content" className="sr-only">
           new content
         </label>
-        <textarea
-          id="content"
-          className="grow outline-0 resize-none"
-          placeholder="new content here ..."
-          onChange={handleContentChange}
-          value={content}
-          name="content"
-        ></textarea>
+        <EditMessageTextArea onChange={handleContentChange} value={content} />
         <Button
           type="submit"
           className={"shrink-0 dark:text-green-400 text-green-600"}
@@ -196,5 +189,26 @@ export function EditMessageDialog() {
         </Button>
       </form>
     </dialog>
+  );
+}
+
+function EditMessageTextArea({ value, onChange }) {
+  const textAreaRef = useRef();
+
+  return (
+    <textarea
+      ref={textAreaRef}
+      id="content"
+      className="grow outline-0 resize-none"
+      placeholder="new content here ..."
+      onChange={(e) => {
+        const textarea = textAreaRef.current;
+        onChange(e);
+        textarea.style.height = "auto";
+        textarea.style.height = Math.min(textarea.scrollHeight, 150) + "px";
+      }}
+      value={value}
+      name="content"
+    ></textarea>
   );
 }

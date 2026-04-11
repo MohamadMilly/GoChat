@@ -278,7 +278,7 @@ export const SendMessageForm = memo(({ messagesListRef }) => {
           <label htmlFor="chat" className="sr-only">
             {translations.SendMessageForm[language].YourMessageSR}
           </label>
-          <div className="flex  items-center px-3 py-2 rounded-4xl bg-white/20 backdrop-blur-xs dark:bg-gray-800/20 shadow-inner shadow-white/60 dark:shadow-gray-400/70">
+          <div className="flex  items-center px-3 py-2 rounded-4xl bg-white/20 border border-gray-50 dark:border-gray-700/50 backdrop-blur-xs dark:bg-gray-800/20 shadow-inner shadow-white/60 dark:shadow-gray-500/70">
             <button
               onClick={() => setIsDrawerVisible((prev) => !prev)}
               type="button"

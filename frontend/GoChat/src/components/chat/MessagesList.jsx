@@ -57,7 +57,7 @@ function ChatBubbleMenuContainer({ children }) {
   return (
     <ChatBubbleContainerContext value={contextValue}>
       {message && (message.senderId === user.id || isCurrentUserAdmin) && (
-        <div className="text-white w-full h-full inset-0 bg-gray-700/30 z-100 absolute">
+        <div className="text-white w-full h-full inset-0 bg-gray-700/30 z-100 fixed">
           <ChatBubbleMenu
             setMessage={setMessage}
             message={message}

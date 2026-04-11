@@ -126,6 +126,7 @@ export function ChatPage() {
           style={{
             backgroundAttachment: "scroll",
             backgroundRepeat: "repeat",
+            overflowAnchor: "auto",
           }}
         >
           <MessagesList ref={chatContentRef} />
