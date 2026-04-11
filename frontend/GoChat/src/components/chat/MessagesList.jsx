@@ -17,7 +17,9 @@ import { useMemo } from "react";
 import { socket } from "../../socket";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router";
-
+import MessagesQueryTrigger from "./MessagesQueryTrigger";
+import { Circle } from "lucide-react";
+import { forwardRef } from "react";
 /*
 TO DO : (DONE)
 ChatBubbleMenuContainer is a layer in messages list which will receive a message and pass it via context (which is stored in a state) to the ChatBubbleMenu 
@@ -70,37 +72,41 @@ function ChatBubbleMenuContainer({ children }) {
   );
 }
 
-export function MessagesList() {
+export function MessagesList({ ref = null }) {
   const { conversationId } = useContext(ChatPageContext);
 
   return (
     <ChatBubbleMenuContainer>
-      <MessagesListContent conversationId={conversationId} />
+      <MessagesListContent conversationId={conversationId} ref={ref} />
     </ChatBubbleMenuContainer>
   );
 }
 
-export function MessagesListContent(props) {
+export const MessagesListContent = forwardRef((props, ref) => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
-  const messagesListRef = useRef(null);
+  const messagesListRef = ref;
   const navigate = useNavigate();
   const { setMessage, setClickCoords } = useContext(ChatBubbleContainerContext);
   const { setRepliedMessage } = useContext(ChatPageContext);
+
   const { setIsInPreviewMode, setPreviewImageURL } =
     useContext(ChatPageContext);
   const {
     messages,
     type,
+    isFetchingNextPage,
     error: messagesError,
     isFetching: isFetchingMessages,
   } = useMessages(props.conversationId);
+  useEffect(() => {});
   const memoizedMessages = useMemo(() => messages, [messages]);
+  const isFetchingInitialData = isFetchingMessages && messages.length === 0;
   useEffect(() => {
-    if (messagesListRef.current) {
+    if (messagesListRef.current && !isFetchingInitialData) {
       messagesListRef.current.scrollTop = messagesListRef.current.scrollHeight;
     }
-  }, [messages]);
+  }, [isFetchingInitialData, messagesListRef]);
   useEffect(() => {
     function onUserJoin(conversationId, fullname) {
       const messageList = messagesListRef.current;
@@ -117,7 +123,7 @@ export function MessagesListContent(props) {
     return () => {
       socket.off("join conversation", onUserJoin);
     };
-  }, [queryClient]);
+  }, [queryClient, messagesListRef]);
   useEffect(() => {
     function onUserLeave(withDelete, fullname, userId, conversationId) {
       const messageList = messagesListRef.current;
@@ -139,7 +145,7 @@ export function MessagesListContent(props) {
     return () => {
       socket.off("leave conversation", onUserLeave);
     };
-  }, [queryClient, navigate]);
+  }, [queryClient, navigate, messagesListRef]);
   /* TO DO :
   if the conversation going to be deleted , then remove it ! ,
   or if it is not going to be deleted create a notification 
@@ -163,7 +169,8 @@ export function MessagesListContent(props) {
     },
     [setIsInPreviewMode, setPreviewImageURL],
   );
-  if (isFetchingMessages) return <MessagesListLoading />;
+
+  if (isFetchingInitialData) return <MessagesListLoading />;
   if (messagesError) return <p>Error: {messagesError.message}</p>;
 
   return (
@@ -172,6 +179,14 @@ export function MessagesListContent(props) {
       ref={messagesListRef}
       className="flex-1 px-1 sm:px-3 pt-1 pb-6 overflow-visible overflow-y-auto overflow-x-hidden z-10 scrollbar-custom"
     >
+      {!isFetchingMessages && !isFetchingNextPage && (
+        <MessagesQueryTrigger conversationId={props.conversationId} />
+      )}
+      {isFetchingNextPage && (
+        <div className="flex justify-center items-center text-cyan-600 dark:text-cyan-400">
+          <Circle size={20} className="animate-spin" />
+        </div>
+      )}
       {memoizedMessages && memoizedMessages.length === 0 ? (
         <p
           className="text-center text-lg h-full flex justify-center items-center text-gray-800 dark:text-gray-100 p-1 z-10
@@ -226,4 +241,4 @@ export function MessagesListContent(props) {
       )}
     </ul>
   );
-}
+});

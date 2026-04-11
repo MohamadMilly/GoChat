@@ -23,26 +23,35 @@ export function EditMessageDialog() {
     e.preventDefault();
     let oldMessage = editedMessage;
     let newMessages = [];
+
     queryClient.setQueryData(
       ["conversation", "messages", conversationId],
       (old) => {
-        if (!old.messages) return old;
-        newMessages = old.messages.map((message) => {
-          if (message.id === editedMessage.id) {
-            return {
-              ...message,
-              content: content,
-              edit: true,
-            };
-          }
-          return message;
-        });
+        if (!old?.pages) return old;
+
+        const updatedPages = old.pages.map((page) => ({
+          ...page,
+          messages: page.messages.map((message) => {
+            if (message.id === editedMessage.id) {
+              return {
+                ...message,
+                content: content,
+                edit: true,
+              };
+            }
+            return message;
+          }),
+        }));
+
+        newMessages = updatedPages.flatMap((page) => page.messages);
+
         return {
           ...old,
-          messages: newMessages,
+          pages: updatedPages,
         };
       },
     );
+
     queryClient.setQueryData(["conversations"], (old) => {
       if (!old.conversations) return old;
 

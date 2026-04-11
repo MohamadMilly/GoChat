@@ -396,7 +396,6 @@ export const ChatBubble = memo(
       });
       const observedMessage = messagesContainerRef.current;
       observer.observe(observedMessage);
-
       return () => {
         if (!observedMessage) return;
         observer.unobserve(observedMessage);

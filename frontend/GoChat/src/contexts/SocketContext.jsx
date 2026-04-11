@@ -2,7 +2,6 @@ import { createContext, useState, useEffect, useContext } from "react";
 import { socket } from "../socket";
 import { useAuth } from "./AuthContext";
 import { useQueryClient } from "@tanstack/react-query";
-import { useNavigate } from "react-router";
 
 const SocketContext = createContext(null);
 
@@ -84,7 +83,7 @@ export function SocketProvider({ children }) {
         ["conversation", "messages", conversationId],
         (old) => {
           // if there is no previous cached data return the old data , or if it the user's message don't added because it is now optimistic
-          if (!old?.messages || !old?.type) {
+          if (!old?.pages) {
             return old;
           }
 
@@ -97,31 +96,68 @@ export function SocketProvider({ children }) {
               const d2 = new Date(date2);
               return d1.getTime() === d2.getTime();
             };
-            const existingOptimsticMessage = old.messages.some((message) =>
-              checkSameDate(message.createdAt, optimisticMessageCreatedAt),
+            const existingOptimsticMessage = old.pages.some((page) =>
+              page.messages.some((message) =>
+                checkSameDate(message.createdAt, optimisticMessageCreatedAt),
+              ),
             );
             if (existingOptimsticMessage) {
               return {
                 ...old,
-                messages: old.messages.map((m) => {
+                pages: old.pages.map((page, index) => {
+                  if (index === 0) {
+                    return {
+                      ...page,
+                      messages: page.messages.map((m) => {
+                        const d1 = new Date(m.createdAt);
+                        const d2 = new Date(optimisticMessageCreatedAt);
+
+                        if (d1.getTime() === d2.getTime()) {
+                          return message;
+                        } else return m;
+                      }),
+                    };
+                  } else {
+                    return page;
+                  }
+                }),
+                /* messages: old.messages.map((m) => {
                   const d1 = new Date(m.createdAt);
                   const d2 = new Date(optimisticMessageCreatedAt);
 
                   if (d1.getTime() === d2.getTime()) {
                     return message;
                   } else return m;
-                }),
+                }),*/
               };
             } else {
               return {
                 ...old,
-                messages: [...old.messages, message],
+                pages: old.pages.map((page, index) => {
+                  if (index === 0) {
+                    return {
+                      ...page,
+                      messages: [...page.messages, message],
+                    };
+                  } else {
+                    return page;
+                  }
+                }),
               };
             }
           }
           return {
             ...old,
-            messages: [...old.messages, message],
+            pages: old.pages.map((page, index) => {
+              if (index === 0) {
+                return {
+                  ...page,
+                  messages: [...page.messages, message],
+                };
+              } else {
+                return page;
+              }
+            }),
           };
         },
       );
@@ -141,16 +177,24 @@ export function SocketProvider({ children }) {
       queryClient.setQueryData(
         ["conversation", "messages", conversationId],
         (old) => {
-          if (!old.messages) return old;
-          newMessages = old.messages.filter(
-            (message) => message.id !== messageId,
-          );
+          if (!old?.pages) return old;
+
+          const updatedPages = old.pages.map((page) => ({
+            ...page,
+            messages: page.messages.filter(
+              (message) => message.id !== messageId,
+            ),
+          }));
+
+          newMessages = updatedPages.flatMap((page) => page.messages);
+
           return {
             ...old,
-            messages: newMessages,
+            pages: updatedPages,
           };
         },
       );
+
       queryClient.setQueryData(["conversations"], (old) => {
         if (!old.conversations) return old;
 
@@ -172,19 +216,27 @@ export function SocketProvider({ children }) {
       queryClient.setQueryData(
         ["conversation", "messages", conversationId],
         (old) => {
-          if (!old.messages) return old;
-          newMessages = old.messages.map((message) => {
-            if (message.id === editedMessage.id) {
-              return editedMessage;
-            }
-            return message;
-          });
+          if (!old?.pages) return old;
+
+          const updatedPages = old.pages.map((page) => ({
+            ...page,
+            messages: page.messages.map((message) => {
+              if (message.id === editedMessage.id) {
+                return editedMessage;
+              }
+              return message;
+            }),
+          }));
+
+          newMessages = updatedPages.flatMap((page) => page.messages);
+
           return {
             ...old,
-            messages: newMessages,
+            pages: updatedPages,
           };
         },
       );
+
       queryClient.setQueryData(["conversations"], (old) => {
         if (!old.conversations) return old;
 
@@ -332,23 +384,28 @@ export function SocketProvider({ children }) {
       queryClient.setQueryData(
         ["conversation", "messages", conversationId],
         (old) => {
-          if (!old?.messages) return old;
+          if (!old?.pages) return old;
+
           return {
             ...old,
-            messages: old.messages.map((message) => {
-              const previousReaders = message?.readers || [];
-              if (message.id == messageId && userId !== user.id) {
-                return {
-                  ...message,
-                  readers: [...previousReaders, { id: userId }],
-                };
-              } else {
-                return message;
-              }
-            }),
+            pages: old.pages.map((page) => ({
+              ...page,
+              messages: page.messages.map((message) => {
+                const previousReaders = message?.readers || [];
+                if (message.id == messageId && userId !== user.id) {
+                  return {
+                    ...message,
+                    readers: [...previousReaders, { id: userId }],
+                  };
+                } else {
+                  return message;
+                }
+              }),
+            })),
           };
         },
       );
+
       queryClient.setQueryData(["conversations"], (old) => {
         if (!old?.conversations) return old;
         return {

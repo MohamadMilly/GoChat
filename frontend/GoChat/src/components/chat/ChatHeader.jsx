@@ -84,7 +84,7 @@ export const ChatHeaderContent = memo((props) => {
   );
   /* if the conversation is direct and partner is diconnected */
   const lastSeenDate = !isGroup
-    ? formatLastSeen(chatPartner.profile.lastSeen)
+    ? formatLastSeen(chatPartner?.profile?.lastSeen)
     : null;
 
   return (

@@ -26,13 +26,18 @@ export function ChatBubbleMenu({
     queryClient.setQueryData(
       ["conversation", "messages", conversationId],
       (old) => {
-        if (!old.messages) return old;
-        newMessages = old.messages.filter(
-          (message) => message.id !== messageId,
-        );
+        if (!old?.pages) return old;
+
+        const updatedPages = old.pages.map((page) => ({
+          ...page,
+          messages: page.messages.filter((message) => message.id !== messageId),
+        }));
+
+        newMessages = updatedPages.flatMap((page) => page.messages);
+
         return {
           ...old,
-          messages: newMessages,
+          pages: updatedPages,
         };
       },
     );

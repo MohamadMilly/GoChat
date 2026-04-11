@@ -54,6 +54,11 @@ const sendMessagePost = async (req, res) => {
 const getConversationMessagesGet = async (req, res) => {
   const { conversationId } = req.params;
   const { userId: userIdString } = req.query;
+  const oldCursor =
+    req.query.cursor && req.query.cursor !== "null"
+      ? Number(req.query.cursor)
+      : null;
+
   const userId = parseInt(userIdString);
   try {
     const conversation = await prisma.conversation.findUnique({
@@ -96,6 +101,14 @@ const getConversationMessagesGet = async (req, res) => {
       where: {
         conversationId: parseInt(conversationId),
       },
+      /* paginating backwards required negative value*/
+      take: 20,
+      skip: oldCursor ? 1 : 0,
+      ...(oldCursor && {
+        cursor: {
+          id: oldCursor,
+        },
+      }),
       include: {
         sender: {
           include: {
@@ -130,9 +143,10 @@ const getConversationMessagesGet = async (req, res) => {
         },
       },
       orderBy: {
-        createdAt: "asc",
+        createdAt: "desc",
       },
     });
+
     const filteredMessages = messages.map((message) => {
       return {
         ...message,
@@ -145,9 +159,13 @@ const getConversationMessagesGet = async (req, res) => {
             : filterProfile(message.sender, participantsPreferences),
       };
     });
+    let reveredMessages =
+      filteredMessages.reverse(); /* to keep the order of messages asc by timestamp */
+    let nextCursor = reveredMessages.length > 0 ? reveredMessages[0].id : null;
     return res.json({
-      messages: filteredMessages,
+      messages: reveredMessages,
       type: conversation.type,
+      nextCursor: nextCursor,
     });
   } catch (err) {
     return res.status(500).json({

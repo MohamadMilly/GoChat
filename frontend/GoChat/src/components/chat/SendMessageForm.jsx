@@ -18,7 +18,7 @@ import { toast } from "react-toastify";
 
 let counter = 0;
 
-export const SendMessageForm = memo(() => {
+export const SendMessageForm = memo(({ messagesListRef }) => {
   const { language } = useLanguage();
   const [message, setMessage] = useState("");
   const [isDrawerVisible, setIsDrawerVisible] = useState(false);
@@ -87,10 +87,33 @@ export const SendMessageForm = memo(() => {
     queryClient.setQueryData(
       ["conversation", "messages", conversationId],
       (old) => {
-        if (!old?.messages) return old;
-        return { ...old, messages: [...old.messages, optimisticMessage] };
+        if (!old?.pages) return old;
+        return {
+          ...old,
+          pages: old.pages.map((page, index) => {
+            if (index === 0) {
+              return {
+                ...page,
+                messages: [...page.messages, optimisticMessage],
+              };
+            } else {
+              return page;
+            }
+          }),
+        };
       },
     );
+    /* scroll down messages list */
+
+    if (messagesListRef.current) {
+      /* becase updating the UI and rerendering is async so i need to wait for the upper process */
+      setTimeout(() => {
+        messagesListRef.current.scrollTo({
+          top: messagesListRef.current.scrollHeight,
+          behavior: "smooth",
+        });
+      }, 0);
+    }
     queryClient.setQueryData(["conversations"], (old) => {
       if (!old?.conversations) return old;
       return {

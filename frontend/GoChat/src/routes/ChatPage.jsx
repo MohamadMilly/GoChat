@@ -2,7 +2,14 @@ import { useParams } from "react-router";
 import { SendMessageForm } from "../components/chat/SendMessageForm";
 import { ChatHeader } from "../components/chat/ChatHeader";
 import { MessagesList } from "../components/chat/MessagesList";
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { socket } from "../socket";
 import { useSocket } from "../contexts/SocketContext";
 import Button from "../components/ui/Button";
@@ -71,7 +78,7 @@ export function ChatPage() {
   const [repliedMessage, setRepliedMessage] = useState(null);
   const [editedMessage, setEditedMessage] = useState(null);
   const { language } = useLanguage();
-
+  const messagesListRef = useRef(null);
   useEffect(() => {
     if (!isConnected) return;
     socket.emit("join chat", String(id));
@@ -119,8 +126,8 @@ export function ChatPage() {
             backgroundRepeat: "repeat",
           }}
         >
-          <MessagesList />
-          <SendMessageForm />
+          <MessagesList ref={messagesListRef} />
+          <SendMessageForm messagesListRef={messagesListRef} />
           {editedMessage && <EditMessageDialog message={editedMessage} />}
         </section>
 
