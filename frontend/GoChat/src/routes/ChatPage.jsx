@@ -128,7 +128,7 @@ export function ChatPage() {
             backgroundRepeat: "repeat",
           }}
         >
-          <MessagesList ref={messagesListRef} />
+          <MessagesList ref={chatContentRef} />
           <SendMessageForm messagesListRef={chatContentRef} />
           {editedMessage && <EditMessageDialog message={editedMessage} />}
         </section>
