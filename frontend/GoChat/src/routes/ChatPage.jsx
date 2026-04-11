@@ -79,6 +79,7 @@ export function ChatPage() {
   const [editedMessage, setEditedMessage] = useState(null);
   const { language } = useLanguage();
   const messagesListRef = useRef(null);
+  const chatContentRef = useRef(null);
   useEffect(() => {
     if (!isConnected) return;
     socket.emit("join chat", String(id));
@@ -116,8 +117,9 @@ export function ChatPage() {
       >
         <ChatHeader />
         <section
-          className="relative basis-full flex flex-col flex-1 overflow-hidden 
-             bg-white dark:bg-slate-950 
+          ref={chatContentRef}
+          className="relative basis-full w-full flex flex-col flex-1 overflow-y-auto scrollbar-custom
+             bg-white dark:bg-slate-950
              bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] 
              dark:bg-[radial-gradient(#1e293b_1px,transparent_1px)] 
              [background-size:16px_16px]"
@@ -127,7 +129,7 @@ export function ChatPage() {
           }}
         >
           <MessagesList ref={messagesListRef} />
-          <SendMessageForm messagesListRef={messagesListRef} />
+          <SendMessageForm messagesListRef={chatContentRef} />
           {editedMessage && <EditMessageDialog message={editedMessage} />}
         </section>
 

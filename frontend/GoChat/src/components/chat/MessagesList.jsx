@@ -177,7 +177,7 @@ export const MessagesListContent = forwardRef((props, ref) => {
     <ul
       dir="ltr"
       ref={messagesListRef}
-      className="flex-1 px-1 sm:px-3 pt-1 pb-6 overflow-visible overflow-y-auto overflow-x-hidden z-10 scrollbar-custom"
+      className="flex-1 px-1 sm:px-3 pt-1 pb-6"
     >
       {!isFetchingMessages && !isFetchingNextPage && (
         <MessagesQueryTrigger conversationId={props.conversationId} />

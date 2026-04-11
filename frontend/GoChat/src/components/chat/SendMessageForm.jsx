@@ -200,7 +200,7 @@ export const SendMessageForm = memo(({ messagesListRef }) => {
   return (
     <div
       dir={language === "Arabic" ? "rtl" : "ltr"}
-      className="z-20 shrink-0 relative md:bottom-4 bottom-2 mx-2"
+      className="z-20 shrink-0 sticky md:bottom-4 bottom-2 mx-2"
     >
       {repliedMessage && (
         <div
@@ -278,11 +278,11 @@ export const SendMessageForm = memo(({ messagesListRef }) => {
           <label htmlFor="chat" className="sr-only">
             {translations.SendMessageForm[language].YourMessageSR}
           </label>
-          <div className="flex  items-center px-3 py-2 rounded-4xl bg-white dark:bg-gray-800 shadow">
+          <div className="flex  items-center px-3 py-2 rounded-4xl bg-white/20 backdrop-blur-xs dark:bg-gray-800/20 shadow-inner shadow-white/60 dark:shadow-gray-400/70">
             <button
               onClick={() => setIsDrawerVisible((prev) => !prev)}
               type="button"
-              className="p-2 text-gray-500 dark:text-gray-300 dark:hover:text-gray-100 rounded-lg cursor-pointer hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-700"
+              className="p-2 text-gray-700 dark:text-gray-300 dark:hover:text-gray-100 rounded-lg cursor-pointer hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-700"
             >
               <Paperclip />
               <span className="sr-only">
@@ -292,7 +292,7 @@ export const SendMessageForm = memo(({ messagesListRef }) => {
 
             <button
               type="button"
-              className="p-2 text-gray-500 dark:text-gray-300 dark:hover:text-gray-100 rounded-lg cursor-pointer hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-700"
+              className="p-2 text-gray-700 dark:text-gray-300 dark:hover:text-gray-100 rounded-lg cursor-pointer hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-700"
               onClick={() => setShowEmojiPicker(!showEmojiPicker)}
             >
               <Smile />
@@ -305,7 +305,7 @@ export const SendMessageForm = memo(({ messagesListRef }) => {
               dir="auto"
               id="chat"
               rows="1"
-              className="block max-h-37.5 md:min-h-12 resize-none mx-4 p-2.5 w-full text-sm text-gray-900 bg-white dark:bg-gray-900 dark:text-gray-50 outline-2 outline-gray-400/20 dark:outline-gray-200/20 focus:outline-offset-2 focus:outline-cyan-600/80 dark:focus:outline-cyan-400/80 rounded-lg"
+              className="block max-h-37.5 md:min-h-12 resize-none mx-4 p-2.5 w-full text-sm text-gray-900 bg-white/30 dark:bg-gray-900/50 dark:text-gray-50 outline-2 outline-gray-400/20 dark:outline-gray-200/20 focus:outline-offset-2 focus:outline-cyan-600/80 dark:focus:outline-cyan-400/80 rounded-lg"
               placeholder={translations.SendMessageForm[language].Placeholder}
               onChange={onMessageChange}
               value={message}
