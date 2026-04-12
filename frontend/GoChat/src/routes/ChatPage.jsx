@@ -81,6 +81,7 @@ export function ChatPage() {
   const { language } = useLanguage();
   /* const messagesListRef = useRef(null); */
   const chatContentRef = useRef(null);
+
   const { fetchNextPage, hasNextPage, isFetchingNextPage } = useMessages(id);
   useEffect(() => {
     if (!isConnected) return;

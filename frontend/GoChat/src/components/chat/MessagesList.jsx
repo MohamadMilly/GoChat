@@ -89,7 +89,10 @@ export const MessagesListContent = forwardRef((props, ref) => {
   const navigate = useNavigate();
   const { setMessage, setClickCoords } = useContext(ChatBubbleContainerContext);
   const { setRepliedMessage } = useContext(ChatPageContext);
-
+  const prevScrollRef =
+    useRef(
+      0,
+    ); /* I want to store the previous scroll to prevent the scroll from jumping */
   const { setIsInPreviewMode, setPreviewImageURL } =
     useContext(ChatPageContext);
   const {
@@ -169,7 +172,15 @@ export const MessagesListContent = forwardRef((props, ref) => {
     },
     [setIsInPreviewMode, setPreviewImageURL],
   );
-
+  useEffect(() => {
+    if (messagesListRef.current && messages.length > 0) {
+      const diff = messagesListRef.current.scrollHeight - prevScrollRef.current;
+      if (diff > 0) {
+        messagesListRef.current.scrollTop += diff;
+      }
+      prevScrollRef.current = messagesListRef.current.scrollHeight;
+    }
+  }, [messages, messagesListRef]);
   if (isFetchingInitialData) return <MessagesListLoading />;
   if (messagesError) return <p>Error: {messagesError.message}</p>;
 
