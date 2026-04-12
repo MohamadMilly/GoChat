@@ -99,7 +99,7 @@ export const MessagesListContent = forwardRef((props, ref) => {
     error: messagesError,
     isFetching: isFetchingMessages,
   } = useMessages(props.conversationId);
-  useEffect(() => {});
+
   const memoizedMessages = useMemo(() => messages, [messages]);
   const isFetchingInitialData = isFetchingMessages && messages.length === 0;
   useEffect(() => {
@@ -174,10 +174,13 @@ export const MessagesListContent = forwardRef((props, ref) => {
   if (messagesError) return <p>Error: {messagesError.message}</p>;
 
   return (
-    <ul dir="ltr" className="flex-1 px-1 sm:px-3 pt-1 pb-6">
-      {!isFetchingMessages && !isFetchingNextPage && (
-        <MessagesQueryTrigger conversationId={props.conversationId} />
-      )}
+    <ul
+      style={{
+        overflowAnchor: "auto",
+      }}
+      dir="ltr"
+      className="flex-1 px-1 sm:px-3 pt-1 pb-6"
+    >
       {isFetchingNextPage && (
         <div className="flex justify-center items-center text-cyan-600 dark:text-cyan-400">
           <Circle size={20} className="animate-spin" />

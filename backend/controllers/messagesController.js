@@ -159,11 +159,12 @@ const getConversationMessagesGet = async (req, res) => {
             : filterProfile(message.sender, participantsPreferences),
       };
     });
-    let reveredMessages =
+    let reversedMessages =
       filteredMessages.reverse(); /* to keep the order of messages asc by timestamp */
-    let nextCursor = reveredMessages.length > 0 ? reveredMessages[0].id : null;
+    let nextCursor =
+      reversedMessages.length > 0 ? reversedMessages[0].id : null;
     return res.json({
-      messages: reveredMessages,
+      messages: reversedMessages,
       type: conversation.type,
       nextCursor: nextCursor,
     });

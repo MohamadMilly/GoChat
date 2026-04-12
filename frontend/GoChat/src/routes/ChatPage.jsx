@@ -22,6 +22,7 @@ import { useConversation } from "../hooks/useConversation";
 import { getChatInfo } from "../utils/getChatInfo";
 import { useAuth } from "../contexts/AuthContext";
 import { useUser } from "../hooks/useUser";
+import { useMessages } from "../hooks/useMessages";
 
 export const ChatPageContext = createContext({
   conversationId: null,
@@ -78,8 +79,9 @@ export function ChatPage() {
   const [repliedMessage, setRepliedMessage] = useState(null);
   const [editedMessage, setEditedMessage] = useState(null);
   const { language } = useLanguage();
-  const messagesListRef = useRef(null);
+  /* const messagesListRef = useRef(null); */
   const chatContentRef = useRef(null);
+  const { fetchNextPage, hasNextPage, isFetchingNextPage } = useMessages(id);
   useEffect(() => {
     if (!isConnected) return;
     socket.emit("join chat", String(id));
@@ -117,6 +119,12 @@ export function ChatPage() {
       >
         <ChatHeader />
         <section
+          onScroll={(e) => {
+            const { scrollTop } = e.target;
+            if (scrollTop < 150 && !isFetchingNextPage && hasNextPage) {
+              fetchNextPage();
+            }
+          }}
           ref={chatContentRef}
           className="relative basis-full w-full flex flex-col flex-1 overflow-y-auto scrollbar-custom
              bg-white dark:bg-slate-950
