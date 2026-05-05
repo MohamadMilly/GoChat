@@ -14,7 +14,6 @@ export function SocketProvider({ children }) {
 
   useEffect(() => {
     if (!token || !user) return;
-
     socket.connect();
     socket.emit("user connected", user.id);
     return () => socket.disconnect();
@@ -25,6 +24,7 @@ export function SocketProvider({ children }) {
       if (!socket.recovered) {
         const offsets = socket.auth.serverOffset;
         socket.emit("recover", offsets);
+        socket.emit("user connected", user.id);
       }
       setIsConnected(true);
     }

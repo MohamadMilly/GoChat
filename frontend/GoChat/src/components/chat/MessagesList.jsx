@@ -20,6 +20,7 @@ import { useNavigate } from "react-router";
 import MessagesQueryTrigger from "./MessagesQueryTrigger";
 import { Circle } from "lucide-react";
 import { forwardRef } from "react";
+import { Spinner } from "../ui/Spinner";
 /*
 TO DO : (DONE)
 ChatBubbleMenuContainer is a layer in messages list which will receive a message and pass it via context (which is stored in a state) to the ChatBubbleMenu 
@@ -180,7 +181,7 @@ export const MessagesListContent = forwardRef((props, ref) => {
       }
       prevScrollRef.current = messagesListRef.current.scrollHeight;
     }
-  }, [messages, messagesListRef]);
+  }, [messages.length, messagesListRef]);
   if (isFetchingInitialData) return <MessagesListLoading />;
   if (messagesError) return <p>Error: {messagesError.message}</p>;
 
@@ -194,7 +195,7 @@ export const MessagesListContent = forwardRef((props, ref) => {
     >
       {isFetchingNextPage && (
         <div className="flex justify-center items-center text-cyan-600 dark:text-cyan-400">
-          <Circle size={20} className="animate-spin" />
+          <Spinner size={20} />
         </div>
       )}
       {memoizedMessages && memoizedMessages.length === 0 ? (

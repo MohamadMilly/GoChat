@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { socket } from "../socket";
+import { useMemo } from "react";
 
 const initialToken = localStorage.getItem("token");
 const initialUser = JSON.parse(localStorage.getItem("user"));
@@ -36,10 +37,11 @@ export function AuthProvider({ children }) {
     },
     [user],
   );
+  const contextValue = useMemo(() => {
+    token, user, login, logout, editUser;
+  }, [token, user, login, logout, editUser]);
   return (
-    <AuthContext.Provider value={{ token, user, login, logout, editUser }}>
-      {children}
-    </AuthContext.Provider>
+    <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>
   );
 }
 

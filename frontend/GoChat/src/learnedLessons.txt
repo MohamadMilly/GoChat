@@ -17,5 +17,9 @@ provider to the items and also use useCallback hook instead of calling useContex
 
   6 - when i need to lift the listener up in the component tree not to lose events when the small low level components are unmounted
       i can use a custom event and emit it to the app using window.dispatchEvent and listen for this event in those low level components for better performance.
-
+ 
   7 - overflow-anchor is a CSS property that lets me control the scroll potision when the data or content overflows and increases
+
+  8- we should derive values in parent components and pass them to the child components if the 
+  calculation is expensive and the values are used by other componenets or the parent it self
+  also this keeps the child components pure and only handle the UI

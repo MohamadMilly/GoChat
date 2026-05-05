@@ -23,7 +23,7 @@ let connectedUsers = new Map();
 io.on("connection", async (socket) => {
   const userId = socket.handshake.auth.userId;
   if (!connectedUsers[userId]) connectedUsers.set(userId, socket.id);
-
+  
   socket.isFirstConnection = true;
   io.emit("user connected", [...connectedUsers.keys()]);
 
@@ -668,7 +668,7 @@ io.on("connection", async (socket) => {
         });
 
         if (!conversation) return callback({ status: 404 });
-
+       
         const sockets = await io.fetchSockets();
 
         const socketMap = new Map(
