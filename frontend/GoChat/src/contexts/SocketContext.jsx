@@ -2,6 +2,7 @@ import { createContext, useState, useEffect, useContext } from "react";
 import { socket } from "../socket";
 import { useAuth } from "./AuthContext";
 import { useQueryClient } from "@tanstack/react-query";
+import { useMemo } from "react";
 
 const SocketContext = createContext(null);
 
@@ -474,10 +475,12 @@ export function SocketProvider({ children }) {
       socket.off("leave conversation", onLeaveConversation);
     };
   }, [queryClient, user]);
+  const contextValue = useMemo(
+    () => ({ isConnected, connectedUsers, typingUsers }),
+    [isConnected, connectedUsers, typingUsers],
+  );
   return (
-    <SocketContext.Provider
-      value={{ isConnected, connectedUsers, typingUsers }}
-    >
+    <SocketContext.Provider value={contextValue}>
       {children}
     </SocketContext.Provider>
   );

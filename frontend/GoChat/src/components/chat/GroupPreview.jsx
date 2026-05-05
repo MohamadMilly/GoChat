@@ -12,6 +12,7 @@ import { LoadingLayer } from "../ui/LoadingLayer";
 import { useConversation } from "../../hooks/useConversation";
 import { useMemo } from "react";
 import { getChatInfo } from "../../utils/getChatInfo";
+import { useRef } from "react";
 
 function GroupPreviewFooter({ isJoined, isFetchingConversation }) {
   const { id } = useParams();
@@ -66,6 +67,7 @@ export function GroupPreview() {
   const { id } = useParams();
   const naviagte = useNavigate();
   const { user } = useAuth();
+  const chatContentRef = useRef(null);
   const {
     conversation,
     membersCount,
@@ -78,6 +80,7 @@ export function GroupPreview() {
     if (isFetchingConversation) return;
     return getChatInfo(conversation, user.id);
   }, [user.id, conversation, isFetchingConversation]);
+
   return (
     <>
       <div className="inset-0 bg-gray-600/20 backdrop-blur-xs absolute"></div>
@@ -101,19 +104,19 @@ export function GroupPreview() {
         />
         <div
           className="flex flex-col flex-1 relative h-[70vh] bg-white bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] 
-             dark:bg-[radial-gradient(#1e293b_1px,transparent_1px)] dark:bg-slate-950
+             dark:bg-[radial-gradient(#1e293b_1px,transparent_1px)] dark:bg-slate-950 
              [background-size:16px_16px]"
           style={{
             backgroundAttachment: "fixed",
             backgroundRepeat: "repeat",
           }}
         >
-          <div className="inset-0 absolute bg-gray-600/20"></div>
           <article
-            className="flex flex-col z-10 flex-1 overflow-y-auto scrollbar-custom"
+            ref={chatContentRef}
+            className="flex flex-col  z-10 flex-1 overflow-y-auto scrollbar-custom"
             aria-label="polite"
           >
-            <MessagesListContent conversationId={id} />
+            <MessagesListContent ref={chatContentRef} conversationId={id} />
           </article>
         </div>
 
