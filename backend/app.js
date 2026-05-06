@@ -26,7 +26,7 @@ io.on("connection", async (socket) => {
   
   socket.isFirstConnection = true;
   io.emit("user connected", [...connectedUsers.keys()]);
-
+  
   socket.on("disconnect", async () => {
     const userId = socket.handshake.auth.userId;
     if (!userId) return;
