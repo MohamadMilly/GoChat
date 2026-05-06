@@ -18,7 +18,7 @@ import {
 import { ChatsListContext } from "../../routes/ChatsListPage";
 import { Link } from "../ui/Link";
 
-function NewChatLink() {
+export function NewChatLink() {
   return (
     <div className="fixed z-10 md:hidden bottom-12 rtl:left-8 ltr:right-8">
       <Link

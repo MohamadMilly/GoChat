@@ -4,6 +4,7 @@ import translations from "../translations";
 import { useLanguage } from "../contexts/LanguageContext";
 import { useContext } from "react";
 import { ChatsListContext } from "./ChatsListPage";
+import { NewChatLink } from "../components/chatList/ChatsPanel";
 
 export function ChatsListLanding() {
   const { language } = useLanguage();
@@ -27,13 +28,7 @@ export function ChatsListLanding() {
       >
         {PageTranslations[language].Subtitle}
       </p>
-
-      <Link
-        route={"/chats/direct/new"}
-        className="flex justify-center items-center rounded-full dark:bg-gray-800 shadow-inner shadow-gray-400/20 aspect-square text-cyan-600 dark:text-cyan-400 absolute right-1/6 bottom-1/6"
-      >
-        <CirclePlus />
-      </Link>
+      <NewChatLink />
     </div>
   );
 }
