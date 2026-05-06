@@ -22,8 +22,8 @@ let connectedUsers = new Map();
 
 io.on("connection", async (socket) => {
   const userId = socket.handshake.auth.userId;
-  if (!connectedUsers[userId]) connectedUsers.set(userId, socket.id);
-  
+  if (!connectedUsers.has(userId)) connectedUsers.set(userId, socket.id);
+   
   socket.isFirstConnection = true;
   io.emit("user connected", [...connectedUsers.keys()]);
   
