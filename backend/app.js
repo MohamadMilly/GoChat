@@ -18,19 +18,23 @@ const io = new Server(server, {
     maxDisconnectionDuration: 1000 * 60 * 2,
   },
 });
-let connectedUsers = new Map();
 
 io.on("connection", async (socket) => {
   const userId = socket.handshake.auth.userId;
-  if (!connectedUsers.has(userId)) connectedUsers.set(userId, socket.id);
-   
-  socket.isFirstConnection = true;
-  io.emit("user connected", [...connectedUsers.keys()]);
-  
+  const hasConnected = handleConnection(userId);
+  // sending all previous connected users to the new client
+  socket.emit("connected users", getConnectedUsersIds());
+  if (hasConnected) {
+    socket.broadcast.emit("user connected", userId);
+  }
+
   socket.on("disconnect", async () => {
     const userId = socket.handshake.auth.userId;
-    if (!userId) return;
-    connectedUsers.delete(userId);
+    const hasDisconnected = handleDiconnection(userId);
+
+    if (hasDisconnected) {
+      io.emit("user disconnected", userId);
+    }
     await prisma.profile.update({
       where: {
         userId: userId,
@@ -39,13 +43,12 @@ io.on("connection", async (socket) => {
         lastSeen: new Date(),
       },
     });
-    io.emit("user disconnected", userId);
   });
 
   socket.on("join chat", async (conversationId) => {
     if (!conversationId) return;
     const convId = String(conversationId);
-    console.log("JOINED CHAT");
+
     socket.join(convId);
     /* try {
       const userId = socket.handshake.auth.userId;
@@ -125,7 +128,8 @@ io.on("connection", async (socket) => {
                     userId: {
                       in: (
                         await prisma.$queryRawUnsafe(
-                          `SELECT "banningUserId" FROM "Ban" WHERE "bannedUserId" = ${userId}`,
+                          `SELECT "banningUserId" FROM "Ban" WHERE "bannedUserId" = $1`,
+                          userId,
                         )
                       ).map((banningUserObj) => banningUserObj.banningUserId),
                     },
@@ -668,7 +672,7 @@ io.on("connection", async (socket) => {
         });
 
         if (!conversation) return callback({ status: 404 });
-       
+
         const sockets = await io.fetchSockets();
 
         const socketMap = new Map(
@@ -729,6 +733,11 @@ const authRouter = require("./routes/authRouter");
 const usersRouter = require("./routes/usersRouter");
 const conversationsRouter = require("./routes/conversationsRouter");
 const filterProfile = require("./utils/filterProfile");
+const {
+  handleConnection,
+  handleDiconnection,
+  getConnectedUsersIds,
+} = require("./utils/connectionUtils");
 
 app.use(express.json());
 app.use(

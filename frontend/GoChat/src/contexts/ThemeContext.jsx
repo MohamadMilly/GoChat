@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { useState } from "react";
 import { createContext, useContext } from "react";
 
@@ -15,9 +15,12 @@ export function ThemeProvider({ children }) {
   useEffect(() => {
     document.documentElement.classList = theme;
   }, [theme]);
-  return (
-    <ThemeContext value={{ theme, handleSetTheme }}>{children}</ThemeContext>
+
+  const themeContextValue = useMemo(
+    () => ({ theme, handleSetTheme }),
+    [theme, handleSetTheme],
   );
+  return <ThemeContext value={themeContextValue}>{children}</ThemeContext>;
 }
 
 export const useTheme = () => useContext(ThemeContext);

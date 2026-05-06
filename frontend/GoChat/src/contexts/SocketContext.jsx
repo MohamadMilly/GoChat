@@ -12,11 +12,10 @@ export function SocketProvider({ children }) {
   const [typingUsers, setTypingUsers] = useState([]);
   const { token, user } = useAuth();
   const queryClient = useQueryClient();
-  
+
   useEffect(() => {
     if (!token || !user) return;
     socket.connect();
-    socket.emit("user connected", user.id);
     return () => socket.disconnect();
   }, [token, user]);
 
@@ -25,7 +24,6 @@ export function SocketProvider({ children }) {
       if (!socket.recovered) {
         const offsets = socket.auth.serverOffset;
         socket.emit("recover", offsets);
-        socket.emit("user connected", user.id);
       }
       setIsConnected(true);
     }
@@ -36,11 +34,19 @@ export function SocketProvider({ children }) {
         socket.connect();
       }
     }
-    function onUserConnect(users) {
-      setConnectedUsers(users);
+    function onUserConnect(userId) {
+      setConnectedUsers((prev) => {
+        let connectedUsers = prev || [];
+        return [...connectedUsers, userId];
+      });
     }
     function onUserDisconnect(userId) {
       setConnectedUsers((prev) => prev.filter((id) => id != userId));
+    }
+    function initializeConnectedUsers(usersIds) {
+      if (!socket.connected) return;
+
+      setConnectedUsers(usersIds);
     }
     function onUserTyping(userId, conversationId) {
       setTypingUsers((prev) =>
@@ -442,6 +448,7 @@ export function SocketProvider({ children }) {
     socket.on("disconnect", onDisconnect);
     socket.on("user connected", onUserConnect);
     socket.on("user disconnected", onUserDisconnect);
+    socket.on("connected users", initializeConnectedUsers);
     socket.on("typing", onUserTyping);
     socket.on("stopped typing", onUserStoppedTyping);
     socket.on("delete message", onDeleteMessage);
@@ -461,6 +468,7 @@ export function SocketProvider({ children }) {
       socket.off("disconnect", onDisconnect);
       socket.off("user connected", onUserConnect);
       socket.off("user disconnected", onUserDisconnect);
+      socket.off("connected users", initializeConnectedUsers);
       socket.off("typing", onUserTyping);
       socket.off("stopped typing", onUserStoppedTyping);
       socket.off("delete message", onDeleteMessage);
