@@ -1,6 +1,10 @@
 const express = require("express");
 const { createServer } = require("node:http");
 const { Server } = require("socket.io");
+const {
+  handleConnection,
+  handleDisconnection,
+} = require("./utils/connectionUtils");
 // import enviroment variables
 require("dotenv").config();
 
@@ -30,7 +34,7 @@ io.on("connection", async (socket) => {
 
   socket.on("disconnect", async () => {
     const userId = socket.handshake.auth.userId;
-    const hasDisconnected = handleDiconnection(userId);
+    const hasDisconnected = handleDisconnection(userId);
 
     if (hasDisconnected) {
       io.emit("user disconnected", userId);
@@ -737,6 +741,7 @@ const {
   handleConnection,
   handleDiconnection,
   getConnectedUsersIds,
+  handleDisconnection,
 } = require("./utils/connectionUtils");
 
 app.use(express.json());

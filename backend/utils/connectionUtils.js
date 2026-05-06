@@ -5,9 +5,9 @@ function handleConnection(userId) {
   users.set(userId, count + 1);
   return count === 0;
 }
-function handleDiconnection(userId) {
+function handleDisconnection(userId) {
   const count = users.get(userId) - 1;
-  if (count === 1) {
+  if (count === 0) {
     users.delete(userId);
   } else {
     users.set(userId, count);
@@ -19,4 +19,8 @@ function getConnectedUsersIds() {
   return [...users.keys()];
 }
 
-module.exports = { handleConnection, handleDiconnection, getConnectedUsersIds };
+module.exports = {
+  handleConnection,
+  handleDisconnection,
+  getConnectedUsersIds,
+};
