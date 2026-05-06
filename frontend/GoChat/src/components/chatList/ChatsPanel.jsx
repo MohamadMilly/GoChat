@@ -22,7 +22,7 @@ function NewChatLink() {
   return (
     <div className="fixed z-10 md:hidden bottom-12 rtl:left-8 ltr:right-8">
       <Link
-        className="rounded-full text-white dark:bg-cyan-400! bg-cyan-600! w-13! h-13! flex justify-center items-center"
+        className="rounded-full text-white dark:bg-cyan-400! dark:text-cyan-600 bg-cyan-600! w-13! h-13! flex justify-center items-center"
         route={"/chats/direct/new"}
       >
         <Plus size={30} />
