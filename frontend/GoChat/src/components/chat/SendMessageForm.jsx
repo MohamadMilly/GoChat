@@ -9,7 +9,6 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "../../contexts/AuthContext";
 import { supabase } from "../../utils/supabase";
 import EmojiPicker from "emoji-picker-react";
-import { useSearchParams } from "react-router";
 import Button from "../ui/Button";
 import { useTheme } from "../../contexts/ThemeContext";
 import translations from "../../translations";
@@ -18,11 +17,30 @@ import { toast } from "react-toastify";
 
 let counter = 0;
 
+/* When the message changes fire the event immediatly */
+
+function useType(message, conversationId) {
+  const typingRef = useRef(false);
+  useEffect(() => {
+    if (!typingRef.current && message) {
+      socket.emit("typing", conversationId);
+      typingRef.current = true;
+    }
+    const timer = setTimeout(() => {
+      const isTyping = typingRef.current;
+      if (isTyping) {
+        socket.emit("stopped typing", conversationId);
+        typingRef.current = false;
+      }
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, [message, conversationId]);
+}
+
 export const SendMessageForm = memo(({ messagesListRef }) => {
   const { language } = useLanguage();
   const [message, setMessage] = useState("");
   const [isDrawerVisible, setIsDrawerVisible] = useState(false);
-
   const [hasAttached, setHasAttached] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const { theme } = useTheme();
@@ -38,31 +56,12 @@ export const SendMessageForm = memo(({ messagesListRef }) => {
     isFetchingPermissions,
     isCurrentUserAdmin,
   } = useContext(ChatPageContext);
-  const [searchParams] = useSearchParams();
+
   const { conversationId } = useContext(ChatPageContext);
   const queryClient = useQueryClient();
   const { user } = useAuth();
-
+  useType(message, conversationId.toString());
   const [previewFileURL, setPreviewFileURL] = useState(null);
-
-  const messageRef = useRef(message);
-
-  useEffect(() => {
-    messageRef.current = message;
-    const timer = setTimeout(() => {
-      if (messageRef.current === message) {
-        socket.emit("stopped typing", String(conversationId));
-      }
-      return () => clearTimeout(timer);
-    }, 3000);
-  }, [message, conversationId]);
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (!message) return;
-      socket.emit("typing", String(conversationId));
-    }, 500);
-    return () => clearTimeout(timer);
-  }, [message, conversationId]);
 
   const onSend = async (e) => {
     e.preventDefault();
@@ -106,7 +105,7 @@ export const SendMessageForm = memo(({ messagesListRef }) => {
     /* scroll down messages list */
 
     if (messagesListRef.current) {
-      /* becase updating the UI and rerendering is async so i need to wait for the upper process */
+      /* because updating the UI and rerendering is async so i need to wait for the upper process */
       setTimeout(() => {
         messagesListRef.current.scrollTo({
           top: messagesListRef.current.scrollHeight,
@@ -130,6 +129,7 @@ export const SendMessageForm = memo(({ messagesListRef }) => {
         }),
       };
     });
+    // reset state
     setMessage("");
     setHasAttached(false);
     setRepliedMessage(null);
