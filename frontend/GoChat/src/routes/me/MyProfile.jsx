@@ -11,6 +11,7 @@ import { UserProfileLoading } from "../../components/skeletonLoadingComponents/U
 import translations from "../../translations";
 import { useLanguage } from "../../contexts/LanguageContext";
 
+
 export function MyProfile() {
   const { language } = useLanguage();
   const PageTranslations = translations.Profile;

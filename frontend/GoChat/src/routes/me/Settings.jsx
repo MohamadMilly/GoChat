@@ -234,7 +234,7 @@ export function Settings() {
   const { language } = useLanguage();
 
   return (
-    <main className="max-w-200 mx-auto dark:bg-gray-900 font-rubik relative p-1">
+    <main className="max-w-200 mx-auto dark:bg-gray-900 font-rubik relative px-4 pb-6">
       <ToastContainer position="top-right" draggable={true} autoClose={3000} />
       <div className="flex justify-start items-center p-2 bg-white dark:bg-gray-800/80 rounded-lg my-2 shadow-xs">
         <Button
@@ -245,8 +245,8 @@ export function Settings() {
           <ArrowBigLeft size={20} />
         </Button>
       </div>
-      <section dir={language === "Arabic" ? "rtl" : "ltr"} className="p-4 my-4">
-        <h2 className="text-xl tracking-tight font-bold text-cyan-600">
+      <section dir={language === "Arabic" ? "rtl" : "ltr"} className="p-2 my-4">
+        <h2 className="text-xl tracking-tight font-bold text-cyan-600 dark:text-cyan-400">
           {PageTranslations[language].RouteTitle}
         </h2>
         <div className="my-4 bg-white dark:bg-gray-800 shadow-xs border border-gray-100 dark:border-gray-700 p-4 rounded">

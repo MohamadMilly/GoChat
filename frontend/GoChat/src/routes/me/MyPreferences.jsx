@@ -133,7 +133,7 @@ export function MyPreferences() {
   if (error) return <p>Error: {error.message}</p>;
 
   return (
-    <main className="max-w-200 mx-auto bg-gray-50 dark:bg-gray-900 font-rubik relative p-2">
+    <main className="max-w-200 mx-auto bg-gray-50 dark:bg-gray-900 font-rubik relative px-4 pb-6">
       <div className="flex justify-start items-center p-2 bg-white dark:bg-gray-800/80 rounded-lg my-2">
         <Button
           onClick={() => navigate(-1)}

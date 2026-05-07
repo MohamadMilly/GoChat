@@ -1,10 +1,8 @@
 import { printGroupTypingUsers } from "../../utils/printGroupTypingUsers";
 import { Avatar } from "../chat/Avatar";
 import { NavLink } from "react-router";
-import { memo, useEffect, useState } from "react";
-import { socket } from "../../socket";
+import { memo } from "react";
 import { ChatBubbleStatus } from "../chat/chatBubbleStatus";
-import { useAuth } from "../../contexts/AuthContext";
 
 export const ChatEntry = memo(
   ({
