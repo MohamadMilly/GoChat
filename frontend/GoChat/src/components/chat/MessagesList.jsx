@@ -203,7 +203,9 @@ export const MessagesListContent = forwardRef((props, ref) => {
           className="text-center text-lg h-full flex justify-center items-center text-gray-800 dark:text-gray-100 p-1 z-10
             "
         >
-          No messages yet.
+          <span className="dark:bg-gray-600/20 p-1 rounded">
+            No Messages Yet
+          </span>
         </p>
       ) : (
         memoizedMessages.map((message, index) => {

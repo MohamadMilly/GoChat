@@ -90,7 +90,7 @@ export const ChatHeaderContent = memo((props) => {
   return (
     <header
       dir={language === "Arabic" ? "rtl" : "ltr"}
-      className="z-20 border-b border-gray-50 dark:border-gray-700 px-4 py-2 shadow-xs bg-white dark:bg-gray-800 flex items-center justify-between gap-2"
+      className="z-20 border-b border-gray-50 dark:border-gray-800 px-4 py-2 shadow-xs bg-white dark:bg-gray-900 flex items-center justify-between gap-2"
     >
       <div className="flex items-center gap-2">
         <Button
