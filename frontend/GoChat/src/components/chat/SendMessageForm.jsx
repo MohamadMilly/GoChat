@@ -17,10 +17,18 @@ import { toast } from "react-toastify";
 
 let counter = 0;
 
-/* When the message changes fire the event immediatly */
+/* Edge case : when user leaves the conversation (the send message unmounts before the stop typing event is emitted ) 
+for that reason we need to emit this event on unmount 
+*/
 
-function useType(message, conversationId) {
+function useTyping(message, conversationId) {
   const typingRef = useRef(false);
+  const isUnMounting = useRef(false);
+  useEffect(() => {
+    return () => {
+      isUnMounting.current = true;
+    };
+  }, []);
   useEffect(() => {
     if (!typingRef.current && message) {
       socket.emit("typing", conversationId);
@@ -33,46 +41,45 @@ function useType(message, conversationId) {
         typingRef.current = false;
       }
     }, 2000);
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      if (isUnMounting.current) {
+        socket.emit("stopped typing", conversationId);
+      }
+    };
   }, [message, conversationId]);
 }
 
-export const SendMessageForm = memo(({ messagesListRef }) => {
-  const { language } = useLanguage();
-  const [message, setMessage] = useState("");
-  const [isDrawerVisible, setIsDrawerVisible] = useState(false);
-  const [hasAttached, setHasAttached] = useState(false);
-  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-  const { theme } = useTheme();
-  const messageTextAreaRef = useRef(null);
-  const [mediaFileData, setMediaFileData] = useState({
-    file: null,
-    mimeType: null,
-  });
-  const {
-    setRepliedMessage,
-    repliedMessage,
-    permissions,
-    isFetchingPermissions,
-    isCurrentUserAdmin,
-  } = useContext(ChatPageContext);
+function useScrollDown(ref) {
+  const scroll = (ref) => {
+    const el = ref.current;
+    if (!el) return;
+    /* because updating the UI and rerendering is async so i need to wait for the upper process */
+    setTimeout(() => {
+      el.scrollTo({
+        top: el.scrollHeight,
+        behavior: "smooth",
+      });
+    }, 0);
+  };
+  return () => scroll(ref);
+}
 
-  const { conversationId } = useContext(ChatPageContext);
+function useSendMessage() {
   const queryClient = useQueryClient();
-  const { user } = useAuth();
-  useType(message, conversationId.toString());
-  const [previewFileURL, setPreviewFileURL] = useState(null);
-
-  const onSend = async (e) => {
-    e.preventDefault();
+  const sendMessage = async (messageData, user, conversationId) => {
     const client_offset = `${socket.id}-${++counter}`;
     const now = new Date();
+    const message = messageData.message;
+    const repliedMessage = messageData.repliedMessage;
+    const mediaFileData = messageData.mediaFileData;
+
     const optimisticMessage = {
       createdAt: now,
       sender: user,
       content: message,
       file: mediaFileData.file,
-      fileURL: previewFileURL,
+      fileURL: mediaFileData.previewFileURL,
       mimeType: mediaFileData?.mimeType || "text/plain",
       type: mediaFileData.mimeType
         ? mediaFileData.mimeType.includes("image")
@@ -102,17 +109,7 @@ export const SendMessageForm = memo(({ messagesListRef }) => {
         };
       },
     );
-    /* scroll down messages list */
 
-    if (messagesListRef.current) {
-      /* because updating the UI and rerendering is async so i need to wait for the upper process */
-      setTimeout(() => {
-        messagesListRef.current.scrollTo({
-          top: messagesListRef.current.scrollHeight,
-          behavior: "smooth",
-        });
-      }, 0);
-    }
     queryClient.setQueryData(["conversations"], (old) => {
       if (!old?.conversations) return old;
       return {
@@ -129,20 +126,16 @@ export const SendMessageForm = memo(({ messagesListRef }) => {
         }),
       };
     });
-    // reset state
-    setMessage("");
-    setHasAttached(false);
-    setRepliedMessage(null);
-    setMediaFileData({ file: null, mimeType: null });
+
     try {
       let finalFileURL = "";
 
-      if (hasAttached && mediaFileData.file) {
+      if (messageData.mediaFileData.file) {
         const { data, error } = await supabase.storage
           .from("files")
           .upload(
-            `${Date.now()}-${mediaFileData.file.name}`,
-            mediaFileData.file,
+            `${Date.now()}-${messageData.mediaFileData.file.name}`,
+            messageData.mediaFileData.file,
           );
 
         if (error) throw error;
@@ -156,15 +149,15 @@ export const SendMessageForm = memo(({ messagesListRef }) => {
         "chat message",
         {
           createdAt: optimisticMessage.createdAt,
-          content: message,
+          content: messageData.message,
           fileURL: finalFileURL,
-          mimeType: mediaFileData?.mimeType || "text/plain",
+          mimeType: messageData.mediaFileData?.mimeType || "text/plain",
           type: finalFileURL
-            ? mediaFileData.mimeType.includes("image")
+            ? messageData.mediaFileData.mimeType.includes("image")
               ? "IMAGE"
               : "FILE"
             : "TEXT",
-          repliedMessageId: repliedMessage?.id || null,
+          repliedMessageId: messageData.repliedMessage?.id || null,
         },
         String(conversationId),
         client_offset,
@@ -181,9 +174,59 @@ export const SendMessageForm = memo(({ messagesListRef }) => {
     }
   };
 
+  return sendMessage;
+}
+
+export const SendMessageForm = memo(({ messagesListRef }) => {
+  const [message, setMessage] = useState("");
+  const [isDrawerVisible, setIsDrawerVisible] = useState(false);
+  const [hasAttached, setHasAttached] = useState(false);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [previewFileURL, setPreviewFileURL] = useState(null);
+  const [mediaFileData, setMediaFileData] = useState({
+    file: null,
+    mimeType: null,
+  });
+  const { user } = useAuth();
+  const { theme } = useTheme();
+  const { language } = useLanguage();
+  const {
+    setRepliedMessage,
+    repliedMessage,
+    permissions,
+    isFetchingPermissions,
+    isCurrentUserAdmin,
+    conversationId,
+  } = useContext(ChatPageContext);
+
+  const messageTextAreaRef = useRef(null);
+
+  useTyping(message, conversationId.toString());
+  const send = useSendMessage();
+  const scroll = useScrollDown(messagesListRef);
+
+  const handleSendMessage = async (e) => {
+    e.preventDefault();
+    const messageData = {
+      message: message,
+      previewFileURL: previewFileURL,
+      mediaFileData: mediaFileData,
+      repliedMessage: repliedMessage,
+    };
+    send(messageData, user, conversationId);
+    scroll();
+
+    // state reset
+    setMessage("");
+    setHasAttached(false);
+    setRepliedMessage(null);
+    setMediaFileData({ file: null, mimeType: null });
+  };
+
   const handlePickEmoji = (emojiObj) => {
     setMessage((prev) => prev + emojiObj.emoji);
   };
+
   const onMessageChange = (e) => {
     const el = messageTextAreaRef.current;
     if (!el) return;
@@ -192,6 +235,7 @@ export const SendMessageForm = memo(({ messagesListRef }) => {
 
     setMessage(e.target.value);
   };
+
   const handleUnAttach = () => {
     setMediaFileData({ file: null, mimeType: null });
     setHasAttached(false);
@@ -260,12 +304,7 @@ export const SendMessageForm = memo(({ messagesListRef }) => {
       )}
       {(permissions ? permissions?.sendingMessages : true) ||
       isCurrentUserAdmin ? (
-        <form
-          method="POST"
-          onSubmit={(e) => {
-            onSend(e);
-          }}
-        >
+        <form method="POST" onSubmit={handleSendMessage}>
           <EmojiPicker
             style={{ backgroundColor: theme === "light" ? "white" : "#1e2939" }}
             previewConfig={{ showPreview: false }}

@@ -23,3 +23,6 @@ provider to the items and also use useCallback hook instead of calling useContex
   8- we should derive values in parent components and pass them to the child components if the 
   calculation is expensive and the values are used by other componenets or the parent it self
   also this keeps the child components pure and only handle the UI
+
+  9- if a event handler or effect becomes large and complex we can move it to a custom hook to keep the component clean and also we can reuse this logic in other components if needed.
+  if it does not use the state of the component and just consider it a utility function
