@@ -3,6 +3,8 @@ const { createServer } = require("node:http");
 const { Server } = require("socket.io");
 const {
   handleConnection,
+  handleDiconnection,
+  getConnectedUsersIds,
   handleDisconnection,
 } = require("./utils/connectionUtils");
 // import enviroment variables
@@ -737,12 +739,6 @@ const authRouter = require("./routes/authRouter");
 const usersRouter = require("./routes/usersRouter");
 const conversationsRouter = require("./routes/conversationsRouter");
 const filterProfile = require("./utils/filterProfile");
-const {
-  handleConnection,
-  handleDiconnection,
-  getConnectedUsersIds,
-  handleDisconnection,
-} = require("./utils/connectionUtils");
 
 app.use(express.json());
 app.use(
