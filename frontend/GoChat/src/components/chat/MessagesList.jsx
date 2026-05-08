@@ -21,12 +21,6 @@ import MessagesQueryTrigger from "./MessagesQueryTrigger";
 import { Circle } from "lucide-react";
 import { forwardRef } from "react";
 import { Spinner } from "../ui/Spinner";
-/*
-TO DO : (DONE)
-ChatBubbleMenuContainer is a layer in messages list which will receive a message and pass it via context (which is stored in a state) to the ChatBubbleMenu 
-it will contain the messages and one menu component that will flow depending on where the user clicks
-this created an isolated place for the flow between ChatBubble and its Menu
-*/
 
 export const ChatBubbleContainerContext = createContext({ message: null });
 
@@ -218,9 +212,6 @@ export const MessagesListContent = forwardRef((props, ref) => {
               new Date(previousMessageDate).getDate()
             : true;
 
-          const sender = message.sender;
-          const isMyMessage = user.id === sender.id;
-
           const isThereNextMessageFromTheSameUser =
             memoizedMessages[index + 1]?.senderId === message.senderId;
           const isTherePreviousMessageFromTheSameuser =
@@ -241,7 +232,6 @@ export const MessagesListContent = forwardRef((props, ref) => {
                 key={message.id}
                 message={message}
                 isGroupMessage={type === "GROUP"}
-                isMyMessage={isMyMessage}
                 hideAvatar={isThereNextMessageFromTheSameUser}
                 hideName={isTherePreviousMessageFromTheSameuser}
                 handleShowChatBubbleMenu={handleShowChatBubbleMenu}

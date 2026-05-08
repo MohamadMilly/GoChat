@@ -2,7 +2,6 @@ import { useMessageReader } from "../../hooks/useMessageReaders";
 import { Avatar } from "../chat/Avatar";
 import { memo, useContext, useMemo } from "react";
 import { ChatPageContext } from "../../routes/ChatPage";
-import { ChatBubbleContext } from "./ChatBubble";
 import { useAuth } from "../../contexts/AuthContext";
 import translations from "../../translations";
 import { useLanguage } from "../../contexts/LanguageContext";

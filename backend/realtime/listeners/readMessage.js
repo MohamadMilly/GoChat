@@ -19,7 +19,7 @@ module.exports = async (
       },
     });
     if (messageOnReader) {
-      if (typeof callback === "function") callback({ status: 401 });
+      if (typeof callback === "function") callback({ status: 400 });
       return;
     }
     await prisma.messageOnReader.upsert({

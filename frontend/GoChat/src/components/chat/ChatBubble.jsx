@@ -6,6 +6,7 @@ import {
   memo,
   useContext,
   useMemo,
+  useCallback,
 } from "react";
 import { Avatar } from "./Avatar";
 import { TransitionLink } from "../ui/TransitionLink";
@@ -153,129 +154,101 @@ export function MediaFilePreview({
   );
 }
 
-export const ChatBubbleContext = createContext({
-  messageId: null,
-  isInPreview: false,
-  clickYCoords: null,
-  isFadeRunning: false,
-});
+function useObserve(ref) {
+  const [observing, setObserving] = useState(false);
 
-function ChatBubbleToolsMenu({ message, isMessageToolsVisible }) {
-  const { messageId, isInPreview } = useContext(ChatBubbleContext);
-  const [screenWidth, setScreenWidth] = useState(window.innerWidth);
-  const { setEditedMessage } = useContext(ChatPageContext);
-  const queryClient = useQueryClient();
-  const { conversationId } = useContext(ChatPageContext);
-
-  const handleDeleteMessage = (messageId, conversationId) => {
-    if (!messageId || !conversationId) return;
-    let newMessages = [];
-    let previousMessages = queryClient.getQueryData([
-      "conversation",
-      "messages",
-      conversationId,
-    ]).messages;
-
-    queryClient.setQueryData(
-      ["conversation", "messages", conversationId],
-      (old) => {
-        if (!old.messages) return old;
-        newMessages = old.messages.filter(
-          (message) => message.id !== messageId,
-        );
-        return {
-          ...old,
-          messages: newMessages,
-        };
-      },
-    );
-    queryClient.setQueryData(["conversations"], (old) => {
-      if (!old.conversations) return old;
-
-      return {
-        ...old,
-        conversations: old.conversations.map((c) => {
-          if (c.id == conversationId && c.messages[0].id === messageId) {
-            return { ...c, messages: [newMessages[newMessages.length - 1]] };
-          } else {
-            return c;
-          }
-        }),
-      };
-    });
-    socket
-      .timeout(5000)
-      .emit("delete message", messageId, conversationId, (err, response) => {
-        if (err || response.status !== "ok") {
-          console.error(
-            "An error happened while deleting the message:",
-            messageId,
-            "status:",
-            response.status,
-          );
-          queryClient.setQueryData(
-            ["conversation", "messages", conversationId],
-            (old) => {
-              if (!old.messages) return old;
-
-              return {
-                ...old,
-                messages: previousMessages,
-              };
-            },
-          );
-          queryClient.setQueryData(["conversations"], (old) => {
-            if (!old.conversations) return old;
-            return {
-              ...old,
-              conversations: old.conversations.map((c) => {
-                if (c.id == conversationId) {
-                  return {
-                    ...c,
-                    messages: [previousMessages[previousMessages.length - 1]],
-                  };
-                }
-                return c;
-              }),
-            };
-          });
-          return;
-        }
-      });
-  };
   useEffect(() => {
-    function handleResize() {
-      setScreenWidth(window.innerWidth);
-    }
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-  if (isInPreview) return null;
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting) {
+        setObserving(true);
+      }
+    });
+    observer.observe(el);
 
-  if (!isMessageToolsVisible && screenWidth < 768) return null;
-  return (
-    <div className="md:opacity-0 h-fit z-10 md:group-hover:opacity-100 transition-all delay-300 duration-300 absolute md:bottom-2 md:-left-2 -top-2 md:translate-y-0 -translate-x-1/3 md:-translate-x-full -translate-y-1/2 w-30 dark:bg-gray-700 bg-gray-100 rounded-md overflow-hidden">
-      <button
-        className="text-sm dark:text-gray-200 text-gray-600 cursor-pointer w-full p-2 hover:bg-gray-200 hover:text-gray-700"
-        onClick={() => handleDeleteMessage(messageId, conversationId)}
-      >
-        Delete
-      </button>
-      <button
-        onClick={() => setEditedMessage(message)}
-        className="text-sm dark:text-gray-200 text-gray-600 cursor-pointer w-full p-2 hover:bg-gray-200 hover:text-gray-700"
-      >
-        Edit
-      </button>
-    </div>
-  );
+    return () => observer.unobserve(el);
+  }, [ref]);
+
+  return observing;
+}
+
+function useReadMessage(messageId, conversationId, userId, status, observing) {
+  useEffect(() => {
+    if (observing && status !== "pending") {
+      socket
+        .timeout(5000)
+        .emit("read message", conversationId, messageId, userId, (response) => {
+          if (response?.status !== "ok") {
+            console.error("Read message error:", response?.status);
+          }
+        });
+    }
+  }, [conversationId, userId, messageId, status, observing]);
+}
+
+function useDrag(ref, maxDisplacement, triggerDisplacement, onTrigger) {
+  /* The latest ref pattern */
+
+  const onTriggerRef = useRef(onTrigger);
+  useEffect(() => {
+    onTriggerRef.current = onTrigger;
+  });
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    let hasTriggered = false;
+    let startX = 0;
+
+    const handleMove = (currentX) => {
+      const diffX = startX - currentX;
+      el.style.transition = "none";
+      if (diffX > 0 && diffX < maxDisplacement) {
+        el.style.right = diffX + "px";
+      }
+
+      if (diffX > triggerDisplacement && !hasTriggered) {
+        onTriggerRef.current();
+        hasTriggered = true;
+      }
+    };
+
+    const handleEnd = () => {
+      el.style.right = "0px";
+      el.style.transition = "all 0.3s ease";
+      document.removeEventListener("mousemove", onMouseMove);
+      document.removeEventListener("mouseup", handleEnd);
+      document.removeEventListener("touchmove", onTouchMove);
+      document.removeEventListener("touchend", handleEnd);
+      hasTriggered = false;
+    };
+
+    const onMouseMove = (e) => handleMove(e.clientX);
+    const onTouchMove = (e) => handleMove(e.touches[0].clientX);
+
+    const handleStart = (e) => {
+      startX = e.type === "mousedown" ? e.clientX : e.touches[0].clientX;
+      document.addEventListener("mousemove", onMouseMove);
+      document.addEventListener("mouseup", handleEnd);
+      document.addEventListener("touchmove", onTouchMove, { passive: false });
+      document.addEventListener("touchend", handleEnd);
+    };
+
+    el.addEventListener("mousedown", handleStart);
+    el.addEventListener("touchstart", handleStart);
+
+    return () => {
+      el.removeEventListener("mousedown", handleStart);
+      el.removeEventListener("touchstart", handleStart);
+    };
+  }, [maxDisplacement, ref, triggerDisplacement]);
 }
 
 export const ChatBubble = memo(
   ({
     message,
     isGroupMessage,
-    isMyMessage,
     hideAvatar = false,
     hideName = false,
     handleShowChatBubbleMenu,
@@ -283,199 +256,34 @@ export const ChatBubble = memo(
     handlePreview,
   }) => {
     const { user } = useAuth();
+    const [transitionId, setTransitionId] = useState(null);
+    const messageContainerRef = useRef(null);
+    const messageContentContainerRef = useRef(null);
+    const { language } = useLanguage();
+    const { id: conversationId } = useParams();
+    const observing = useObserve(messageContainerRef);
+
+    useReadMessage(
+      message.id,
+      conversationId,
+      user.id,
+      message.status,
+      observing,
+    );
+
+    useDrag(messageContainerRef, 150, 100, () => handleReply(message));
+
     /* Because the message comes from tanstack so the reference is not changing */
     const readers = useMemo(
       () => (message.readers ? message.readers.map((reader) => reader.id) : []),
       [message.readers],
     );
-    const queryClient = useQueryClient();
-
-    const [isReadersVisible, setIsReadersVisible] = useState(false);
-
-    const [transitionId, setTransitionId] = useState(null);
-    const [isFadeRunning, setIsFadeRunning] = useState(false);
-    const messagesContainerRef = useRef(null);
-    const messageContentContainerRef = useRef(null);
-    const { language } = useLanguage();
-    const fullname = message.sender.firstname + " " + message.sender.lastname;
-    const { id: conversationId } = useParams();
-
-    const isThereAvatar = !!message.sender.profile?.avatar;
-    const avatar = isThereAvatar && message.sender.profile?.avatar;
-    const color = message.sender?.accountColor || "";
-    /* 
-    TODO :
-    lift this listener up in the components tree (SocketContext) to not to lose the events when the messagesList is unmounted */
-
-    useEffect(() => {
-      function onReadMessage(messageId, userId) {
-        if (messageId !== message.id) return;
-
-        queryClient.setQueryData(
-          ["conversation", "messages", conversationId],
-          (old) => {
-            if (!old.messages) return old;
-            return {
-              ...old,
-              messages: old.messages.map((message) => {
-                const previousReaders = message?.readers || [];
-                if (message.id == messageId && userId !== user.id) {
-                  return {
-                    ...message,
-                    readers: [...previousReaders, { id: userId }],
-                  };
-                } else {
-                  return message;
-                }
-              }),
-            };
-          },
-        );
-        queryClient.setQueryData(["conversations"], (old) => {
-          if (!old.conversations) return old;
-          return {
-            ...old,
-            conversations: old.conversations.map((c) => {
-              if (c.id == conversationId) {
-                const readMessage = c.messages.find((m) => m.id == messageId);
-
-                if (!readMessage) {
-                  return c;
-                } else {
-                  return {
-                    ...c,
-                    messages: [
-                      {
-                        ...readMessage,
-                        readers:
-                          userId == user.id && readMessage.senderId === user.id
-                            ? readMessage.readers
-                            : [...(readMessage.readers || []), { id: userId }],
-                      },
-                    ],
-                  };
-                }
-              } else {
-                return c;
-              }
-            }),
-          };
-        });
-      }
-      socket.on("read message", onReadMessage);
-
-      return () => {
-        socket.off("read message", onReadMessage);
-      };
-    }, [message.id, conversationId, queryClient, user.id]);
-
-    useEffect(() => {
-      if (!messagesContainerRef.current) return;
-      const observer = new IntersectionObserver((entries) => {
-        const observedMessage = entries[0];
-        const isReadByMe = readers.some((id) => id == user.id);
-        if (
-          observedMessage.isIntersecting &&
-          !isReadByMe &&
-          message.status !== "pending"
-        ) {
-          socket
-            .timeout(5000)
-            .emit(
-              "read message",
-              conversationId,
-              message.id,
-              user.id,
-              (response) => {
-                if (response?.status !== "ok") {
-                  console.error("Read message error:", response?.status);
-                }
-              },
-            );
-        }
-      });
-      const observedMessage = messagesContainerRef.current;
-      observer.observe(observedMessage);
-      return () => {
-        if (!observedMessage) return;
-        observer.unobserve(observedMessage);
-      };
-    }, [message.id, user.id, message.status, readers, conversationId]);
-
-    useEffect(() => {
-      let timer;
-      function handleClickOutside(event) {
-        if (
-          isReadersVisible &&
-          messageContentContainerRef.current &&
-          !messageContentContainerRef.current.contains(event.target)
-        ) {
-          setIsFadeRunning(true);
-
-          timer = setTimeout(() => {
-            setIsFadeRunning(false);
-            setIsReadersVisible(false);
-          }, 300);
-        }
-      }
-      document.addEventListener("mousedown", handleClickOutside);
-      return () => {
-        document.removeEventListener("mousedown", handleClickOutside);
-        clearTimeout(timer);
-      };
-    }, [isReadersVisible]);
-
-    useEffect(() => {
-      const container = messagesContainerRef.current;
-      const content = messagesContainerRef.current;
-
-      if (!container || !content) return;
-
-      let hasTriggered = false;
-      let startX = 0;
-
-      const handleMove = (currentX) => {
-        const diffX = startX - currentX;
-        container.style.transition = "none";
-        if (diffX > 0 && diffX < 150) {
-          container.style.right = diffX + "px";
-        }
-
-        if (diffX > 100 && !hasTriggered) {
-          handleReply(message);
-          hasTriggered = true;
-        }
-      };
-
-      const handleEnd = () => {
-        container.style.right = "0px";
-        container.style.transition = "all 0.3s ease";
-        document.removeEventListener("mousemove", onMouseMove);
-        document.removeEventListener("mouseup", handleEnd);
-        document.removeEventListener("touchmove", onTouchMove);
-        document.removeEventListener("touchend", handleEnd);
-        hasTriggered = false;
-      };
-
-      const onMouseMove = (e) => handleMove(e.clientX);
-      const onTouchMove = (e) => handleMove(e.touches[0].clientX);
-
-      const handleStart = (e) => {
-        startX = e.type === "mousedown" ? e.clientX : e.touches[0].clientX;
-        document.addEventListener("mousemove", onMouseMove);
-        document.addEventListener("mouseup", handleEnd);
-        document.addEventListener("touchmove", onTouchMove, { passive: false });
-        document.addEventListener("touchend", handleEnd);
-      };
-
-      container.addEventListener("mousedown", handleStart);
-      container.addEventListener("touchstart", handleStart);
-
-      return () => {
-        container.removeEventListener("mousedown", handleStart);
-        container.removeEventListener("touchstart", handleStart);
-      };
-    }, [message, handleReply]);
+    const sender = message.sender;
+    const isMyMessage = user.id === sender.id;
+    const fullname = sender.firstname + " " + sender.lastname;
+    const isThereAvatar = !!sender.profile?.avatar;
+    const avatar = isThereAvatar && sender.profile?.avatar;
+    const color = sender?.accountColor || "";
 
     const scrollToMessage = (messageId, e) => {
       e.stopPropagation();
@@ -490,116 +298,107 @@ export const ChatBubble = memo(
         setTimeout(() => chatBubble.classList.remove("highlight"), 3000);
       }
     };
+
     return (
-      <ChatBubbleContext
-        value={{
-          messageId: message.id,
-          isReadersVisible: isReadersVisible,
-          isFadeRunning: isFadeRunning,
-        }}
+      <li
+        id={message.id}
+        ref={messageContainerRef}
+        className={`my-1 will-change-auto relative flex items-end gap-1 text-sm md:text-base animate-pop transition-all duration-300 ${hideAvatar && isGroupMessage ? "pl-12" : ""}`}
       >
-        <li
-          id={message.id}
-          ref={messagesContainerRef}
-          className={`my-1 will-change-auto relative flex items-end gap-1 text-sm md:text-base animate-pop transition-all duration-300 ${hideAvatar && isGroupMessage ? "pl-12" : ""}`}
+        {isGroupMessage && !isMyMessage && !hideAvatar && (
+          <TransitionLink
+            route={message.sender.id ? `/users/${message.sender?.id}` : ""}
+            setDynamicTransitionId={setTransitionId}
+          >
+            <Avatar
+              avatar={avatar}
+              chatTitle={fullname}
+              color={color}
+              dynamicTransitionId={transitionId}
+              size="42px"
+            />
+          </TransitionLink>
+        )}
+        <div
+          className={`w-fit max-w-[85%] md:max-w-[75%] ${isMyMessage ? "ml-auto" : ""}`}
         >
-          {isGroupMessage && !isMyMessage && !hideAvatar && (
-            <TransitionLink
-              route={message.sender.id ? `/users/${message.sender?.id}` : ""}
-              setDynamicTransitionId={setTransitionId}
-            >
-              <Avatar
-                avatar={avatar}
-                chatTitle={fullname}
-                color={color}
-                dynamicTransitionId={transitionId}
-                size="42px"
-              />
-            </TransitionLink>
+          {message.type !== "TEXT" && (
+            <MediaFilePreview
+              fileURL={message.fileURL}
+              mimeType={message.mimeType}
+              handlePreview={handlePreview}
+            />
           )}
           <div
-            className={`w-fit max-w-[85%] md:max-w-[75%] ${isMyMessage ? "ml-auto" : ""}`}
+            onClick={(e) => {
+              handleShowChatBubbleMenu(message, e.clientX, e.clientY);
+            }}
+            ref={messageContentContainerRef}
+            className={`group relative w-full px-2 py-1 font-rubik rounded-t-xl ${isMyMessage ? "bg-cyan-700 dark:bg-cyan-600 rounded-br-none rounded-bl-xl text-gray-100" : "bg-gray-100 text-gray-600 dark:bg-gray-700 rounded-bl-none rounded-br-xl"} cursor-grab`}
           >
-            {message.type !== "TEXT" && (
-              <MediaFilePreview
-                fileURL={message.fileURL}
-                mimeType={message.mimeType}
-                handlePreview={handlePreview}
-              />
-            )}
-            <div
-              onClick={(e) => {
-                handleShowChatBubbleMenu(message, e.clientX, e.clientY);
-              }}
-              ref={messageContentContainerRef}
-              className={`group relative w-full px-2 py-1 font-rubik rounded-t-xl ${isMyMessage ? "bg-cyan-700 dark:bg-cyan-600 rounded-br-none rounded-bl-xl text-gray-100" : "bg-gray-100 text-gray-600 dark:bg-gray-700 rounded-bl-none rounded-br-xl"} cursor-grab`}
-            >
-              <div className="min-w-0 w-full">
-                {isGroupMessage && !isMyMessage && !hideName && (
-                  <p
-                    className={`${color ? "text-[var(--color)]" : "text-gray-800"} font-medium `}
-                    style={{ "--color": color }}
-                  >
-                    {fullname}
-                  </p>
-                )}
-                {message.repliedMessage && (
-                  <button
-                    onClick={(e) =>
-                      scrollToMessage(message.repliedMessage.id, e)
-                    }
-                    className={`px-2 border-l-5 dark:text-gray-300 border-[var(--accountColor)] w-full min-w-50 py-0.5 my-0.5 rounded flex flex-col items-start gap-0.5 ${isMyMessage ? "bg-[var(--accountColor)]/20" : "bg-[var(--accountColor)]/10"} shadow-[var(--accountColor)]/40 shadow-inner`}
-                    style={{
-                      "--accountColor":
-                        message.repliedMessage.sender?.accountColor,
-                    }}
-                  >
-                    <strong className="text-sm text-clamp-1 w-full text-start">
-                      {message.repliedMessage.sender.id === user.id
-                        ? translations.ChatBubble[language].YouLabel
-                        : message.repliedMessage.sender.firstname +
-                          " " +
-                          message.repliedMessage.sender.lastname}
-                    </strong>
-                    <p className="text-xs line-clamp-2 text-balance w-full text-start">
-                      {message.repliedMessage.content}
-                    </p>
-                  </button>
-                )}
-                {message.content && (
-                  <p
-                    className="wrap-break-word whitespace-pre-wrap dark:text-gray-200 "
-                    dir="auto"
-                  >
-                    {message.content}
-                  </p>
-                )}
-              </div>
-
-              <div className="flex items-center gap-2">
-                <ChatBubbleStatus
-                  readers={readers}
-                  senderId={message.sender.id || message.senderId}
-                  status={message.status}
-                />
-
-                <span
-                  className={`text-xs block ${isMyMessage ? "text-white text-left" : "text-gray-400 text-right"}`}
+            <div className="min-w-0 w-full">
+              {isGroupMessage && !isMyMessage && !hideName && (
+                <p
+                  className={`${color ? "text-[var(--color)]" : "text-gray-800"} font-medium `}
+                  style={{ "--color": color }}
                 >
-                  {new Date(message.createdAt).toLocaleTimeString()}
+                  {fullname}
+                </p>
+              )}
+              {message.repliedMessage && (
+                <button
+                  onClick={(e) => scrollToMessage(message.repliedMessage.id, e)}
+                  className={`px-2 border-l-5 dark:text-gray-300 border-[var(--accountColor)] w-full min-w-50 py-0.5 my-0.5 rounded flex flex-col items-start gap-0.5 ${isMyMessage ? "bg-[var(--accountColor)]/20" : "bg-[var(--accountColor)]/10"} shadow-[var(--accountColor)]/40 shadow-inner`}
+                  style={{
+                    "--accountColor":
+                      message.repliedMessage.sender?.accountColor,
+                  }}
+                >
+                  <strong className="text-sm text-clamp-1 w-full text-start">
+                    {message.repliedMessage.sender.id === user.id
+                      ? translations.ChatBubble[language].YouLabel
+                      : message.repliedMessage.sender.firstname +
+                        " " +
+                        message.repliedMessage.sender.lastname}
+                  </strong>
+                  <p className="text-xs line-clamp-2 text-balance w-full text-start">
+                    {message.repliedMessage.content}
+                  </p>
+                </button>
+              )}
+              {message.content && (
+                <p
+                  className="wrap-break-word whitespace-pre-wrap dark:text-gray-200 "
+                  dir="auto"
+                >
+                  {message.content}
+                </p>
+              )}
+            </div>
+
+            <div className="flex items-center gap-2">
+              <ChatBubbleStatus
+                readers={readers}
+                senderId={message.sender.id || message.senderId}
+                status={message.status}
+              />
+
+              <span
+                className={`text-xs block ${isMyMessage ? "text-white text-left" : "text-gray-400 text-right"}`}
+              >
+                {new Date(message.createdAt).toLocaleTimeString()}
+              </span>
+              {message.edit && (
+                <span
+                  className={`text-xs block ${isMyMessage ? "text-white text-right" : "text-gray-500"}`}
+                >
+                  {translations.ChatBubble[language].Edited}
                 </span>
-                {message.edit && (
-                  <span
-                    className={`text-xs block ${isMyMessage ? "text-white text-right" : "text-gray-500"}`}
-                  >
-                    {translations.ChatBubble[language].Edited}
-                  </span>
-                )}
-              </div>
+              )}
             </div>
           </div>
-        </li>
-      </ChatBubbleContext>
+        </div>
+      </li>
     );
   },
 );
