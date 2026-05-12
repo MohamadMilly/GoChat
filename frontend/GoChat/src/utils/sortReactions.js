@@ -3,6 +3,8 @@ const symbolToType = {
   LOVE: "❤️",
   LAUGH: "🤣",
   ANGER: "😡",
+  NAIL_POLISH: "💅",
+  FIRE: "🔥",
 };
 
 export function sortReactions(reactions) {

@@ -4,7 +4,12 @@ import { ChatPageContext } from "../../routes/ChatPage";
 import { socket } from "../../socket";
 import { ReadersMenu } from "./ReadersMenu";
 import { useState } from "react";
-import { ArrowBigLeft, ArrowBigRight } from "lucide-react";
+import {
+  ArrowBigLeft,
+  ArrowBigRight,
+  ArrowLeftCircle,
+  ArrowRightCircle,
+} from "lucide-react";
 import Button from "../ui/Button";
 import { useAuth } from "../../contexts/AuthContext";
 
@@ -25,6 +30,14 @@ const reactions = [
   {
     symbol: "😡",
     type: "ANGER",
+  },
+  {
+    symbol: "💅",
+    type: "NAIL_POLISH",
+  },
+  {
+    symbol: "🔥",
+    type: "FIRE",
   },
 ];
 
@@ -146,20 +159,51 @@ function ReactionsBar({
   conversationId,
   setMessage,
 }) {
+  const [extended, setExtended] = useState(false);
   return (
-    <div className="flex gap-1 w-50 p-0.5 my-1 bg-gray-50 dark:bg-gray-600 border border-gray-200 dark:border-gray-800 rounded-full">
-      {reactions.map((reaction, index) => {
-        return (
-          <ReactionButton
-            setMessage={setMessage}
-            delay={index * 150}
-            reaction={reaction}
-            messageId={messageId}
-            userId={userId}
-            conversationId={conversationId}
-          />
-        );
-      })}
+    <div
+      className={`flex gap-1  w-50 p-0.5 my-1 bg-gray-50 dark:bg-gray-600 border border-gray-200 dark:border-gray-800 ${extended ? "rounded-lg" : "rounded-full"}`}
+    >
+      <div
+        className={`flex transition-all duration-500 ease-in-out content-start gap-1 overflow-x-hidden ${extended ? "max-h-30 flex-wrap rounded!" : "max-h-10"}`}
+      >
+        {!extended
+          ? reactions.slice(0, 3).map((reaction, index) => {
+              return (
+                <ReactionButton
+                  setMessage={setMessage}
+                  delay={index * 150}
+                  reaction={reaction}
+                  messageId={messageId}
+                  userId={userId}
+                  conversationId={conversationId}
+                />
+              );
+            })
+          : reactions.map((reaction, index) => {
+              return (
+                <ReactionButton
+                  setMessage={setMessage}
+                  delay={index * 150}
+                  reaction={reaction}
+                  messageId={messageId}
+                  userId={userId}
+                  conversationId={conversationId}
+                />
+              );
+            })}
+      </div>
+      <Button
+        className={`rounded-full! p-1! text-lg! animate-slideRight 
+           flex justify-center items-center`}
+        onClick={() => setExtended(!extended)}
+      >
+        {extended ? (
+          <ArrowLeftCircle size={20} />
+        ) : (
+          <ArrowRightCircle size={20} />
+        )}
+      </Button>
     </div>
   );
 }

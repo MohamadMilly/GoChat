@@ -15,9 +15,14 @@ import { sortReactions } from "../../utils/sortReactions";
 
 function formatMessageDate(date) {
   const dateObj = new Date(date);
-  const hours = String(dateObj.getHours()).padStart(2, "0");
+  let hours = dateObj.getHours();
   const minutes = String(dateObj.getMinutes()).padStart(2, "0");
-  return `${hours}:${minutes}`;
+  const ampm = hours >= 12 ? "PM" : "AM";
+
+  hours = hours % 12;
+  hours = hours ? hours : 12;
+
+  return `${hours}:${minutes} ${ampm}`;
 }
 
 function VideoFile({ link }) {
@@ -388,19 +393,23 @@ export const ChatBubble = memo(
               )}
             </div>
 
-            <div className="flex items-baseline my-0.5 gap-2">
-              {isReacted &&
-                sortedReactions.map(([type, details]) => {
-                  return (
-                    <Reaction
-                      key={type}
-                      type={type}
-                      symbol={details.symbol}
-                      count={details.count}
-                    />
-                  );
-                })}
-              <div className="flex gap-2 items-end">
+            <div className="flex items-end my-0.5 gap-2">
+              {isReacted && (
+                <div>
+                  {sortedReactions.map(([type, details]) => {
+                    return (
+                      <Reaction
+                        key={type}
+                        type={type}
+                        symbol={details.symbol}
+                        count={details.count}
+                      />
+                    );
+                  })}
+                </div>
+              )}
+
+              <div className="flex gap-2 items-center">
                 <ChatBubbleStatus
                   readers={readers}
                   senderId={message.sender.id || message.senderId}

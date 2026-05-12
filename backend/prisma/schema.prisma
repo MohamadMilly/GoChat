@@ -144,6 +144,8 @@ LIKE
 LOVE
 LAUGH
 ANGER
+NAIL_POLISH
+FIRE
 }
 
 model Message {
