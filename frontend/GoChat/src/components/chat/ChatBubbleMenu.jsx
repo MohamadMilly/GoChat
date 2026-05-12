@@ -131,7 +131,7 @@ function ReactionButton({
         animationDelay: `${delay}ms`,
         animationFillMode: "backwards",
       }}
-      className={`rounded-full! animate-slideRight 
+      className={`rounded-full! text-lg! animate-slideRight 
           w-8! h-8! flex justify-center items-center`}
     >
       {reaction.symbol}
@@ -147,7 +147,7 @@ function ReactionsBar({
   setMessage,
 }) {
   return (
-    <div className="flex gap-1 w-40 p-0.5 my-1 mx-auto bg-gray-50 dark:bg-gray-600 border border-gray-200 dark:border-gray-800 rounded-full">
+    <div className="flex gap-1 w-50 p-0.5 my-1 bg-gray-50 dark:bg-gray-600 border border-gray-200 dark:border-gray-800 rounded-full">
       {reactions.map((reaction, index) => {
         return (
           <ReactionButton
@@ -267,7 +267,7 @@ export function ChatBubbleMenu({
         "--x": Math.floor(x) + "px",
         "--y": Math.floor(y) + "px",
       }}
-      className="h-fit z-10 animate-pop transition-all delay-300 duration-300 w-45 fixed md:-translate-x-full -translate-y-1/2 md:left-[var(--x)] left-1/2 -translate-x-1/2 top-[var(--y)] "
+      className="h-fit flex flex-col items-center z-10 animate-pop transition-all delay-300 duration-300 w-48 fixed md:-translate-x-full -translate-y-1/2 md:left-[var(--x)] left-1/2 -translate-x-1/2 top-[var(--y)] "
     >
       <ReactionsBar
         setMessage={setMessage}
@@ -276,7 +276,7 @@ export function ChatBubbleMenu({
         conversationId={conversationId}
         userId={user.id}
       />
-      <div className="dark:bg-gray-700 bg-gray-100 rounded-md overflow-hidden">
+      <div className="dark:bg-gray-700 bg-gray-100 rounded-md overflow-hidden w-full">
         <div>
           <Button
             className={"flex items-center gap-1 w-full m-1"}

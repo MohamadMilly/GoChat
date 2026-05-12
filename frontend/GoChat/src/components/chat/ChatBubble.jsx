@@ -388,7 +388,7 @@ export const ChatBubble = memo(
               )}
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-baseline my-0.5 gap-2">
               {isReacted &&
                 sortedReactions.map(([type, details]) => {
                   return (
@@ -400,24 +400,26 @@ export const ChatBubble = memo(
                     />
                   );
                 })}
-              <ChatBubbleStatus
-                readers={readers}
-                senderId={message.sender.id || message.senderId}
-                status={message.status}
-              />
+              <div className="flex gap-2 items-end">
+                <ChatBubbleStatus
+                  readers={readers}
+                  senderId={message.sender.id || message.senderId}
+                  status={message.status}
+                />
 
-              <span
-                className={`text-xs block ${isMyMessage ? "text-white text-left" : "text-gray-400 text-right"}`}
-              >
-                {messageDate}
-              </span>
-              {message.edit && (
                 <span
-                  className={`text-xs block ${isMyMessage ? "text-white text-right" : "text-gray-500"}`}
+                  className={`text-xs block ${isMyMessage ? "text-white text-left" : "text-gray-400 text-right"}`}
                 >
-                  {translations.ChatBubble[language].Edited}
+                  {messageDate}
                 </span>
-              )}
+                {message.edit && (
+                  <span
+                    className={`text-xs block ${isMyMessage ? "text-white text-right" : "text-gray-500"}`}
+                  >
+                    {translations.ChatBubble[language].Edited}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
         </div>
