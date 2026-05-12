@@ -395,7 +395,7 @@ export const ChatBubble = memo(
 
             <div className="flex items-end my-0.5 gap-2">
               {isReacted && (
-                <div>
+                <div className="flex gap-1">
                   {sortedReactions.map(([type, details]) => {
                     return (
                       <Reaction
