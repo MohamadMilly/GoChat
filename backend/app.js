@@ -38,6 +38,7 @@ const joinConversationBroadcast = require("./realtime/listeners/joinConversation
 const leaveConversation = require("./realtime/listeners/leaveConversation");
 const createConversation = require("./realtime/listeners/createConversation");
 const editConversation = require("./realtime/listeners/editConversation");
+const reactToMessage = require("./realtime/listeners/reaction");
 
 const app = express();
 const server = createServer(app);
@@ -131,6 +132,18 @@ io.on("connection", async (socket) => {
         callback,
       ),
   );
+
+  socket.on("reaction", (messageId, userId, conversationId, type, callback) =>
+    reactToMessage(
+      socket,
+      io,
+      messageId,
+      userId,
+      Number(conversationId),
+      type,
+      callback,
+    ),
+  );
 });
 
 app.use(
@@ -151,6 +164,12 @@ app.use(
 app.use("/auth", authRouter);
 app.use("/users", usersRouter);
 app.use("/conversations", conversationsRouter);
+
+app.use((req, res) => {
+  res.status(404).json({
+    message: "Route does not exist.",
+  });
+});
 
 const PORT = process.env.PORT || 3000;
 

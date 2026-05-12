@@ -35,6 +35,7 @@
   .animate-slidedown {
     animation: slidedown 0.5s 1 forwards;
   }
+
   .animate-pop {
     animation: pop 0.3s 1 forwards;
   }
@@ -44,6 +45,10 @@
   .animate-fill-mode-none {
     animation-fill-mode: none;
   }
+  .animate-slideRight {
+    animation: slideRight 0.3s 1 forwards;
+  }
+
   @keyframes slidedown {
     from {
       display: block;
@@ -70,19 +75,17 @@
   }
   @keyframes pop {
     from {
-      display: hidden;
       opacity: 0;
       transform: scale(0.9);
     }
     to {
-      display: black;
       opacity: 1;
       transform: scale(1);
     }
   }
   @keyframes fade {
     from {
-      display: black;
+      display: block;
       opacity: 1;
       transform: scale(1);
     }
@@ -90,6 +93,17 @@
       display: hidden;
       opacity: 0;
       transform: scale(0.9);
+    }
+  }
+
+  @keyframes slideRight {
+    from {
+      opacity: 0;
+      transform: translateX(-100%);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
     }
   }
 }

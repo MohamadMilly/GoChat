@@ -151,6 +151,7 @@ async function processChatMessage(
               sender: true,
             },
           },
+          reactions: true,
         },
       });
       createdMessage = {
@@ -204,6 +205,7 @@ async function processChatMessage(
               sender: true,
             },
           },
+          reactions: true,
         },
       });
       createdMessage = {

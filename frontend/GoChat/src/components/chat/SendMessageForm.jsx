@@ -88,6 +88,7 @@ function useSendMessage() {
         : "TEXT",
       status: "pending",
       repliedMessage: repliedMessage,
+      reactions: [],
     };
 
     queryClient.setQueryData(
@@ -158,11 +159,11 @@ function useSendMessage() {
               : "FILE"
             : "TEXT",
           repliedMessageId: messageData.repliedMessage?.id || null,
+          reactions: [],
         },
         String(conversationId),
         client_offset,
-        (response) => {
-          console.log(response);
+        (err, response) => {
           if (response?.status !== "ok") {
             console.error(`Error: (${response?.status}) ` + response?.error);
           }

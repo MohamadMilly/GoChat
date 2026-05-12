@@ -443,6 +443,58 @@ export function SocketProvider({ children }) {
         };
       });
     }
+
+    function onUserReact(reaction) {
+      const queryKey = [
+        "conversation",
+        "messages",
+        reaction.conversationId.toString(),
+      ];
+
+      queryClient.setQueryData(queryKey, (old) => {
+        if (!old?.pages) return old;
+        const updatedPages = old.pages.map((page) => ({
+          ...page,
+          messages: page.messages.map((message) => {
+            if (message.id === reaction.messageId) {
+              return {
+                ...message,
+                reactions: [...message.reactions, reaction],
+              };
+            }
+            return message;
+          }),
+        }));
+        return {
+          ...old,
+          pages: updatedPages,
+        };
+      });
+    }
+
+    function onUserRemovesReaction(conversationId, messageId, reactionId) {
+      const queryKey = ["conversation", "messages", conversationId.toString()];
+      queryClient.setQueryData(queryKey, (old) => {
+        if (!old?.pages) return old;
+        const updatedPages = old.pages.map((page) => ({
+          ...page,
+          messages: page.messages.map((message) => {
+            if (message.id === messageId) {
+              return {
+                ...message,
+                reactions: message.reactions.filter((r) => r.id !== reactionId),
+              };
+            }
+            return message;
+          }),
+        }));
+        return {
+          ...old,
+          pages: updatedPages,
+        };
+      });
+    }
+
     socket.on("chat message", onReceiveMessage);
     socket.on("connect", onConnect);
     socket.on("disconnect", onDisconnect);
@@ -461,7 +513,8 @@ export function SocketProvider({ children }) {
     socket.on("create conversation", onCreateConversation);
     socket.on("join conversation", onJoinConversation);
     socket.on("leave conversation", onLeaveConversation);
-
+    socket.on("reaction", onUserReact);
+    socket.on("remove reaction", onUserRemovesReaction);
     return () => {
       socket.off("chat message", onReceiveMessage);
       socket.off("connect", onConnect);
@@ -481,6 +534,8 @@ export function SocketProvider({ children }) {
       socket.off("create conversation", onCreateConversation);
       socket.off("join conversation", onJoinConversation);
       socket.off("leave conversation", onLeaveConversation);
+      socket.off("reaction", onUserReact);
+      socket.off("remove reaction", onUserRemovesReaction);
     };
   }, [queryClient, user]);
   const contextValue = useMemo(

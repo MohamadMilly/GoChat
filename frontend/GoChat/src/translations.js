@@ -387,7 +387,7 @@ const translations = {
       ErrorPrefix: "خطأ:",
       NoReaders: "لا قراء بعد",
       SeenBy: "تمت رؤيته بواسطة",
-      SeenAtPrefix: "رؤي في",
+      SeenAtPrefix: "في",
     },
     English: {
       JoinPreview: "Join or go to the chat to see the readers",
@@ -395,7 +395,7 @@ const translations = {
       ErrorPrefix: "Error:",
       NoReaders: "No Readers yet",
       SeenBy: "Seen by",
-      SeenAtPrefix: "seen at",
+      SeenAtPrefix: "at",
     },
   },
   ChatHeader: {

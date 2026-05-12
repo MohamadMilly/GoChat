@@ -141,6 +141,7 @@ const getConversationMessagesGet = async (req, res) => {
             },
           },
         },
+        reactions: true,
       },
       orderBy: {
         createdAt: "desc",

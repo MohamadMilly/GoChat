@@ -1,13 +1,4 @@
-import {
-  useRef,
-  useState,
-  useEffect,
-  createContext,
-  memo,
-  useContext,
-  useMemo,
-  useCallback,
-} from "react";
+import { useRef, useState, useEffect, memo, useMemo } from "react";
 import { Avatar } from "./Avatar";
 import { TransitionLink } from "../ui/TransitionLink";
 import { Braces, FileText, FileArchive, File } from "lucide-react";
@@ -20,7 +11,14 @@ import { ChatPageContext } from "../../routes/ChatPage";
 import { useParams } from "react-router";
 import translations from "../../translations";
 import { useLanguage } from "../../contexts/LanguageContext";
-import { useQueryClient } from "@tanstack/react-query";
+import { sortReactions } from "../../utils/sortReactions";
+
+function formatMessageDate(date) {
+  const dateObj = new Date(date);
+  const hours = String(dateObj.getHours()).padStart(2, "0");
+  const minutes = String(dateObj.getMinutes()).padStart(2, "0");
+  return `${hours}:${minutes}`;
+}
 
 function VideoFile({ link }) {
   const { language } = useLanguage();
@@ -245,6 +243,16 @@ function useDrag(ref, maxDisplacement, triggerDisplacement, onTrigger) {
   }, [maxDisplacement, ref, triggerDisplacement]);
 }
 
+function Reaction({ type, symbol, count = 1 }) {
+  return (
+    <div className="w-8 animate-pop h-8 rounded-full bg-white/60 dark:bg-gray-700/50 flex justify-center items-center">
+      <span className="text-sm">{symbol}</span>
+      <span className="text-xs">{count}</span>
+      <span className="sr-only">{type}</span>
+    </div>
+  );
+}
+
 export const ChatBubble = memo(
   ({
     message,
@@ -284,6 +292,10 @@ export const ChatBubble = memo(
     const isThereAvatar = !!sender.profile?.avatar;
     const avatar = isThereAvatar && sender.profile?.avatar;
     const color = sender?.accountColor || "";
+    const messageDate = formatMessageDate(message.createdAt);
+    const messageReactions = message.reactions;
+    const isReacted = messageReactions ? messageReactions.length > 0 : false;
+    const sortedReactions = isReacted ? sortReactions(messageReactions) : [];
 
     const scrollToMessage = (messageId, e) => {
       e.stopPropagation();
@@ -377,6 +389,17 @@ export const ChatBubble = memo(
             </div>
 
             <div className="flex items-center gap-2">
+              {isReacted &&
+                sortedReactions.map(([type, details]) => {
+                  return (
+                    <Reaction
+                      key={type}
+                      type={type}
+                      symbol={details.symbol}
+                      count={details.count}
+                    />
+                  );
+                })}
               <ChatBubbleStatus
                 readers={readers}
                 senderId={message.sender.id || message.senderId}
@@ -386,7 +409,7 @@ export const ChatBubble = memo(
               <span
                 className={`text-xs block ${isMyMessage ? "text-white text-left" : "text-gray-400 text-right"}`}
               >
-                {new Date(message.createdAt).toLocaleTimeString()}
+                {messageDate}
               </span>
               {message.edit && (
                 <span

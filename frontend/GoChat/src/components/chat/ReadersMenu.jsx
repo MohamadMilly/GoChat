@@ -6,9 +6,22 @@ import { useAuth } from "../../contexts/AuthContext";
 import translations from "../../translations";
 import { useLanguage } from "../../contexts/LanguageContext";
 
+function formatReadDate(date) {
+  const dateObj = new Date(date);
+
+  const year = dateObj.getFullYear();
+  const month = String(dateObj.getMonth() + 1).padStart(2, "0");
+  const day = String(dateObj.getDate()).padStart(2, "0");
+
+  const hours = String(dateObj.getHours()).padStart(2, "0");
+  const minutes = String(dateObj.getMinutes()).padStart(2, "0");
+
+  return `${year}/${month}/${day} ${hours}:${minutes}`;
+}
+
 export const ReadersMenu = memo(({ messageId }) => {
   const { conversationId, isInPreview } = useContext(ChatPageContext);
-
+  
   const { user } = useAuth();
   const { readers, isFetching, error } = useMessageReader(
     messageId,
@@ -28,7 +41,7 @@ export const ReadersMenu = memo(({ messageId }) => {
 
   return (
     <div
-      className={`w-50 text-gray-700 dark:text-gray-100 bg-white dark:bg-gray-700 p-2 z-20 border-b border-gray-200 dark:border-gray-600`}
+      className={`w-full rounded animate-slideRight max-h-40 overflow-y-auto text-gray-700 dark:text-gray-100 bg-white dark:bg-gray-700 p-2 z-20 border-b border-gray-200 dark:border-gray-600`}
     >
       {isInPreview ? (
         <p className="text-xs">
@@ -46,11 +59,12 @@ export const ReadersMenu = memo(({ messageId }) => {
         </p>
       ) : (
         <>
-          <h4 className="text-sm text-gray-700 dark:text-gray-100 mb-2">
+          <h4 className="text-xs text-gray-700 dark:text-gray-100 mb-2">
             {translations.ReadersMenu[language].SeenBy}
           </h4>
           <ul className="divide-y divide-gray-200 dark:divide-gray-600">
             {readersWithOutMe.map((readerOnMessage) => {
+              const readDate = formatReadDate(readerOnMessage.seenAt);
               const fullname =
                 readerOnMessage.reader.firstname +
                 " " +
@@ -69,7 +83,7 @@ export const ReadersMenu = memo(({ messageId }) => {
                     <span className="font-medium">{fullname}</span>
                     <span className="text-gray-400 dark:text-gray-300 text-[10px]">
                       {translations.ReadersMenu[language].SeenAtPrefix}{" "}
-                      {new Date(readerOnMessage.seenAt).toLocaleString("en-US")}
+                      {readDate}
                     </span>
                   </div>
                 </li>
