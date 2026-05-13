@@ -250,7 +250,7 @@ function useDrag(ref, maxDisplacement, triggerDisplacement, onTrigger) {
 
 function Reaction({ type, symbol, count = 1 }) {
   return (
-    <div className="w-8 animate-pop h-8 rounded-full bg-white/60 dark:bg-gray-700/50 flex justify-center items-center">
+    <div className="w-8 shadow-inner border border-white dark:border-gray-100/50 shadow-gray-50/30 animate-pop h-8 rounded-full bg-gray-50/65 dark:bg-gray-300/40 flex justify-center items-center">
       <span className="text-sm">{symbol}</span>
       <span className="text-xs">{count}</span>
       <span className="sr-only">{type}</span>
@@ -393,9 +393,13 @@ export const ChatBubble = memo(
               )}
             </div>
 
-            <div className="flex items-end my-0.5 gap-2">
+            <div
+              className={`flex items-end my-0.5 gap-2 ${isMyMessage ? "flex-row" : "flex-row-reverse"}`}
+            >
               {isReacted && (
-                <div className="flex gap-1">
+                <div
+                  className={`flex gap-1 ${isMyMessage ? "dark:text-white text-gray-700" : "dark:text-gray-800 text-gray-700"}`}
+                >
                   {sortedReactions.map(([type, details]) => {
                     return (
                       <Reaction

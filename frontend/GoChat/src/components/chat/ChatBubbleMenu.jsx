@@ -168,7 +168,7 @@ function ReactionsBar({
         className={`flex transition-all duration-500 ease-in-out content-start gap-1 overflow-x-hidden ${extended ? "max-h-30 flex-wrap rounded!" : "max-h-10"}`}
       >
         {!extended
-          ? reactions.slice(0, 3).map((reaction, index) => {
+          ? reactions.slice(0, 4).map((reaction, index) => {
               return (
                 <ReactionButton
                   setMessage={setMessage}
