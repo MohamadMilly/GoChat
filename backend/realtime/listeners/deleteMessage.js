@@ -30,13 +30,22 @@ module.exports = async (socket, io, messageId, conversationId, callback) => {
         messageId: messageId,
       },
     });
+    const deleteReactionsPromise = prisma.reaction.deleteMany({
+      where: {
+        messageId: messageId,
+      },
+    });
     const deletedMessagePromise = prisma.message.delete({
       where: {
         id: messageId,
         senderId: message.senderId,
       },
     });
-    await prisma.$transaction([deletedReadersPromise, deletedMessagePromise]);
+    await prisma.$transaction([
+      deletedReadersPromise,
+      deleteReactionsPromise,
+      deletedMessagePromise,
+    ]);
     if (typeof callback === "function") callback({ status: "ok" });
     io.emit("delete message", messageId, conversationId);
   } catch (err) {

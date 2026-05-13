@@ -599,6 +599,11 @@ async function deleteConversation(conversationId) {
       },
     },
   });
+  const deleteMessagesReactionsPromise = prisma.reaction.deleteMany({
+    where: {
+      conversationId: conversationId,
+    },
+  });
   const deleteMessagesPromise = prisma.message.deleteMany({
     where: {
       conversationId: conversationId,
@@ -627,6 +632,7 @@ async function deleteConversation(conversationId) {
   /* Delete all previous in order by transaction */
   await prisma.$transaction([
     deleteMessagesReadersPromise,
+    deleteMessagesReactionsPromise,
     deleteMessagesPromise,
     deletePartnersPromise,
     deleteAdminsPromise,

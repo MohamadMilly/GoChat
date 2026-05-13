@@ -18,9 +18,12 @@ import { socket } from "../../socket";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router";
 import MessagesQueryTrigger from "./MessagesQueryTrigger";
-import { Circle } from "lucide-react";
+import { Circle, Send } from "lucide-react";
 import { forwardRef } from "react";
 import { Spinner } from "../ui/Spinner";
+import Button from "../ui/Button";
+import { useSendMessage } from "../../hooks/chat/useSendMessage";
+import { useLanguage } from "../../contexts/LanguageContext";
 
 export const ChatBubbleContainerContext = createContext({ message: null });
 
@@ -78,8 +81,28 @@ export function MessagesList({ ref = null }) {
   );
 }
 
-export const MessagesListContent = forwardRef((props, ref) => {
+function InitialMessageButton({ content, conversationId }) {
+  const sendMessage = useSendMessage();
   const { user } = useAuth();
+  const handleSendInitialMessage = () => {
+    sendMessage(
+      {
+        message: content,
+        previewFileURL: null,
+        mediaFileData: {
+          file: null,
+          mimeType: null,
+        },
+        repliedMessage: null,
+      },
+      user,
+      conversationId,
+    );
+  };
+  return <Button onClick={handleSendInitialMessage}>{content}</Button>;
+}
+
+export const MessagesListContent = forwardRef((props, ref) => {
   const queryClient = useQueryClient();
   const messagesListRef = ref;
   const navigate = useNavigate();
@@ -194,14 +217,23 @@ export const MessagesListContent = forwardRef((props, ref) => {
         </div>
       )}
       {memoizedMessages && memoizedMessages.length === 0 ? (
-        <p
-          className="text-center text-lg h-full flex justify-center items-center text-gray-800 dark:text-gray-100 p-1 z-10
+        <div
+          className="text-center text-lg h-full flex flex-col gap-0.5 justify-center items-center text-gray-700 dark:text-gray-100 p-1 z-10
             "
         >
-          <span className="dark:bg-gray-600/20 p-1 rounded">
-            No Messages Yet
+          <div className="dark:bg-gray-600/20  bg-gray-50 p-2 rounded-full animate-bounce">
+            <Send size={50} />
+          </div>
+
+          <span className="p-1 rounded w-40">
+            No Messages Yet, Send{" "}
+            <InitialMessageButton
+              content={"Hello"}
+              conversationId={props.conversationId}
+            />{" "}
+            !
           </span>
-        </p>
+        </div>
       ) : (
         memoizedMessages.map((message, index) => {
           const previousMessageDate = memoizedMessages[index - 1]
