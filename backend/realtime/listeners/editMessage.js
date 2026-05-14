@@ -31,6 +31,8 @@ module.exports = async (socket, io, message, conversationId, callback) => {
       },
       include: {
         sender: true,
+        reactions: true,
+        repliedMessage: true,
       },
     });
     if (typeof callback === "function") callback({ status: "ok" });

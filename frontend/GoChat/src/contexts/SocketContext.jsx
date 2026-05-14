@@ -471,7 +471,7 @@ export function SocketProvider({ children }) {
         };
       });
     }
-
+  
     function onUserRemovesReaction(conversationId, messageId, reactionId) {
       const queryKey = ["conversation", "messages", conversationId.toString()];
       queryClient.setQueryData(queryKey, (old) => {
