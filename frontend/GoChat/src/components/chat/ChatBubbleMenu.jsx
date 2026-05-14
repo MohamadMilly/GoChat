@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { useCallback, useContext } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { ChatPageContext } from "../../routes/ChatPage";
 import { socket } from "../../socket";
@@ -208,20 +208,10 @@ function ReactionsBar({
   );
 }
 
-export function ChatBubbleMenu({
-  message,
-  setMessage,
-  clickCoords,
-  menuRef,
-  isCurrentUserMessage,
-  isCurrentUserAdmin,
-}) {
-  const { setEditedMessage, conversationId } = useContext(ChatPageContext);
+function useDeleteMessage(messageId, conversationId) {
   const queryClient = useQueryClient();
-  const { user } = useAuth();
-  const { x, y } = clickCoords;
-  const [readersVisible, setReadersVisible] = useState(false);
-  const handleDeleteMessage = (messageId, conversationId) => {
+
+  const deleteMessage = useCallback(() => {
     if (!messageId || !conversationId) return;
     let newMessages = [];
     let previousMessages = queryClient.getQueryData([
@@ -301,9 +291,30 @@ export function ChatBubbleMenu({
           return;
         }
       });
+  }, [messageId, conversationId, queryClient]);
+
+  return deleteMessage;
+}
+
+export function ChatBubbleMenu({
+  message,
+  setMessage,
+  clickCoords,
+  menuRef,
+  isCurrentUserMessage,
+  isCurrentUserAdmin,
+}) {
+  const { setEditedMessage, conversationId } = useContext(ChatPageContext);
+  const { user } = useAuth();
+  const { x, y } = clickCoords;
+  const [readersVisible, setReadersVisible] = useState(false);
+  const deleteMessage = useDeleteMessage(message.id, conversationId);
+
+  const handleDeleteMessage = () => {
+    deleteMessage();
     setMessage(null);
   };
-
+  
   return (
     <div
       ref={menuRef}
@@ -338,7 +349,7 @@ export function ChatBubbleMenu({
         {(isCurrentUserAdmin || isCurrentUserMessage) && (
           <button
             className="text-sm dark:text-gray-200 text-gray-600 cursor-pointer w-full p-2 hover:bg-gray-200 hover:text-gray-700"
-            onClick={() => handleDeleteMessage(message.id, conversationId)}
+            onClick={handleDeleteMessage}
           >
             Delete
           </button>

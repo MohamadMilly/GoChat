@@ -26,3 +26,6 @@ provider to the items and also use useCallback hook instead of calling useContex
 
   9- if a event handler or effect becomes large and complex we can move it to a custom hook to keep the component clean and also we can reuse this logic in other components if needed.
   if it does not use the state of the component and just consider it a utility function
+
+  10- we should read from closures in a custom hook if the data is static across rerenders (like hook config) and when we don't want to use it in different places , but when the data is dynamic and changing 
+   or we need to use the custom hook in different places or when we want to have the data in the time of the action we should pass it as an argument to the event handler or the and not read it from closure .
