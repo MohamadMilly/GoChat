@@ -129,7 +129,15 @@ const getConversationMessagesGet = async (req, res) => {
         },
         repliedMessage: {
           include: {
-            sender: true,
+            sender: {
+              select: {
+                id: true,
+                firstname: true,
+                lastname: true,
+                username: true,
+                accountColor: true,
+              },
+            },
           },
         },
         readers: {
