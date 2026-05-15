@@ -8,6 +8,7 @@ export const ChatBubbleStatus = memo(function ChatBubbleStatus({
   status,
   className,
   supportNotifications = false,
+  unReadMessagesCount,
 }) {
   const { user } = useAuth();
   const isMyMessage = user.id === senderId;
@@ -15,7 +16,6 @@ export const ChatBubbleStatus = memo(function ChatBubbleStatus({
     ? readers.filter((id) => id != user.id)
     : readers;
 
-  const isReadByMe = actualReaders.includes(user.id);
   if (!isMyMessage && !supportNotifications) return;
   return (
     <div>
@@ -28,8 +28,10 @@ export const ChatBubbleStatus = memo(function ChatBubbleStatus({
           ) : (
             <Check size={12} />
           )
-        ) : !isReadByMe && supportNotifications ? (
-          <span className="block w-2 h-2 rounded-full bg-cyan-500"></span>
+        ) : unReadMessagesCount > 0 && supportNotifications ? (
+          <span className=" h-4 w-4 flex justify-center items-center  rounded-full bg-cyan-500 text-white">
+            {unReadMessagesCount}
+          </span>
         ) : null}
       </span>
     </div>

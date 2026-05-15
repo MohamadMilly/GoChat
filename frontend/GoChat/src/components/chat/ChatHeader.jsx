@@ -54,7 +54,7 @@ export const ChatHeaderContent = memo((props) => {
   const { language } = useLanguage();
   const { connectedUsers, typingUsers } = useSocket();
   const conversation = props.conversation;
-
+  
   const [transitionId, setTransitionId] = useState(null);
 
   const thisChatConnectedUsers = useMemo(

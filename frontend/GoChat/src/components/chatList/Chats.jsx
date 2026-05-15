@@ -30,6 +30,7 @@ export function Chats({ chatsEntries }) {
             <ChatEntry
               key={`${chatEntry.id}-${lastMessage.id || lastMessage.createdAt}`}
               lastMessage={lastMessage}
+              unReadMessagesCount={chatEntry.unReadMessagesCount}
               chatTitle={chatTitle}
               isGroup={isGroup}
               chatAvatar={chatAvatar}

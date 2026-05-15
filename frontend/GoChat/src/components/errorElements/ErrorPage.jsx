@@ -14,17 +14,36 @@ export function ErrorPage({
   let errorTitle = title;
   let errorMessage = message;
 
+  // 1. Handle React Router boundary responses (Loaders / Actions)
   if (isRouteErrorResponse(error)) {
-    errorStatus = errorStatus || error.status;
+    errorStatus = errorStatus || String(error.status);
     errorTitle =
       errorTitle || (error.status === 404 ? "Page not found." : "Route error.");
     errorMessage = errorMessage || error.data?.message || error.statusText;
-  } else if (error instanceof Error) {
-    errorStatus = errorStatus || "Error";
-    errorTitle = errorTitle || "Runtime Error";
+  }
+  // 2. Handle standard native JavaScript Error instances
+  else if (error instanceof Error) {
+    errorStatus = errorStatus || "Runtime Error";
+    errorTitle = errorTitle || error.name || "Application Crash";
     errorMessage = errorMessage || error.message;
   }
+  // 3. Handle raw thrown TanStack Query / Axios object structures
+  else if (error && typeof error === "object") {
+    errorStatus =
+      errorStatus || String(error.status || error.statusCode || "Fetch Error");
+    errorTitle = errorTitle || error.name || error.code || "Data Loading Error";
+    errorMessage =
+      errorMessage ||
+      error.message ||
+      error.data?.message ||
+      "Failed to fetch remote data.";
+  }
+  // 4. Handle plain primitive values (strings, numbers)
+  else if (error) {
+    errorMessage = errorMessage || String(error);
+  }
 
+  // Fallback defaults if properties remain blank
   errorStatus = errorStatus || "Error";
   errorTitle = errorTitle || "Something went wrong.";
   errorMessage = errorMessage || "An unexpected error occurred.";

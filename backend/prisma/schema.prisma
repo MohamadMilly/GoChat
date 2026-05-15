@@ -124,7 +124,7 @@ message Message @relation(fields: [messageId],references: [id])
 messageId Int
 reader User @relation(fields: [readerId],references: [id])
 readerId Int
- 
+
 @@id([messageId,readerId])
 }
 
@@ -139,6 +139,7 @@ reactedAt DateTime @default(now())
 type ReactionType @default(LIKE)
 }
 
+
 enum ReactionType {
 LIKE
 LOVE
@@ -147,6 +148,7 @@ ANGER
 NAIL_POLISH
 FIRE
 }
+
 
 model Message {
   id Int @id @default(autoincrement())

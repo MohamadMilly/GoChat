@@ -201,7 +201,9 @@ export const MessagesListContent = forwardRef((props, ref) => {
     }
   }, [messages.length, messagesListRef]);
   if (isFetchingInitialData) return <MessagesListLoading />;
-  if (messagesError) return <p>Error: {messagesError.message}</p>;
+  if (messagesError) {
+    throw messagesError;
+  }
 
   return (
     <ul

@@ -17,7 +17,7 @@ module.exports = async (socket, io, message, conversationId, callback) => {
       if (typeof callback === "function") callback({ status: 401 });
       return;
     }
-
+    
     const updatedMessage = await prisma.message.update({
       where: {
         id: message.id,

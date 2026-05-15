@@ -8,6 +8,21 @@ const SECRET_KEY = process.env.SECRET_KEY;
 const prisma = require("../lib/prisma");
 const filterProfile = require("../utils/filterProfile");
 const hideUser = require("../utils/hideUser");
+
+const getConversationUnReadMessages = async (conversationId, userId) => {
+  const unReadMessages = await prisma.message.findMany({
+    where: {
+      conversationId: Number(conversationId),
+      readers: {
+        none: {
+          readerId: userId,
+        },
+      },
+    },
+  });
+  return { count: unReadMessages.length, messages: unReadMessages };
+};
+
 const getSpecificConversationGet = async (req, res) => {
   const { conversationId } = req.params;
   const { userId: userIdString } = req.query;
@@ -24,6 +39,13 @@ const getSpecificConversationGet = async (req, res) => {
         message: "Conversation not found.",
       });
     }
+
+    /* ---- UnReadMessages ----  */
+    const unReadMessagesData = await getConversationUnReadMessages(
+      conversationId,
+      userId,
+    );
+
     const participantsIds = await prisma.conversationParticipant.findMany({
       where: {
         conversationId: parseInt(conversationId),
@@ -115,6 +137,20 @@ const getSpecificConversationGet = async (req, res) => {
         message: "Conversation is not found.",
       });
     }
+    const conversationParticipantRecord =
+      await prisma.conversationParticipant.findUnique({
+        where: {
+          conversationId_userId: {
+            conversationId: parseInt(conversationId),
+            userId: userId,
+          },
+        },
+      });
+    if (!conversationParticipantRecord) {
+      return res.status(400).json({
+        message: "You are not a part in this conversation",
+      });
+    }
     const isCurrentUserAdmin = conversation.admins.some(
       (admin) => admin.userId === userId,
     );
@@ -160,6 +196,7 @@ const getSpecificConversationGet = async (req, res) => {
         conversation.type === "DIRECT"
           ? conversation.participants.find((p) => p.userId !== userId)?.userId
           : null,
+      unReadMessagesData: unReadMessagesData,
     });
   } catch (err) {
     console.error(err);

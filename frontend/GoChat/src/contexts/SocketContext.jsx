@@ -412,7 +412,7 @@ export function SocketProvider({ children }) {
           };
         },
       );
-
+      
       queryClient.setQueryData(["conversations"], (old) => {
         if (!old?.conversations) return old;
         return {

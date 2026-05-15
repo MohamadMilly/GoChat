@@ -14,6 +14,7 @@ export const ChatEntry = memo(
     typingUsers,
     conversationId,
     color,
+    unReadMessagesCount,
   }) => {
     const base_class =
       "w-full flex items-center gap-x-2 p-3 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-150";
@@ -75,6 +76,7 @@ export const ChatEntry = memo(
                   readers={readers}
                   senderId={lastMessage?.sender?.id || lastMessage.senderId}
                   status={lastMessage.status}
+                  unReadMessagesCount={unReadMessagesCount}
                   className={"shrink-0"}
                   supportNotifications={true}
                 />

@@ -71,6 +71,20 @@ const getConversationMessagesGet = async (req, res) => {
         message: "Conversation is not found.",
       });
     }
+    const conversationParticipantRecord =
+      await prisma.conversationParticipant.findUnique({
+        where: {
+          conversationId_userId: {
+            conversationId: parseInt(conversationId),
+            userId: userId,
+          },
+        },
+      });
+    if (!conversationParticipantRecord) {
+      return res.status(400).json({
+        message: "You are not a part in this conversation",
+      });
+    }
     const participantsIds = await prisma.conversationParticipant.findMany({
       where: {
         conversationId: parseInt(conversationId),

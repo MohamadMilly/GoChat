@@ -117,6 +117,7 @@ const preferencesPatch = async (req, res) => {
     });
   }
 };
+
 const myConversationsGet = async (req, res) => {
   const currentUser = req.currentUser;
   try {
@@ -137,7 +138,8 @@ const myConversationsGet = async (req, res) => {
                       userId: {
                         in: (
                           await prisma.$queryRawUnsafe(
-                            `SELECT "banningUserId" FROM "Ban" WHERE "bannedUserId" = ${currentUser.id}`,
+                            `SELECT "banningUserId" FROM "Ban" WHERE "bannedUserId" = $1 `,
+                            currentUser.id,
                           )
                         ).map((banningUserObj) => banningUserObj.banningUserId),
                       },
@@ -163,6 +165,19 @@ const myConversationsGet = async (req, res) => {
             },
           },
         },
+        _count: {
+          select: {
+            messages: {
+              where: {
+                readers: {
+                  none: {
+                    readerId: currentUser.id,
+                  },
+                },
+              },
+            },
+          },
+        },
       },
       orderBy: {
         updatedAt: "desc",
@@ -182,6 +197,7 @@ const myConversationsGet = async (req, res) => {
         ...participant,
         user: filterProfile(participant.user, preferences),
       })),
+      unReadMessagesCount: conversation._count.messages,
     }));
 
     return res.json({ conversations });
@@ -199,7 +215,8 @@ const queryUsersGet = async (req, res) => {
   try {
     let users = await prisma.$transaction(async (tx) => {
       await tx.$executeRawUnsafe(
-        `SET LOCAL app.current_user_id = '${currentUser.id}';`,
+        `SET LOCAL app.current_user_id = $1`,
+        currentUser.id,
       );
       return await tx.user.findMany({
         where: {
@@ -217,7 +234,8 @@ const queryUsersGet = async (req, res) => {
                 userId: {
                   in: (
                     await prisma.$queryRawUnsafe(
-                      `SELECT "banningUserId" FROM "Ban" WHERE "bannedUserId" = ${currentUser.id}`,
+                      `SELECT "banningUserId" FROM "Ban" WHERE "bannedUserId" = $1`,
+                      currentUser.id,
                     )
                   ).map((banningUserObj) => banningUserObj.banningUserId),
                 },
@@ -269,7 +287,8 @@ const getMyContactsGet = async (req, res) => {
               userId: {
                 in: (
                   await prisma.$queryRawUnsafe(
-                    `SELECT "banningUserId" FROM "Ban" WHERE "bannedUserId" = ${currentUser.id}`,
+                    `SELECT "banningUserId" FROM "Ban" WHERE "bannedUserId" = $1`,
+                    currentUser.id,
                   )
                 ).map((banningUserObj) => banningUserObj.banningUserId),
               },
@@ -307,8 +326,10 @@ const getSpecificUserGet = async (req, res) => {
   try {
     let user = await prisma.$transaction(async (tx) => {
       await tx.$executeRawUnsafe(
-        `SET LOCAL app.current_user_id = '${currentUser.id}';`,
+        `SELECT set_config('app.current_user_id', $1, true);`,
+        String(currentUser.id),
       );
+      
       return await tx.user.findUnique({
         where: {
           id: parseInt(userId),
@@ -324,7 +345,8 @@ const getSpecificUserGet = async (req, res) => {
                 userId: {
                   in: (
                     await prisma.$queryRawUnsafe(
-                      `SELECT "banningUserId" FROM "Ban" WHERE "bannedUserId" = ${currentUser.id}`,
+                      `SELECT "banningUserId" FROM "Ban" WHERE "bannedUserId" = $1;`,
+                      currentUser.id,
                     )
                   ).map((banningUserObj) => banningUserObj.banningUserId),
                 },
