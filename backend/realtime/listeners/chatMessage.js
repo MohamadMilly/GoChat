@@ -207,6 +207,7 @@ async function processChatMessage(
             },
           },
           reactions: true,
+          readers: true,
         },
       });
       createdMessage = {
