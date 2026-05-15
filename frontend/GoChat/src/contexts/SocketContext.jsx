@@ -79,6 +79,7 @@ export function SocketProvider({ children }) {
             if (conversation.id == conversationId) {
               return {
                 ...conversation,
+                unReadMessagesCount: conversation.unReadMessagesCount + 1,
                 lastMessage: message,
               };
             }
@@ -427,9 +428,12 @@ export function SocketProvider({ children }) {
                 msg.senderId == userId
                   ? msg.readers
                   : [...(msg.readers || []), { readerId: userId }];
-
+              const isCurrentUserTheReader = userId === user.id;
               return {
                 ...c,
+                unReadMessagesCount: isCurrentUserTheReader
+                  ? 0
+                  : c.unReadMessagesCount,
                 lastMessage: { ...msg, readers: updatedReaders },
               };
             }
