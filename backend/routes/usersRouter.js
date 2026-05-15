@@ -28,12 +28,6 @@ usersRouter.use(verifyToken, async (req, res, next) => {
     return res.status(403).json({
       message: "Invalid or expired token",
     });
-  } finally {
-    if (currentUser) {
-      await prisma.$executeRawUnsafe(
-        `SET LOCAL app.current_user_id = '${currentUser.id}';`,
-      );
-    }
   }
 });
 

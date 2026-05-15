@@ -42,7 +42,7 @@ export function EditMessageDialog() {
             return message;
           }),
         }));
-
+        
         newMessages = updatedPages.flatMap((page) => page.messages);
 
         return {
@@ -58,8 +58,11 @@ export function EditMessageDialog() {
       return {
         ...old,
         conversations: old.conversations.map((c) => {
-          if (c.id == conversationId && c.messages[0].id === editedMessage.id) {
-            return { ...c, messages: [newMessages[newMessages.length - 1]] };
+          if (
+            c.id == conversationId &&
+            c.lastMessage?.id === editedMessage.id
+          ) {
+            return { ...c, lastMessage: newMessages[newMessages.length - 1] };
           } else {
             return c;
           }
@@ -104,11 +107,11 @@ export function EditMessageDialog() {
                 conversations: old.conversations.map((c) => {
                   if (
                     c.id == conversationId &&
-                    c.messages[0].id === editedMessage.id
+                    c.lastMessage?.id === editedMessage.id
                   ) {
                     return {
                       ...c,
-                      messages: [oldMessage],
+                      lastMessage: oldMessage,
                     };
                   } else {
                     return c;

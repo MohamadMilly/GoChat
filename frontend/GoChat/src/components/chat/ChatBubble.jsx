@@ -288,7 +288,8 @@ export const ChatBubble = memo(
 
     /* Because the message comes from tanstack so the reference is not changing */
     const readers = useMemo(
-      () => (message.readers ? message.readers.map((reader) => reader.id) : []),
+      () =>
+        message.readers ? message.readers.map((reader) => reader.readerId) : [],
       [message.readers],
     );
     const sender = message.sender;

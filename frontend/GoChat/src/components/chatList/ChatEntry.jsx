@@ -18,9 +18,11 @@ export const ChatEntry = memo(
   }) => {
     const base_class =
       "w-full flex items-center gap-x-2 p-3 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-150";
-    const readers = lastMessage.readers
-      ? lastMessage.readers.map((reader) => reader.readerId)
-      : [];
+
+    const readers =
+      lastMessage &&
+      lastMessage.readers &&
+      lastMessage.readers.map((r) => r.readerId);
 
     return (
       <li>
@@ -74,7 +76,7 @@ export const ChatEntry = memo(
               {lastMessage && (
                 <ChatBubbleStatus
                   readers={readers}
-                  senderId={lastMessage?.sender?.id || lastMessage.senderId}
+                  senderId={lastMessage.sender.id || lastMessage.senderId}
                   status={lastMessage.status}
                   unReadMessagesCount={unReadMessagesCount}
                   className={"shrink-0"}

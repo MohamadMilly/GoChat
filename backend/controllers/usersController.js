@@ -198,6 +198,8 @@ const myConversationsGet = async (req, res) => {
         user: filterProfile(participant.user, preferences),
       })),
       unReadMessagesCount: conversation._count.messages,
+      lastMessage:
+        conversation.messages.length > 0 ? conversation.messages[0] : null,
     }));
 
     return res.json({ conversations });
@@ -214,10 +216,6 @@ const queryUsersGet = async (req, res) => {
   const queryArr = query.split(" ");
   try {
     let users = await prisma.$transaction(async (tx) => {
-      await tx.$executeRawUnsafe(
-        `SET LOCAL app.current_user_id = $1`,
-        currentUser.id,
-      );
       return await tx.user.findMany({
         where: {
           NOT: { id: currentUser.id },
@@ -329,7 +327,7 @@ const getSpecificUserGet = async (req, res) => {
         `SELECT set_config('app.current_user_id', $1, true);`,
         String(currentUser.id),
       );
-      
+
       return await tx.user.findUnique({
         where: {
           id: parseInt(userId),

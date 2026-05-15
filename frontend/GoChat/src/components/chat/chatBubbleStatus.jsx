@@ -15,7 +15,7 @@ export const ChatBubbleStatus = memo(function ChatBubbleStatus({
   const actualReaders = isMyMessage
     ? readers.filter((id) => id != user.id)
     : readers;
-
+  console.log(readers);
   if (!isMyMessage && !supportNotifications) return;
   return (
     <div>

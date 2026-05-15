@@ -244,8 +244,8 @@ function useDeleteMessage(messageId, conversationId) {
       return {
         ...old,
         conversations: old.conversations.map((c) => {
-          if (c.id == conversationId && c.messages[0].id === messageId) {
-            return { ...c, messages: [newMessages[newMessages.length - 1]] };
+          if (c.id == conversationId && c.lastMessage.id === messageId) {
+            return { ...c, lastMessage: newMessages[newMessages.length - 1] };
           } else {
             return c;
           }
@@ -314,7 +314,7 @@ export function ChatBubbleMenu({
     deleteMessage();
     setMessage(null);
   };
-  
+
   return (
     <div
       ref={menuRef}

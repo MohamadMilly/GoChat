@@ -14,6 +14,7 @@ export function Chats({ chatsEntries }) {
         {chatsEntries.map((chatEntry) => {
           const { chatAvatar, lastMessage, chatTitle, isGroup, color } =
             getChatInfo(chatEntry, user.id);
+
           const thisChatConnectedUsers = getConnectedUsers(
             chatEntry.participants,
             connectedUsers,
@@ -28,7 +29,7 @@ export function Chats({ chatsEntries }) {
           );
           return (
             <ChatEntry
-              key={`${chatEntry.id}-${lastMessage.id || lastMessage.createdAt}`}
+              key={chatEntry.id}
               lastMessage={lastMessage}
               unReadMessagesCount={chatEntry.unReadMessagesCount}
               chatTitle={chatTitle}

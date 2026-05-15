@@ -13,7 +13,8 @@ export function getChatInfo(conversation, currentUserId) {
   const chatAvatar = isGroup
     ? conversation.avatar
     : chatPartner?.profile?.avatar || "";
-  const lastMessage = messages[messages.length - 1] || "";
+  const lastMessage = conversation.lastMessage;
+  console.log(lastMessage);
   const color = chatPartner?.accountColor || null;
   return {
     chatTitle,

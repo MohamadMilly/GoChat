@@ -79,7 +79,7 @@ export function SocketProvider({ children }) {
             if (conversation.id == conversationId) {
               return {
                 ...conversation,
-                messages: [message],
+                lastMessage: message,
               };
             }
             return conversation;
@@ -203,13 +203,13 @@ export function SocketProvider({ children }) {
       );
 
       queryClient.setQueryData(["conversations"], (old) => {
-        if (!old.conversations) return old;
+        if (!old?.conversations) return old;
 
         return {
           ...old,
           conversations: old.conversations.map((c) => {
-            if (c.id == conversationId && c.messages[0]?.id === messageId) {
-              return { ...c, messages: [newMessages[newMessages.length - 1]] };
+            if (c.id == conversationId && c.lastMessage?.id === messageId) {
+              return { ...c, lastMessage: newMessages[newMessages.length - 1] };
             } else {
               return c;
             }
@@ -252,9 +252,9 @@ export function SocketProvider({ children }) {
           conversations: old.conversations.map((c) => {
             if (
               c.id == conversationId &&
-              c.messages[0].id === editedMessage.id
+              c.lastMessage.id === editedMessage.id
             ) {
-              return { ...c, messages: [newMessages[newMessages.length - 1]] };
+              return { ...c, lastMessage: newMessages[newMessages.length - 1] };
             } else {
               return c;
             }
@@ -402,7 +402,7 @@ export function SocketProvider({ children }) {
                 if (message.id == messageId && userId !== user.id) {
                   return {
                     ...message,
-                    readers: [...previousReaders, { id: userId }],
+                    readers: [...previousReaders, { readerId: userId }],
                   };
                 } else {
                   return message;
@@ -412,33 +412,28 @@ export function SocketProvider({ children }) {
           };
         },
       );
-      
+
       queryClient.setQueryData(["conversations"], (old) => {
         if (!old?.conversations) return old;
+
         return {
           ...old,
           conversations: old.conversations.map((c) => {
             if (c.id == conversationId) {
-              const readMessage = c.messages.find((m) => m.id == messageId);
-              if (!readMessage) {
-                return c;
-              } else {
-                return {
-                  ...c,
-                  messages: [
-                    {
-                      ...readMessage,
-                      readers:
-                        userId == user.id && readMessage.senderId == user.id
-                          ? readMessage.readers
-                          : [...(readMessage.readers || []), { id: userId }],
-                    },
-                  ],
-                };
-              }
-            } else {
-              return c;
+              const msg = c.lastMessage;
+              if (msg.id != messageId) return c;
+
+              const updatedReaders =
+                msg.senderId == userId
+                  ? msg.readers
+                  : [...(msg.readers || []), { readerId: userId }];
+
+              return {
+                ...c,
+                lastMessage: { ...msg, readers: updatedReaders },
+              };
             }
+            return c;
           }),
         };
       });
@@ -471,7 +466,7 @@ export function SocketProvider({ children }) {
         };
       });
     }
-  
+
     function onUserRemovesReaction(conversationId, messageId, reactionId) {
       const queryKey = ["conversation", "messages", conversationId.toString()];
       queryClient.setQueryData(queryKey, (old) => {
