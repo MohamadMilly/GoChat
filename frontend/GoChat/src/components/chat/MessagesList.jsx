@@ -198,7 +198,7 @@ export const MessagesListContent = forwardRef((props, ref) => {
         messagesListRef.current.scrollTop += diff;
       }
       prevScrollRef.current = messagesListRef.current.scrollHeight;
-    }
+    } 
   }, [messages.length, messagesListRef]);
   if (isFetchingInitialData) return <MessagesListLoading />;
   if (messagesError) {

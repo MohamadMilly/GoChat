@@ -9,9 +9,35 @@ const prisma = require("../lib/prisma");
 const filterProfile = require("../utils/filterProfile");
 const hideUser = require("../utils/hideUser");
 
+/* 
+  TODO :
+  First i should get the last read message id => then apply the same logic,
+  
+*/
+
 const getConversationUnReadMessages = async (conversationId, userId) => {
+  const messageOnReader = await prisma.messageOnReader.findFirst({
+    where: {
+      readerId: userId,
+      message: {
+        conversationId: Number(conversationId),
+      },
+    },
+    orderBy: {
+      seenAt: "desc",
+    },
+    include: {
+      message: true,
+    },
+  });
+  
   const unReadMessages = await prisma.message.findMany({
     where: {
+      ...(messageOnReader?.messageId && {
+        id: {
+          gt: messageOnReader.messageId,
+        },
+      }),
       conversationId: Number(conversationId),
       readers: {
         none: {
@@ -22,7 +48,7 @@ const getConversationUnReadMessages = async (conversationId, userId) => {
   });
   return { count: unReadMessages.length, messages: unReadMessages };
 };
-
+ 
 const getSpecificConversationGet = async (req, res) => {
   const { conversationId } = req.params;
   const { userId: userIdString } = req.query;

@@ -29,7 +29,7 @@ export const ChatBubbleStatus = memo(function ChatBubbleStatus({
             <Check size={12} />
           )
         ) : unReadMessagesCount > 0 && supportNotifications ? (
-          <span className=" h-4 w-4 flex justify-center items-center  rounded-full bg-cyan-500 text-white">
+          <span className=" h-4 min-w-4 flex justify-center items-center  rounded-full bg-cyan-500 text-white">
             {unReadMessagesCount}
           </span>
         ) : null}

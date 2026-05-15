@@ -1,4 +1,5 @@
 const prisma = require("../../lib/prisma");
+const filterProfile = require("../../utils/filterProfile");
 
 async function recover(socket, io, offsets) {
   const userId = socket.handshake.auth.userId;
