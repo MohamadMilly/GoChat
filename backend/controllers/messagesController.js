@@ -154,28 +154,17 @@ const getConversationMessagesGet = async (req, res) => {
             },
           },
         },
-        readers: {
-          include: {
-            reader: {
-              select: {
-                id: true,
-              },
-            },
-          },
-        },
+        readers: true,
         reactions: true,
       },
       orderBy: {
         createdAt: "desc",
       },
     });
-    
+
     const filteredMessages = messages.map((message) => {
       return {
         ...message,
-        readers: message.readers.map((readerOnMessage) =>
-          filterProfile(readerOnMessage.reader, participantsPreferences),
-        ),
         sender:
           permissions?.hideUsersForVisitors && !isCurrentUserParticipant
             ? hideUser(message.sender)
