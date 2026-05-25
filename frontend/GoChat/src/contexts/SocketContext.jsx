@@ -3,6 +3,7 @@ import { socket } from "../socket";
 import { useAuth } from "./AuthContext";
 import { useQueryClient } from "@tanstack/react-query";
 import { useMemo } from "react";
+import { updateMessagesOffset } from "../utils/updateMessagesOffset";
 
 const SocketContext = createContext(null);
 
@@ -12,7 +13,7 @@ export function SocketProvider({ children }) {
   const [typingUsers, setTypingUsers] = useState([]);
   const { token, user } = useAuth();
   const queryClient = useQueryClient();
-  
+
   useEffect(() => {
     if (!token || !user) return;
     socket.connect();
@@ -21,10 +22,6 @@ export function SocketProvider({ children }) {
 
   useEffect(() => {
     function onConnect() {
-      if (!socket.recovered) {
-        const offsets = socket.auth.serverOffset;
-        socket.emit("recover", offsets);
-      }
       setIsConnected(true);
     }
 
@@ -175,10 +172,7 @@ export function SocketProvider({ children }) {
       chatBubbleAudio.play().catch((error) => {
         console.error("Error playing audio: ", error);
       });
-      socket.auth.serverOffset = {
-        ...socket.auth.serverOffset,
-        [conversationId]: serverOffset,
-      };
+      updateMessagesOffset(conversationId, serverOffset);
     }
     function onDeleteMessage(messageId, conversationId) {
       let newMessages;
@@ -340,21 +334,15 @@ export function SocketProvider({ children }) {
       });
     }
 
-    function onEditConversation(withJoin, conversationId) {
+    function onEditConversation(conversationId) {
       queryClient.invalidateQueries({
-        queryKey: ["conversation", conversationId.toString()],
+        queryKey: ["conversation", String(conversationId)],
         exact: true,
       });
-      if (withJoin) {
-        queryClient.invalidateQueries({
-          queryKey: ["conversations"],
-          exact: true,
-        });
-      }
     }
     function onJoinConversation(conversationId, fullname) {
       queryClient.invalidateQueries({
-        queryKey: ["conversation", conversationId],
+        queryKey: ["conversation", String(conversationId)],
         exact: true,
       });
     }
@@ -510,7 +498,7 @@ export function SocketProvider({ children }) {
     socket.on("edit permissions", onEditPermissions);
     socket.on("edit conversation", onEditConversation);
     socket.on("create conversation", onCreateConversation);
-    socket.on("join conversation", onJoinConversation);
+    socket.on("join conversation broadcast", onJoinConversation);
     socket.on("leave conversation", onLeaveConversation);
     socket.on("reaction", onUserReact);
     socket.on("remove reaction", onUserRemovesReaction);

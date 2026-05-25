@@ -1,5 +1,5 @@
-const prisma = require("../../lib/prisma");
-const { handleDisconnection } = require("../../utils/connectionUtils");
+const prisma = require("../../../lib/prisma");
+const { handleDisconnection } = require("../../../utils/connectionUtils");
 
 async function disconnect(socket, io) {
   const userId = socket.handshake.auth.userId;

@@ -12,6 +12,7 @@ import { TextArea } from "../components/ui/TextArea";
 import { supabase } from "../utils/supabase";
 import translations from "../translations";
 import { useLanguage } from "../contexts/LanguageContext";
+import { useAuth } from "../contexts/AuthContext";
 
 export function NewGroupPage() {
   const navigate = useNavigate();
@@ -20,6 +21,7 @@ export function NewGroupPage() {
   const { users, isFetching, error } = useMyContacts();
   const [selectedMembers, setSelectedMembers] = useState([]);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const { user } = useAuth();
   const [groupMetaData, setGroupMetaData] = useState({
     title: "",
     avatar: "",
@@ -49,7 +51,7 @@ export function NewGroupPage() {
   };
   const handleCreateGroup = () => {
     createGroup({
-      participants: selectedMembers,
+      participants: [user, ...selectedMembers],
       ...groupMetaData,
     });
   };

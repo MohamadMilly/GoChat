@@ -105,6 +105,7 @@ function InitialMessageButton({ content, conversationId }) {
 export const MessagesListContent = forwardRef((props, ref) => {
   const queryClient = useQueryClient();
   const messagesListRef = ref;
+  const messagesListContentRef = useRef(null);
   const navigate = useNavigate();
   const { setMessage, setClickCoords } = useContext(ChatBubbleContainerContext);
   const { setRepliedMessage } = useContext(ChatPageContext);
@@ -131,7 +132,7 @@ export const MessagesListContent = forwardRef((props, ref) => {
   }, [isFetchingInitialData, messagesListRef]);
   useEffect(() => {
     function onUserJoin(conversationId, fullname) {
-      const messageList = messagesListRef.current;
+      const messageList = messagesListContentRef.current;
       if (!messageList) return;
       const newMemberNotification = document.createElement("span");
       newMemberNotification.textContent = `${fullname} joined the conversation`;
@@ -140,15 +141,15 @@ export const MessagesListContent = forwardRef((props, ref) => {
       messageList.appendChild(newMemberNotification);
       /* update conversation data is in socketContext*/
     }
-    socket.on("join conversation", onUserJoin);
-
+    socket.on("join conversation broadcast", onUserJoin);
+    
     return () => {
-      socket.off("join conversation", onUserJoin);
+      socket.off("join conversation broadcast", onUserJoin);
     };
   }, [queryClient, messagesListRef]);
   useEffect(() => {
     function onUserLeave(withDelete, fullname, userId, conversationId) {
-      const messageList = messagesListRef.current;
+      const messageList = messagesListContentRef.current;
       if (withDelete) {
         // Navigate to main menu if 'leave' event involves deletion.
         navigate("/chats");
@@ -198,7 +199,7 @@ export const MessagesListContent = forwardRef((props, ref) => {
         messagesListRef.current.scrollTop += diff;
       }
       prevScrollRef.current = messagesListRef.current.scrollHeight;
-    } 
+    }
   }, [messages.length, messagesListRef]);
   if (isFetchingInitialData) return <MessagesListLoading />;
   if (messagesError) {
@@ -207,9 +208,7 @@ export const MessagesListContent = forwardRef((props, ref) => {
 
   return (
     <ul
-      style={{
-        overflowAnchor: "auto",
-      }}
+      ref={messagesListContentRef}
       dir="ltr"
       className="flex-1 px-1 sm:px-3 pt-1 pb-6"
     >
@@ -264,7 +263,7 @@ export const MessagesListContent = forwardRef((props, ref) => {
               )}
 
               <ChatBubble
-                key={message.id}
+                key={message.id || message.createdAt}
                 message={message}
                 isGroupMessage={type === "GROUP"}
                 hideAvatar={isThereNextMessageFromTheSameUser}

@@ -6,427 +6,152 @@ require("dotenv").config();
 const SECRET_KEY = process.env.SECRET_KEY;
 
 const prisma = require("../lib/prisma");
-const filterProfile = require("../utils/filterProfile");
-const hideUser = require("../utils/hideUser");
 
-/* 
-  TODO :
-  First i should get the last read message id => then apply the same logic,
-  
-*/
+const conversationService = require("../services/conversation/conversationService");
+const giveParticipantsWithRoles = require("../services/conversation/utils/giveParticipantsWithRoles");
+const filterConversationByPermissions = require("../services/conversation/utils/filterConversationByPermissions");
+const messageService = require("../services/message/messageService");
 
-const getConversationUnReadMessages = async (conversationId, userId) => {
-  const messageOnReader = await prisma.messageOnReader.findFirst({
-    where: {
-      readerId: userId,
-      message: {
-        conversationId: Number(conversationId),
-      },
-    },
-    orderBy: {
-      seenAt: "desc",
-    },
-    include: {
-      message: true,
-    },
-  });
-  
-  const unReadMessages = await prisma.message.findMany({
-    where: {
-      ...(messageOnReader?.messageId && {
-        id: {
-          gt: messageOnReader.messageId,
-        },
-      }),
-      conversationId: Number(conversationId),
-      readers: {
-        none: {
-          readerId: userId,
-        },
-      },
-    },
-  });
-  return { count: unReadMessages.length, messages: unReadMessages };
-};
- 
-const getSpecificConversationGet = async (req, res) => {
-  const { conversationId } = req.params;
-  const { userId: userIdString } = req.query;
-  const userId = parseInt(userIdString);
+const getSpecificConversationGet = async (req, res, next) => {
+  const { conversationId: conversationIdString } = req.params;
+  const userId = req.currentUser.id;
+  const conversationId = Number(conversationIdString);
+
   try {
-    let conversation;
-    conversation = await prisma.conversation.findUnique({
-      where: {
-        id: parseInt(conversationId),
-      },
-    });
-    if (!conversation) {
-      return res.status(404).json({
-        message: "Conversation not found.",
-      });
-    }
-
-    /* ---- UnReadMessages ----  */
-    const unReadMessagesData = await getConversationUnReadMessages(
+    let conversation = await conversationService.getConversation(
       conversationId,
-      userId,
-    );
-
-    const participantsIds = await prisma.conversationParticipant.findMany({
-      where: {
-        conversationId: parseInt(conversationId),
-      },
-      select: {
-        userId: true,
-      },
-    });
-    const blockedUsers = await prisma.ban.findMany({
-      where: {
-        banningUserId: parseInt(userId),
-      },
-    });
-    const blockingnUsers = await prisma.ban.findMany({
-      where: {
-        bannedUserId: parseInt(userId),
-      },
-    });
-    const isCurrentUserParticipant = userId
-      ? participantsIds.some((idData) => idData.userId === userId)
-      : false;
-    const participantsPreferences = await prisma.preferences.findMany({
-      where: {
-        userId: {
-          in: participantsIds.map((p) => p.userId),
-        },
-      },
-    });
-    const permissions = await prisma.permissions.findUnique({
-      where: {
-        conversationId: parseInt(conversationId),
-      },
-    });
-    let currentUserAdminData;
-    if (userId) {
-      currentUserAdminData = await prisma.conversationAdmin.findUnique({
-        where: {
-          conversationId_userId: {
-            conversationId: parseInt(conversationId),
-            userId: userId,
-          },
-        },
-      });
-    }
-
-    conversation = await prisma.conversation.findUnique({
-      where: {
-        id: parseInt(conversationId),
-      },
-      include: {
-        participants:
-          permissions?.viewMembers || !!currentUserAdminData
-            ? {
-                include: {
-                  user: {
-                    select: {
-                      id: true,
-                      profile: {
-                        where: {
-                          NOT: {
-                            userId: {
-                              in: (
-                                await prisma.$queryRawUnsafe(
-                                  `SELECT "banningUserId" FROM "Ban" WHERE "bannedUserId" = ${userId}`,
-                                )
-                              ).map(
-                                (banningUserObj) =>
-                                  banningUserObj.banningUserId,
-                              ),
-                            },
-                          },
-                        },
-                      },
-                      firstname: true,
-                      lastname: true,
-                      username: true,
-                      accountColor: true,
-                    },
-                  },
-                },
-              }
-            : false,
-        admins: true,
-      },
-    });
-
-    if (!conversation) {
-      return res.status(404).json({
-        message: "Conversation is not found.",
-      });
-    }
-    const conversationParticipantRecord =
-      await prisma.conversationParticipant.findUnique({
-        where: {
-          conversationId_userId: {
-            conversationId: parseInt(conversationId),
-            userId: userId,
-          },
-        },
-      });
-    if (!conversationParticipantRecord) {
-      return res.status(400).json({
-        message: "You are not a part in this conversation",
-      });
-    }
-    const isCurrentUserAdmin = conversation.admins.some(
-      (admin) => admin.userId === userId,
-    );
-    const isCurrentUserOwner = conversation.admins.some(
-      (admin) => admin.userId === userId && admin.isOwner,
-    );
-
-    const membersCount = await prisma.conversationParticipant.count({
-      where: {
-        conversationId: parseInt(conversationId),
-      },
-    });
-    if (permissions?.viewMembers || !!currentUserAdminData) {
-      conversation = {
-        ...conversation,
-        participants: conversation.participants.map((participant) => ({
-          ...participant,
-          isAdmin: conversation.admins.some(
-            (admin) => admin.userId === participant.userId,
-          ),
-          isOwner: conversation.admins.some(
-            (admin) => admin.userId === participant.userId && admin.isOwner,
-          ),
-          user:
-            permissions?.hideUsersForVisitors && !isCurrentUserParticipant
-              ? hideUser(participant.user)
-              : filterProfile(participant.user, participantsPreferences),
-        })),
-      };
-    } else {
-      conversation = {
-        ...conversation,
-        participants: [],
-      };
-    }
-    return res.json({
-      conversation: conversation,
-      membersCount,
-      isJoined: isCurrentUserParticipant,
-      isAdmin: isCurrentUserAdmin,
-      isOwner: isCurrentUserOwner,
-      partnerId:
-        conversation.type === "DIRECT"
-          ? conversation.participants.find((p) => p.userId !== userId)?.userId
-          : null,
-      unReadMessagesData: unReadMessagesData,
-    });
-  } catch (err) {
-    console.error(err);
-    return res.json({
-      message: "Unexpected error happened while getting the conversation",
-    });
-  }
-};
-
-const createNewConversationPost = async (req, res) => {
-  const currentUser = req.currentUser;
-  const { participants, type, title, avatar, description } = req.body;
-  const participantsWithMe = [currentUser, ...participants];
-  const membersCount = participantsWithMe.length;
-  const isOnetoOneChat = membersCount === 2 && type === "DIRECT";
-  try {
-    if (isOnetoOneChat) {
-      const [userAId, userBId] = participantsWithMe.map((p) => p.id);
-
-      const oneToOneChat = await prisma.conversation.findFirst({
-        where: {
-          AND: [
-            {
-              participants: {
-                some: {
-                  userId: userAId,
-                },
-              },
-            },
-            {
-              participants: {
-                some: {
-                  userId: userBId,
-                },
-              },
-            },
-            {
-              participants: {
-                every: {
-                  userId: {
-                    in: [userAId, userBId],
-                  },
-                },
-              },
-            },
-          ],
-          type: "DIRECT",
-        },
+      {
         include: {
           participants: {
             include: {
               user: {
-                include: {
+                select: {
+                  id: true,
+                  firstname: true,
+                  lastname: true,
+                  username: true,
+                  accountColor: true,
+                  preferences: true,
                   profile: true,
+                  bannedUsers: {
+                    where: {
+                      bannedUserId: userId,
+                    },
+                  },
                 },
               },
             },
           },
-          messages: true,
+          admins: true,
+          permissions: true,
         },
-      });
-      if (oneToOneChat) {
-        const participantsPreferences = await prisma.preferences.findMany({
-          where: {
-            userId: {
-              in: oneToOneChat.participants.map((p) => p.userId),
-            },
-          },
-        });
-        const filteredParticipants = oneToOneChat.participants.map(
-          (participant) => ({
-            ...participant,
-            user: filterProfile(participant.user, participantsPreferences),
-          }),
-        );
+      },
+    );
+    /* NOTE : These variables are raw without any filtering */
+    const participants = conversation.participants;
+    const admins = conversation.admins;
+    const permissions = conversation.permissions;
 
-        return res.json({
-          conversation: {
-            ...oneToOneChat,
-            participants: filteredParticipants,
-          },
-        });
-      }
-    }
-    if (type === "GROUP" && !title) {
-      return res.status(400).json({
-        message: "Group should have a title.",
-      });
-    }
-    let createdConversation = await prisma.conversation.create({
-      data: {
-        avatar: avatar || undefined,
-        title: title || undefined,
-        description: description || undefined,
-        type: type,
-        participants: {
-          create: participantsWithMe.map((p) => ({
-            user: {
-              connect: {
-                id: p.id,
-              },
-            },
-          })),
-        },
-        admins: {
-          create: {
-            isOwner: true,
-            user: {
-              connect: {
-                id: currentUser.id,
-              },
-            },
-          },
-        },
-        permissions: {
-          create: {},
-        },
-      },
-      include: {
-        participants: {
-          include: {
-            user: {
-              include: {
-                profile: true,
-              },
-            },
-          },
-        },
-        messages: true,
-      },
-    });
-    const participantsPreferences = await prisma.preferences.findMany({
-      where: {
-        userId: {
-          in: createdConversation.participants.map((p) => p.userId),
-        },
-      },
-    });
-
-    const filteredParticipants = createdConversation.participants.map(
-      (participant) => ({
-        ...participant,
-        user: filterProfile(participant.user, participantsPreferences),
-      }),
+    const isCurrentUserParticipant = participants.some(
+      (p) => p.userId === userId,
     );
 
+    let currentUserAdminData;
+    if (userId) {
+      currentUserAdminData = admins.find((admin) => admin.userId === userId);
+    }
+    const isCurrentUserOwner = currentUserAdminData
+      ? currentUserAdminData.isOwner
+      : false;
+
+    const membersCount = participants.length;
+    conversation = filterConversationByPermissions(
+      conversation,
+      participants,
+      permissions,
+      currentUserAdminData,
+      isCurrentUserParticipant,
+      "DIRECT",
+    );
+
+    conversation = {
+      ...conversation,
+      participants: giveParticipantsWithRoles(
+        conversation.participants,
+        admins,
+      ),
+    };
+
+    /* ---- UnReadMessages ----  */
+    const unReadMessagesData = await messageService.getUnReadMessages(
+      conversationId,
+      userId,
+    );
     return res.json({
-      conversation: {
-        ...createdConversation,
-        participants: filteredParticipants,
-      },
+      conversation: conversation,
+      membersCount,
+      isJoined: isCurrentUserParticipant,
+      isAdmin: !!currentUserAdminData,
+      isOwner: isCurrentUserOwner,
+      ...(conversation.type === "DIRECT" && participants.length > 0
+        ? { partnerId: participants.find((p) => p.userId !== userId)?.userId }
+        : {}),
+      unReadMessagesData: unReadMessagesData,
+      type: conversation.type,
     });
   } catch (err) {
-    return res.status(500).json({
-      message: "Unexpected error happened while creating the conversation.",
-    });
+    console.error(err);
+    next(err);
   }
 };
 
-const queryGroupsGet = async (req, res) => {
-  const { title } = req.query;
+/* Note : edit the frontend to append the current user (creator) in the participants */
 
+const createNewConversationPost = async (req, res, next) => {
+  const currentUser = req.currentUser;
+  const { participants, type, title, avatar, description } = req.body;
+  const membersCount = participants.length;
   try {
-    const conversations = await prisma.conversation.findMany({
-      where: {
-        AND: [
-          {
-            title: {
-              contains: title,
-            },
-          },
-          { type: "GROUP" },
-        ],
-      },
+    const conversation = await conversationService.createConversation(
+      participants,
+      type,
+      title,
+      avatar,
+      description,
+      currentUser.id,
+    );
+    return res.json({
+      conversation,
+      membersCount,
     });
+  } catch (err) {
+    next(err);
+  }
+};
+
+const queryGroupsGet = async (req, res, next) => {
+  const { title } = req.query;
+  try {
+    const conversations = await conversationService.queryConversations(title);
+
     return res.json({
       conversations: conversations,
     });
   } catch (err) {
-    return res.status(500).json({
-      message: "Unexpected error happened while getting the conversations",
-    });
+    if (!err.statusCode) {
+      err.statusCode = 500;
+    }
+    next(err);
   }
 };
 
-const joinConversationPost = async (req, res) => {
+const joinConversationPost = async (req, res, next) => {
   const currentUser = req.currentUser;
   const conversationId = req.params.conversationId;
   try {
-    const conversationParticipant = await prisma.conversationParticipant.create(
-      {
-        data: {
-          user: {
-            connect: {
-              id: currentUser.id,
-            },
-          },
-          conversation: {
-            connect: {
-              id: parseInt(conversationId),
-            },
-          },
-        },
-      },
+    const conversationParticipant = await conversationService.joinConversation(
+      currentUser.id,
+      Number(conversationId),
     );
     if (conversationParticipant) {
       return res.json({
@@ -434,9 +159,7 @@ const joinConversationPost = async (req, res) => {
       });
     }
   } catch (err) {
-    return res.status(500).json({
-      message: "Unexpected error happened while joining this conversation.",
-    });
+    next(err);
   }
 };
 
@@ -444,11 +167,13 @@ const joinConversationPost = async (req, res) => {
 No one can remove the owner , so if the owner does not exists in the new participants , reject 
 */
 
-const editGroupPut = async (req, res) => {
+const editGroupPut = async (req, res, next) => {
   const currentUser = req.currentUser;
-  const { conversationId } = req.params;
+  const { conversationId: conversationIdString } = req.params;
+  const conversationId = Number(conversationIdString);
   const { title, description, participants, avatar } = req.body;
   try {
+    /*
     const groupAdmins = await prisma.conversationAdmin.findMany({
       where: {
         conversationId: parseInt(conversationId),
@@ -460,7 +185,7 @@ const editGroupPut = async (req, res) => {
     const currentUserAdminObj = groupAdmins.find(
       (admin) => admin.userId === currentUser.id,
     );
-
+    
     if (!currentUserAdminObj) {
       return res.status(401).json({
         message: "editing the group is only permissible by admins ",
@@ -540,58 +265,40 @@ const editGroupPut = async (req, res) => {
       include: {
         participants: true,
       },
-    });
+    }); */
+    const updatedGroup = await conversationService.editConversationMetaData(
+      conversationId,
+      { title, description, participants, avatar },
+      currentUser.id,
+    );
     return res.json({
       conversation: updatedGroup,
     });
   } catch (err) {
-    return res.status(500).json({
-      message: "Unexpected error happened while editing the group",
-      error: err.message,
-    });
+    next(err);
   }
 };
 
-const conversationPermissionsGet = async (req, res) => {
+const conversationPermissionsGet = async (req, res, next) => {
   const { conversationId } = req.params;
   try {
-    const group = await prisma.conversation.findUnique({
-      where: {
-        id: parseInt(conversationId),
-      },
-      include: {
-        admins: true,
-      },
-    });
-    if (!group) {
+    const permissions = await conversationService.getConversationPermissions(
+      Number(conversationId),
+    );
+    if (!permissions) {
       return res.status(404).json({
-        message: "There is no conversation has this id.",
+        message: "No Permissions for this group yet.",
       });
     }
-    const groupPermissions = await prisma.permissions.findUnique({
-      where: {
-        conversationId: parseInt(conversationId),
-      },
-    });
-    if (groupPermissions) {
-      return res.json({
-        permissions: groupPermissions,
-        admins: group.admins,
-      });
-    }
-    return res.status(404).json({
-      message: "No Permissions for this group yet.",
+    res.json({
+      permissions: permissions,
     });
   } catch (err) {
-    return res.status(500).json({
-      message:
-        "Unexpected error happened while getting this conversation permissions.",
-      error: err.message,
-    });
+    next(err);
   }
 };
 
-const conversationPermissionsPut = async (req, res) => {
+const conversationPermissionsPut = async (req, res, next) => {
   const currentUser = req.currentUser;
   const { conversationId } = req.params;
   const {
@@ -603,49 +310,27 @@ const conversationPermissionsPut = async (req, res) => {
     viewMembers,
   } = req.body;
   try {
-    const group = await prisma.conversation.findUnique({
-      where: {
-        id: parseInt(conversationId),
-      },
-      include: {
-        admins: true,
-      },
-    });
-    if (!group) {
-      return res.status(404).json({
-        message: "Conversation is not found.",
-      });
-    }
-    const isTheCurrentUserAnAdmin = group.admins.some(
-      (admin) => admin.userId === currentUser.id,
-    );
-    if (!isTheCurrentUserAnAdmin) {
-      return res.status(401).json({
-        message: "Admins are only allowed to change permissions.",
-      });
-    }
-    const updatedPermissions = await prisma.permissions.update({
-      where: {
-        conversationId: parseInt(conversationId),
-      },
-      data: {
-        sendingMessages,
-        sendingMedia,
-        onlineMembers,
-        hideUsersForVisitors,
-        messageReaders,
-        viewMembers,
-      },
-    });
+    const updatedPermissions =
+      await conversationService.editConversationPermissions(
+        Number(conversationId),
+        currentUser.id,
+        {
+          sendingMessages,
+          sendingMedia,
+          onlineMembers,
+          hideUsersForVisitors,
+          messageReaders,
+          viewMembers,
+        },
+      );
     return res.json({
       permissions: updatedPermissions,
     });
   } catch (err) {
-    return res.status(500).json({
-      message: "Unexpected error happened while updating this conversation.",
-    });
+    next(err);
   }
 };
+
 /* 
  TODO : 
  if the conversation is direct => delete it from both partners 
@@ -654,129 +339,112 @@ const conversationPermissionsPut = async (req, res) => {
  if the user is just a member just leave (delete conversationParticipant record)
  */
 
-async function deleteConversation(conversationId) {
-  const deleteMessagesReadersPromise = prisma.messageOnReader.deleteMany({
-    where: {
-      message: {
-        conversationId: conversationId,
-      },
-    },
-  });
-  const deleteMessagesReactionsPromise = prisma.reaction.deleteMany({
-    where: {
-      conversationId: conversationId,
-    },
-  });
-  const deleteMessagesPromise = prisma.message.deleteMany({
-    where: {
-      conversationId: conversationId,
-    },
-  });
-  const deletePartnersPromise = prisma.conversationParticipant.deleteMany({
-    where: {
-      conversationId: conversationId,
-    },
-  });
-  const deleteAdminsPromise = prisma.conversationAdmin.deleteMany({
-    where: {
-      conversationId: conversationId,
-    },
-  });
-  const deletePermissionsPromise = prisma.permissions.delete({
-    where: {
-      conversationId: conversationId,
-    },
-  });
-  const deleteConversationPromise = prisma.conversation.delete({
-    where: {
-      id: conversationId,
-    },
-  });
-  /* Delete all previous in order by transaction */
-  await prisma.$transaction([
-    deleteMessagesReadersPromise,
-    deleteMessagesReactionsPromise,
-    deleteMessagesPromise,
-    deletePartnersPromise,
-    deleteAdminsPromise,
-    deletePermissionsPromise,
-    deleteConversationPromise,
-  ]);
-}
-
-const leaveOrDeleteConversationDelete = async (req, res) => {
+const leaveOrDeleteConversationDelete = async (req, res, next) => {
   const currentUser = req.currentUser;
   const conversationId = Number(req.params.conversationId);
   try {
-    const conversationData = await prisma.conversation.findUnique({
+    const action = await conversationService.leaveOrDeleteConversation(
+      currentUser.id,
+      conversationId,
+    );
+    return res.json({
+      message:
+        action === "leave"
+          ? "Left conversation successfully."
+          : "Deleted conversation successfully.",
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+const addParticipantPost = async (req, res, next) => {
+  const currentUser = req.currentUser;
+  const { conversationId: conversationIdString } = req.params;
+  const numericConversationId = Number(conversationIdString);
+  const { userId } = req.body;
+  try {
+    const createdParticipant = await conversationService.addParticipant(
+      numericConversationId,
+      userId,
+    );
+    return res.json({
+      participant: createdParticipant,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+const removeParticipantDelete = async (req, res, next) => {
+  const currentUser = req.currentUser;
+  const {
+    conversationId: conversationIdString,
+    participantId: participantIdString,
+  } = req.params;
+  const numericConversationId = Number(conversationIdString);
+  const participantId = Number(participantIdString);
+
+  try {
+    const currentUserAdminRecord = await prisma.conversationAdmin.findUnique({
       where: {
-        id: conversationId,
+        conversationId_userId: {
+          conversationId: numericConversationId,
+          userId: currentUser.id,
+        },
       },
     });
-    if (!conversationData)
-      return res.status(404).json({
-        message: "Conversation is not found.",
+    if (!currentUserAdminRecord) {
+      res.status(401).json({
+        message: "Admins can only update conversation participants.",
       });
-    switch (conversationData.type) {
-      case "DIRECT":
-        await deleteConversation(conversationId);
-        return res.json({
-          message: "Conversation is deleted sucessfully.",
-        });
-      case "GROUP":
-        const userRoleRecord = await prisma.conversationAdmin.findUnique({
-          where: {
-            conversationId_userId: {
-              conversationId: conversationId,
-              userId: currentUser.id,
-            },
-          },
-        });
-        if (!userRoleRecord) {
-          await prisma.conversationParticipant.delete({
-            where: {
-              conversationId_userId: {
-                conversationId: conversationId,
-                userId: currentUser.id,
-              },
-            },
-          });
-          return res.json({
-            message: "Left the conversation successfully.",
-          });
-        } else if (userRoleRecord.isOwner) {
-          await deleteConversation(conversationId);
-          return res.json({
-            message: "Conversation is deleted successfully.",
-          });
-        } else {
-          await prisma.conversationAdmin.delete({
-            where: {
-              conversationId_userId: {
-                conversationId: conversationId,
-                userId: currentUser.id,
-              },
-            },
-          });
-          await prisma.conversationParticipant.delete({
-            where: {
-              conversationId_userId: {
-                conversationId: conversationId,
-                userId: currentUser.id,
-              },
-            },
-          });
-          return res.json({
-            message: "Left the conversation successfully.",
-          });
-        }
     }
+
+    const result = await conversationService.removeParticipant(
+      numericConversationId,
+      participantId,
+    );
+
+    res.json(result);
   } catch (err) {
-    return res.status(500).json({
-      message:
-        "Unexpected error happened while deleting or leaving this conversation.",
-      error: err.stack,
+    next(err);
+  }
+};
+
+const addAdminPost = async (req, res, next) => {
+  const currentUser = req.currentUser;
+  const { conversationId: conversationIdString } = req.params;
+  const numericConversationId = Number(conversationIdString);
+  const { participantId } = req.body;
+  try {
+    const createdAdmin = await conversationService.addAdmin(
+      numericConversationId,
+      Number(participantId),
+      currentUser.id,
+    );
+    return res.json({
+      admin: createdAdmin,
     });
+  } catch (err) {
+    next(err);
+  }
+};
+
+const removeAdminDelete = async (req, res, next) => {
+  const currentUser = req.currentUser;
+  const { conversationId: conversationIdString, userId: userIdString } =
+    req.params;
+  const numericConversationId = Number(conversationIdString);
+  const userId = Number(userIdString);
+  try {
+    const result = await conversationService.removeAdmin(
+      numericConversationId,
+      userId,
+      currentUser.id,
+    );
+    return res.json(result);
+  } catch (err) {
+    next(err);
   }
 };
 
@@ -789,4 +457,8 @@ module.exports = {
   conversationPermissionsGet,
   conversationPermissionsPut,
   leaveOrDeleteConversationDelete,
+  addParticipantPost,
+  removeParticipantDelete,
+  addAdminPost,
+  removeAdminDelete,
 };

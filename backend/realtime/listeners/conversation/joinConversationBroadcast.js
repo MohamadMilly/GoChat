@@ -4,6 +4,6 @@ module.exports = (socket, io, conversationId, fullname) => {
   } else {
     socket.broadcast
       .to(conversationId)
-      .emit("join conversation", conversationId, fullname);
+      .emit("join conversation broadcast", conversationId, fullname);
   }
 };

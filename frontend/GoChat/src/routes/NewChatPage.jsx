@@ -10,6 +10,7 @@ import translations from "../translations";
 import { useLanguage } from "../contexts/LanguageContext";
 import { LoadingLayer } from "../components/ui/LoadingLayer";
 import { useDebounce } from "../hooks/utils/useDebounce";
+import { useAuth } from "../contexts/AuthContext";
 
 export function NewChatPage() {
   const { language } = useLanguage();
@@ -17,6 +18,7 @@ export function NewChatPage() {
   const navigate = useNavigate();
   const query = searchParams.get("query");
   const { connectedUsers } = useSocket();
+  const { user } = useAuth();
   /*  deboncing the search with useDebounce */
   const debouncedQuery = useDebounce(query, 500);
   const {
@@ -33,7 +35,7 @@ export function NewChatPage() {
   } = useCreateConversation();
   const onOpenChat = async (selectedUserChat) => {
     createChat({
-      participants: [selectedUserChat],
+      participants: [selectedUserChat, user],
       type: "DIRECT",
     });
   };

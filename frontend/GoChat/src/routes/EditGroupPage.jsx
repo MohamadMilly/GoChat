@@ -531,7 +531,7 @@ export function EditGroupPage() {
                 />
               </div>
 
-              <ParticipantsList
+              {/* <ParticipantsList
                 language={language}
                 participants={groupMetaData.participants}
                 setParticipants={(updater) => {
@@ -543,7 +543,7 @@ export function EditGroupPage() {
                     return { ...prev, participants: next };
                   });
                 }}
-              />
+              />*/}
             </div>
           </div>
         </form>

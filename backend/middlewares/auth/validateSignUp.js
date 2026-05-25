@@ -1,8 +1,8 @@
 const { body } = require("express-validator");
 
-const errorMessages = require("../utils/errorMessages");
+const errorMessages = require("../../utils/errorMessages");
 
-const prisma = require("../lib/prisma");
+const prisma = require("../../lib/prisma");
 
 const validateFirstName = body("firstname")
   .trim()

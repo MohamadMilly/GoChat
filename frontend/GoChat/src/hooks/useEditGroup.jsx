@@ -52,28 +52,8 @@ export function useEditGroup() {
     },
 
     onSuccess: (data, args, context) => {
-      const participantsIds = data.conversation.participants.map(
-        (p) => p.userId,
-      );
-
-      const prevParticipantsIds =
-        context?.previousConversationInfo.conversation.participants.map(
-          (p) => p.userId,
-        );
-      const conversationId = data.conversation.id.toString();
-      socket
-        .timeout(4000)
-        .emit(
-          "edit conversation",
-          participantsIds,
-          prevParticipantsIds,
-          conversationId,
-          (response) => {
-            if (response?.status !== "ok") {
-              console.error("Error emitting group event: ", response?.status);
-            }
-          },
-        );
+      const conversationId = args.conversationId;
+      socket.emit("edit conversation", String(conversationId));
     },
 
     onError: (_err, args, context) => {

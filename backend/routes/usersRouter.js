@@ -4,7 +4,8 @@ const usersRouter = express.Router();
 
 const usersController = require("../controllers/usersController");
 
-const verifyToken = require("../middlewares/verifyToken");
+const verifyToken = require("../middlewares/auth/verifyToken");
+const extractToken = require("../middlewares/auth/extractToken");
 
 const prisma = require("../lib/prisma");
 
@@ -15,21 +16,8 @@ const SECRET_KEY = process.env.SECRET_KEY;
 // general resources (no authentication is required)
 
 // private resources (for specific users)
-usersRouter.use(verifyToken, async (req, res, next) => {
-  const token = req.token;
-  let currentUser;
-  try {
-    const authData = jwt.verify(token, SECRET_KEY);
-    const user = authData.user;
-    req.currentUser = user;
-    currentUser = user;
-    next();
-  } catch (err) {
-    return res.status(403).json({
-      message: "Invalid or expired token",
-    });
-  }
-});
+usersRouter.use(extractToken);
+usersRouter.use(verifyToken);
 
 usersRouter.get("/me/conversations", usersController.myConversationsGet);
 usersRouter.get("/", usersController.queryUsersGet);

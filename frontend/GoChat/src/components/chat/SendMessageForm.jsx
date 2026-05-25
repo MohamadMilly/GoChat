@@ -19,12 +19,12 @@ for that reason we need to emit this event on unmount
 
 function useTyping(message, conversationId) {
   const typingRef = useRef(false);
-  const isUnMounting = useRef(false);
+  
   useEffect(() => {
     return () => {
-      isUnMounting.current = true;
+      socket.emit("stopped typing", conversationId);
     };
-  }, []);
+  }, [conversationId]);
   useEffect(() => {
     if (!typingRef.current && message) {
       socket.emit("typing", conversationId);
@@ -39,9 +39,6 @@ function useTyping(message, conversationId) {
     }, 2000);
     return () => {
       clearTimeout(timer);
-      if (isUnMounting.current) {
-        socket.emit("stopped typing", conversationId);
-      }
     };
   }, [message, conversationId]);
 }

@@ -1,4 +1,4 @@
-const prisma = require("../../lib/prisma");
+const prisma = require("../../../lib/prisma");
 
 module.exports = async (socket, io, message, conversationId, callback) => {
   if (!message || !conversationId) return;
@@ -17,7 +17,7 @@ module.exports = async (socket, io, message, conversationId, callback) => {
       if (typeof callback === "function") callback({ status: 401 });
       return;
     }
-    
+
     const updatedMessage = await prisma.message.update({
       where: {
         id: message.id,

@@ -8,7 +8,7 @@ const SECRET_KEY = process.env.SECRET_KEY;
 const bcrypt = require("bcryptjs");
 
 const prisma = require("../lib/prisma");
-const filterProfile = require("../utils/filterProfile");
+const userService = require("../services/user/userService");
 
 const editProfilePut = async (req, res) => {
   const currentUser = req.currentUser;
@@ -16,35 +16,15 @@ const editProfilePut = async (req, res) => {
     req.body;
 
   try {
-    const updatedProfile = await prisma.profile.upsert({
-      where: {
-        userId: parseInt(currentUser.id),
-      },
-      update: {
-        bio,
-        phoneNumber,
-        birthday,
-        email,
-        avatar,
-        avatarBackground,
-      },
-      create: {
-        bio,
-        phoneNumber,
-        birthday,
-        email,
-        avatar,
-        avatarBackground,
-        user: {
-          connect: {
-            id: currentUser.id,
-          },
-        },
-      },
+    const updatedProfile = await userService.editProfile(currentUser.id, {
+      bio,
+      phoneNumber,
+      birthday,
+      email,
+      avatar,
+      avatarBackground,
     });
-    return res.json({
-      profile: updatedProfile,
-    });
+    return res.json({ profile: updatedProfile });
   } catch (err) {
     return res.status(500).json({
       message: "Unexpected error happened while updating profile.",
@@ -64,26 +44,10 @@ const preferencesPatch = async (req, res) => {
     preferredVerification,
   } = req.body;
 
-  /* const data = {};
-  data.isEmailHidden = isEmailHidden;
-  data.isBioHidden = isBioHidden;
-  data.isPhoneNumberHidden = isPhoneNumberHidden
-    ? isPhoneNumberHidden
-    : undefined;
-  data.isAvatarHidden = isAvatarHidden ? isAvatarHidden : undefined;
-  data.isAvatarBackgroundHidden = isAvatarBackgroundHidden
-    ? isAvatarBackgroundHidden
-    : undefined;
-  data.preferredVerification = preferredVerification
-    ? preferredVerification
-    : undefined; */
-
   try {
-    const updatedPreferences = await prisma.preferences.upsert({
-      where: {
-        userId: currentUser.id,
-      },
-      update: {
+    const updatedPreferences = await userService.updatePreferences(
+      currentUser.id,
+      {
         isEmailHidden,
         isBioHidden,
         isPhoneNumberHidden,
@@ -92,24 +56,8 @@ const preferencesPatch = async (req, res) => {
         isBirthdayHidden,
         preferredVerification,
       },
-      create: {
-        isEmailHidden,
-        isBioHidden,
-        isPhoneNumberHidden,
-        isAvatarHidden,
-        isAvatarBackgroundHidden,
-        isBirthdayHidden,
-        preferredVerification,
-        user: {
-          connect: {
-            id: currentUser.id,
-          },
-        },
-      },
-    });
-    return res.json({
-      preferences: updatedPreferences,
-    });
+    );
+    return res.json({ preferences: updatedPreferences });
   } catch (err) {
     return res.status(500).json({
       message: "Unxpected error happened while updating preferences",
@@ -120,88 +68,9 @@ const preferencesPatch = async (req, res) => {
 
 const myConversationsGet = async (req, res) => {
   const currentUser = req.currentUser;
+ 
   try {
-    let conversations = await prisma.conversation.findMany({
-      where: {
-        participants: {
-          some: { userId: currentUser.id },
-        },
-      },
-      include: {
-        participants: {
-          include: {
-            user: {
-              include: {
-                profile: {
-                  where: {
-                    NOT: {
-                      userId: {
-                        in: (
-                          await prisma.$queryRawUnsafe(
-                            `SELECT "banningUserId" FROM "Ban" WHERE "bannedUserId" = $1 `,
-                            currentUser.id,
-                          )
-                        ).map((banningUserObj) => banningUserObj.banningUserId),
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-        messages: {
-          orderBy: { createdAt: "desc" },
-          take: 1,
-          include: {
-            readers: true,
-            sender: {
-              select: {
-                id: true,
-                firstname: true,
-                lastname: true,
-                username: true,
-              },
-            },
-          },
-        },
-        _count: {
-          select: {
-            messages: {
-              where: {
-                readers: {
-                  none: {
-                    readerId: currentUser.id,
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-      orderBy: {
-        updatedAt: "desc",
-      },
-    });
-
-    const participantIds = conversations.flatMap((c) =>
-      c.participants.map((p) => p.userId),
-    );
-    const preferences = await prisma.preferences.findMany({
-      where: { userId: { in: participantIds } },
-    });
-
-    conversations = conversations.map((conversation) => ({
-      ...conversation,
-      participants: conversation.participants.map((participant) => ({
-        ...participant,
-        user: filterProfile(participant.user, preferences),
-      })),
-      unReadMessagesCount: conversation._count.messages,
-      lastMessage:
-        conversation.messages.length > 0 ? conversation.messages[0] : null,
-    }));
-
+    const conversations = await userService.getMyConversations(currentUser.id);
     return res.json({ conversations });
   } catch (err) {
     console.error(err);
@@ -215,41 +84,7 @@ const queryUsersGet = async (req, res) => {
   const currentUser = req.currentUser;
   const queryArr = query.split(" ");
   try {
-    let users = await prisma.$transaction(async (tx) => {
-      return await tx.user.findMany({
-        where: {
-          NOT: { id: currentUser.id },
-          OR: [
-            { username: { contains: query } },
-            { firstname: { in: queryArr } },
-            { lastname: { in: queryArr } },
-          ],
-        },
-        include: {
-          profile: {
-            where: {
-              NOT: {
-                userId: {
-                  in: (
-                    await prisma.$queryRawUnsafe(
-                      `SELECT "banningUserId" FROM "Ban" WHERE "bannedUserId" = $1`,
-                      currentUser.id,
-                    )
-                  ).map((banningUserObj) => banningUserObj.banningUserId),
-                },
-              },
-            },
-          },
-        },
-      });
-    });
-
-    const preferences = await prisma.preferences.findMany({
-      where: { userId: { in: users.map((u) => u.id) } },
-    });
-
-    users = users.map((user) => filterProfile(user, preferences));
-
+    const users = await userService.queryUsers(query, currentUser.id);
     return res.json({ users });
   } catch (err) {
     return res.status(500).json({
@@ -261,47 +96,7 @@ const queryUsersGet = async (req, res) => {
 const getMyContactsGet = async (req, res) => {
   const currentUser = req.currentUser;
   try {
-    const myConversations = await prisma.conversationParticipant.findMany({
-      where: { userId: currentUser.id },
-      select: { conversationId: true },
-    });
-
-    let users = await prisma.user.findMany({
-      where: {
-        conversations: {
-          some: {
-            conversationId: {
-              in: myConversations.map((c) => c.conversationId),
-            },
-          },
-        },
-        NOT: { id: currentUser.id },
-        deleted: false,
-      },
-      include: {
-        profile: {
-          where: {
-            NOT: {
-              userId: {
-                in: (
-                  await prisma.$queryRawUnsafe(
-                    `SELECT "banningUserId" FROM "Ban" WHERE "bannedUserId" = $1`,
-                    currentUser.id,
-                  )
-                ).map((banningUserObj) => banningUserObj.banningUserId),
-              },
-            },
-          },
-        },
-      },
-    });
-
-    const preferences = await prisma.preferences.findMany({
-      where: { userId: { in: users.map((u) => u.id) } },
-    });
-
-    users = users.map((user) => filterProfile(user, preferences));
-
+    const users = await userService.getMyContacts(currentUser.id);
     return res.json({ users });
   } catch (err) {
     console.error(err);
@@ -322,58 +117,8 @@ const getSpecificUserGet = async (req, res) => {
   const currentUser = req.currentUser;
 
   try {
-    let user = await prisma.$transaction(async (tx) => {
-      await tx.$executeRawUnsafe(
-        `SELECT set_config('app.current_user_id', $1, true);`,
-        String(currentUser.id),
-      );
-
-      return await tx.user.findUnique({
-        where: {
-          id: parseInt(userId),
-        },
-        select: {
-          id: true,
-          firstname: true,
-          lastname: true,
-          username: true,
-          profile: {
-            where: {
-              NOT: {
-                userId: {
-                  in: (
-                    await prisma.$queryRawUnsafe(
-                      `SELECT "banningUserId" FROM "Ban" WHERE "bannedUserId" = $1;`,
-                      currentUser.id,
-                    )
-                  ).map((banningUserObj) => banningUserObj.banningUserId),
-                },
-              },
-            },
-          },
-          accountColor: true,
-        },
-      });
-    });
-
-    const userPreferences = await prisma.preferences.findUnique({
-      where: {
-        userId: parseInt(userId),
-      },
-    });
-    const userBannedList = await prisma.ban.findMany({
-      where: {
-        banningUserId: parseInt(userId),
-      },
-    });
-    const isBlockingCurrentUser = userBannedList.some(
-      (userBannedObj) => userBannedObj.bannedUserId === currentUser.id,
-    );
-    const filteredUser = filterProfile(user, [userPreferences]);
-    return res.json({
-      user: filteredUser,
-      isBlocking: isBlockingCurrentUser,
-    });
+    const result = await userService.getSpecificUser(userId, currentUser.id);
+    return res.json(result);
   } catch (err) {
     console.error(err);
     return res.status(500).json({
@@ -386,40 +131,8 @@ const getCurrentUserGet = async (req, res) => {
   const currentUser = req.currentUser;
 
   try {
-    const user = await prisma.user.findUnique({
-      where: {
-        id: currentUser.id,
-      },
-      select: {
-        id: true,
-        firstname: true,
-        lastname: true,
-        username: true,
-        profile: true,
-        accountColor: true,
-        bannedUsers: {
-          select: {
-            bannedUserId: true,
-          },
-        },
-        banningUsers: true,
-      },
-    });
-    if (!user) {
-      return res.json({
-        message: "This account is not found.",
-      });
-    }
-    const userPreferences = await prisma.preferences.findUnique({
-      where: {
-        userId: currentUser.id,
-      },
-    });
-
-    return res.json({
-      user: user,
-      preferences: userPreferences,
-    });
+    const result = await userService.getCurrentUser(currentUser.id);
+    return res.json(result);
   } catch (err) {
     return res.status(500).json({
       message: "Unexpected error happened while getting this user data.",
@@ -431,20 +144,10 @@ const getCurrentUserGet = async (req, res) => {
 const getCurrentuserPreferences = async (req, res) => {
   const currentUser = req.currentUser;
   try {
-    const preferences = await prisma.preferences.findUnique({
-      where: {
-        userId: currentUser.id,
-      },
-    });
-    if (!preferences) {
-      return res.status(404).json({
-        message: "User or preferences are not defined.",
-      });
-    }
-
-    return res.json({
-      preferences: preferences,
-    });
+    const preferences = await userService.getCurrentUserPreferences(
+      currentUser.id,
+    );
+    return res.json({ preferences });
   } catch (err) {
     return res.status(500).json({
       message: "Unexpected error happened while getting preferences.",
@@ -455,39 +158,8 @@ const getCurrentuserPreferences = async (req, res) => {
 const deleteAccountDelete = async (req, res) => {
   const currentUser = req.currentUser;
   try {
-    const user = await prisma.user.findUnique({
-      where: {
-        id: currentUser.id,
-      },
-    });
-    if (!user) {
-      return res.status(404).json({
-        message: "User is not found.",
-      });
-    }
-    const randomPassword = await bcrypt.hash(crypto.randomUUID(), 10);
-    const updatedUser = await prisma.user.update({
-      where: {
-        id: currentUser.id,
-      },
-      data: {
-        password: randomPassword,
-        profile: {
-          update: {
-            avatar: "",
-            avatarBackground: "",
-          },
-        },
-        accountColor: "#191919",
-        firstname: "Deleted",
-        lastname: "Account",
-        username: `Deleted_${currentUser.id}`,
-        deleted: true,
-      },
-    });
-    return res.json({
-      message: "The account is deleted successfully.",
-    });
+    const result = await userService.deleteAccount(currentUser.id);
+    return res.json(result);
   } catch (err) {
     return res.status(500).json({
       message: "Unexpected error happened while deleting the account.",
@@ -496,7 +168,7 @@ const deleteAccountDelete = async (req, res) => {
   }
 };
 
-const editUserPatch = async (req, res) => {
+const editUserPatch = async (req, res, next) => {
   const currentUser = req.currentUser;
   const {
     firstname,
@@ -508,104 +180,19 @@ const editUserPatch = async (req, res) => {
     blockedUserId,
   } = req.body;
 
-  const data = {};
-  if (firstname) data.firstname = firstname;
-  if (lastname) data.lastname = lastname;
-  if (accountColor) data.accountColor = accountColor;
-
-  if (blockedUserId) {
-    const blockedUserRecord = await prisma.ban.findUnique({
-      where: {
-        bannedUserId_banningUserId: {
-          bannedUserId: parseInt(blockedUserId),
-          banningUserId: currentUser.id,
-        },
-      },
-    });
-    console.log(blockedUserRecord);
-    if (blockedUserRecord) {
-      await prisma.ban.delete({
-        where: {
-          bannedUserId_banningUserId: {
-            bannedUserId: parseInt(blockedUserId),
-            banningUserId: currentUser.id,
-          },
-        },
-      });
-    } else {
-      data.bannedUsers = {
-        create: {
-          banned: {
-            connect: {
-              id: parseInt(blockedUserId),
-            },
-          },
-        },
-      };
-    }
-  }
-
   try {
-    const user = await prisma.user.findUnique({
-      where: {
-        id: currentUser.id,
-      },
+    const result = await userService.editUser(currentUser.id, {
+      firstname,
+      username,
+      lastname,
+      password,
+      passwordConfirmation,
+      accountColor,
+      blockedUserId,
     });
-    if (!user) {
-      return res.status(404).json({
-        message: "User is not found.",
-      });
-    }
-    if (password) {
-      const match = bcrypt.compare(password, user.password);
-      if (!match) {
-        return res.status(401).json({
-          message: "Password is incorrect.",
-        });
-      }
-      if (password !== passwordConfirmation) {
-        return res.status(401).json({
-          message: "Passwords do not match.",
-        });
-      }
-      data.password = await bcrypt.hash(password, 10);
-    }
-    if (username) {
-      const userWithThisUsername = await prisma.findUnique({
-        where: {
-          username: username,
-        },
-      });
-      if (userWithThisUsername) {
-        return res.status(401).json({
-          message: "This username is already used.",
-        });
-      }
-      data.username = username;
-    }
-    const updatedUser = await prisma.user.update({
-      where: {
-        id: currentUser.id,
-      },
-      data: {
-        ...data,
-      },
-      select: {
-        id: true,
-        firstname: true,
-        lastname: true,
-        username: true,
-        accountColor: true,
-      },
-    });
-    return res.json({
-      message: "User is updated successfully.",
-      user: updatedUser,
-    });
+    return res.json(result);
   } catch (err) {
-    return res.status(500).json({
-      message: "Unexpected error happened while updating user.",
-    });
+    next(err);
   }
 };
 

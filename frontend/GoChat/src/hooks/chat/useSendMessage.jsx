@@ -13,13 +13,13 @@ export function useSendMessage() {
     const message = messageData.message;
     const repliedMessage = messageData.repliedMessage;
     const mediaFileData = messageData.mediaFileData;
-    
+
     const optimisticMessage = {
       createdAt: now,
       sender: user,
       content: message,
       file: mediaFileData.file,
-      fileURL: mediaFileData.previewFileURL,
+      fileURL: messageData.previewFileURL,
       mimeType: mediaFileData?.mimeType || "text/plain",
       type: mediaFileData.mimeType
         ? mediaFileData.mimeType.includes("image")
@@ -104,8 +104,23 @@ export function useSendMessage() {
         String(conversationId),
         client_offset,
         (err, response) => {
+          if (err) {
+            console.error(
+              `Message delivery timed out for offset ${client_offset}:`,
+              err.message,
+            );
+            // Optional: Add logic to retry emission or flag message state in DB
+            return;
+          }
+
           if (response?.status !== "ok") {
-            console.error(`Error: (${response?.status}) ` + response?.error);
+            console.error(
+              `Client rejected message: Status (${response?.status || "unknown"}) - ${response?.error || "No error details provided"}`,
+            );
+          } else {
+            console.log(
+              `Message successfully delivered and acknowledged for offset: ${client_offset}`,
+            );
           }
         },
       );

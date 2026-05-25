@@ -8,114 +8,45 @@ const SECRET_KEY = process.env.SECRET_KEY;
 const bcrypt = require("bcryptjs");
 
 const prisma = require("../lib/prisma");
-const filterProfile = require("../utils/filterProfile");
-const hideUser = require("../utils/hideUser");
+const messageService = require("../services/message/messageService");
+const conversationService = require("../services/conversation/conversationService");
+const HttpError = require("../shared/errors/HttpError");
 
 const sendMessagePost = async (req, res) => {
   const currentUser = req.currentUser;
   const conversationId = req.params.conversationId;
   const { content, type, fileURL, mimeType, repliedMessageId } = req.body;
   try {
-    const createdMessage = await prisma.message.create({
-      data: {
-        sender: {
-          connect: {
-            id: currentUser.id,
-          },
-        },
-        conversation: {
-          connect: {
-            id: parseInt(conversationId),
-          },
-        },
-        content: content || "",
-        type: type,
-        fileURL: fileURL || "",
-        mimeType: mimeType || "",
-        repliedMessage: repliedMessageId
-          ? {
-              connect: {
-                id: parseInt(repliedMessageId),
-              },
-            }
-          : null,
-      },
-    });
+    const createdMessage = messageService.createMessage(
+      { content, type, fileURL, mimeType, repliedMessageId },
+      currentUser.id,
+      Number(conversationId),
+    );
+
     return res.json({
       message: createdMessage,
     });
   } catch (err) {
-    return res.json({
-      message: "Unexpected error happened while sending the message.",
-    });
+    next(err);
   }
 };
 
-const getConversationMessagesGet = async (req, res) => {
+const getConversationMessagesGet = async (req, res, next) => {
   const { conversationId } = req.params;
-  const { userId: userIdString } = req.query;
+  const userId = req.currentUser.id;
+  const conversation = await conversationService.getConversation(
+    Number(conversationId),
+  );
+  if (!conversation) {
+    throw new HttpError("Conversation is not found", 404);
+  }
   const oldCursor =
     req.query.cursor && req.query.cursor !== "null"
       ? Number(req.query.cursor)
       : null;
 
-  const userId = parseInt(userIdString);
   try {
-    const conversation = await prisma.conversation.findUnique({
-      where: {
-        id: parseInt(conversationId),
-      },
-    });
-    if (!conversation) {
-      return res.status(404).json({
-        message: "Conversation is not found.",
-      });
-    }
-    const conversationParticipantRecord =
-      await prisma.conversationParticipant.findUnique({
-        where: {
-          conversationId_userId: {
-            conversationId: parseInt(conversationId),
-            userId: userId,
-          },
-        },
-      });
-    if (!conversationParticipantRecord) {
-      return res.status(400).json({
-        message: "You are not a part in this conversation",
-      });
-    }
-    const participantsIds = await prisma.conversationParticipant.findMany({
-      where: {
-        conversationId: parseInt(conversationId),
-      },
-      select: {
-        userId: true,
-      },
-    });
-
-    const isCurrentUserParticipant = userId
-      ? participantsIds.some((idData) => idData.userId === userId)
-      : false;
-
-    const participantsPreferences = await prisma.preferences.findMany({
-      where: {
-        userId: {
-          in: participantsIds.map((p) => p.userId),
-        },
-      },
-    });
-    const permissions = await prisma.permissions.findUnique({
-      where: {
-        conversationId: parseInt(conversationId),
-      },
-    });
-
-    const messages = await prisma.message.findMany({
-      where: {
-        conversationId: parseInt(conversationId),
-      },
-      /* paginating backwards required negative value*/
+    const options = {
       take: 20,
       skip: oldCursor ? 1 : 0,
       ...(oldCursor && {
@@ -123,152 +54,46 @@ const getConversationMessagesGet = async (req, res) => {
           id: oldCursor,
         },
       }),
-      include: {
-        sender: {
-          include: {
-            profile: {
-              where: {
-                NOT: {
-                  userId: {
-                    in: (
-                      await prisma.$queryRawUnsafe(
-                        `SELECT "banningUserId" FROM "Ban" WHERE "bannedUserId" = ${userId}`,
-                      )
-                    ).map((banningUserObj) => banningUserObj.banningUserId),
-                  },
-                },
-              },
-            },
-          },
-        },
-        repliedMessage: {
-          include: {
-            sender: {
-              select: {
-                id: true,
-                firstname: true,
-                lastname: true,
-                username: true,
-                accountColor: true,
-              },
-            },
-          },
-        },
-        readers: true,
-        reactions: true,
-      },
+
       orderBy: {
         createdAt: "desc",
       },
-    });
+    };
 
-    const filteredMessages = messages.map((message) => {
-      return {
-        ...message,
-        sender:
-          permissions?.hideUsersForVisitors && !isCurrentUserParticipant
-            ? hideUser(message.sender)
-            : filterProfile(message.sender, participantsPreferences),
-      };
-    });
-    let reversedMessages =
-      filteredMessages.reverse(); /* to keep the order of messages asc by timestamp */
+    const messages = await messageService.getConversationMessages(
+      Number(conversationId),
+      options,
+      userId,
+    );
+    /* to keep the order of messages asc by timestamp */
+    let reversedMessages = messages.reverse();
     let nextCursor =
       reversedMessages.length > 0 ? reversedMessages[0].id : null;
+
     return res.json({
-      messages: reversedMessages,
       type: conversation.type,
+      messages: reversedMessages,
       nextCursor: nextCursor,
     });
   } catch (err) {
-    return res.status(500).json({
-      message:
-        "Unexpected Error happened while getting this conversation messages",
-      error: err.stack,
-    });
+    next(err);
   }
 };
 
-const getMessageReaders = async (req, res) => {
+const getMessageReaders = async (req, res, next) => {
   const { messageId, conversationId } = req.params;
   const { userId: userIdString } = req.query;
   const userId = parseInt(userIdString);
   try {
-    const permissions = await prisma.permissions.findUnique({
-      where: {
-        conversationId: parseInt(conversationId),
-      },
-    });
-    let currentUserAdminData;
-    if (typeof userId !== "undefined" && userId) {
-      currentUserAdminData = await prisma.conversationAdmin.findUnique({
-        where: {
-          conversationId_userId: {
-            conversationId: parseInt(conversationId),
-            userId: userId,
-          },
-        },
-      });
-    }
+    const readers = await messageService.getMessageReaders(
+      Number(conversationId),
+      Number(messageId),
+      userId,
+    );
 
-    const message = await prisma.message.findUnique({
-      where: {
-        id: parseInt(messageId),
-      },
-    });
-    if (!message) {
-      return res.status(404).json({
-        message: "Message is not found.",
-      });
-    }
-    let readers = [];
-    if (permissions?.messageReaders || !!currentUserAdminData) {
-      readers = await prisma.messageOnReader.findMany({
-        where: {
-          messageId: parseInt(messageId),
-        },
-        include: {
-          reader: {
-            include: {
-              profile: {
-                where: {
-                  NOT: {
-                    userId: {
-                      in: (
-                        await prisma.$queryRawUnsafe(
-                          `SELECT "banningUserId" FROM "Ban" WHERE "bannedUserId" = ${userId}`,
-                        )
-                      ).map((banningUserObj) => banningUserObj.banningUserId),
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      });
-      const readersPreferences = await prisma.preferences.findMany({
-        where: {
-          userId: {
-            in: readers.map((reader) => reader.readerId),
-          },
-        },
-      });
-
-      readers = readers.map((messageOnReader) => ({
-        ...messageOnReader,
-        reader: filterProfile(messageOnReader.reader, readersPreferences),
-      }));
-    }
-
-    return res.json({
-      readers: readers,
-    });
+    return res.json({ readers });
   } catch (err) {
-    return res.status(500).json({
-      message: "Unexpected error happened while getting this message readers.",
-      error: err.stack,
-    });
+    next(err);
   }
 };
 
@@ -276,30 +101,11 @@ const deleteMessageDelete = async (req, res) => {
   const currentUser = req.currentUser;
   const { messageId } = req.params;
   try {
-    const message = await prisma.message.findUnique({
-      where: {
-        id: parseInt(messageId),
-      },
-    });
-    if (!message) {
-      return res.status(403).json({
-        message: "Message is not found.",
-      });
-    }
-    if (message.senderId !== currentUser.id) {
-      return res.status(401).json({
-        message: "Deleting others's message is forbidden.",
-      });
-    }
-    await prisma.message.delete({
-      where: {
-        id: parseInt(messageId),
-        senderId: currentUser.id,
-      },
-    });
-    return res.json({
-      message: "Message is deleted successfully.",
-    });
+    const result = await messageService.deleteMessage(
+      messageId,
+      currentUser.id,
+    );
+    return res.json(result);
   } catch (err) {
     return res.status(500).json({
       message: "unexpected error happened while deleting this message.",
@@ -312,36 +118,14 @@ const editMessagePut = async (req, res) => {
   const { messageId } = req.params;
   const { content, mimeType, fileURL, type } = req.body;
   try {
-    const message = await prisma.message.findUnique({
-      where: {
-        id: parseInt(messageId),
-      },
-    });
-    if (!message) {
-      return res.status(404).json({
-        message: "Message is not found.",
-      });
-    }
-    if (message.senderId !== currentUser.id) {
-      return res.status(401).json({
-        message: "Editing others's message is forbidden.",
-      });
-    }
-    const updatedMessage = await prisma.message.update({
-      where: {
-        id: parseInt(messageId),
-      },
-      data: {
-        edit: true,
-        content,
-        mimeType,
-        fileURL,
-        type,
-      },
-    });
+    const updatedMessage = await messageService.editMessage(
+      messageId,
+      { content, mimeType, fileURL, type },
+      currentUser.id,
+    );
     return res.json({
-      message: "Message is updated sucessfully.",
-      updatedMessage: updatedMessage,
+      message: "Message is updated successfully.",
+      updatedMessage,
     });
   } catch (err) {
     return res.status(500).json({

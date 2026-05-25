@@ -8,7 +8,7 @@ export function Tag({
 }) {
   return (
     <span
-      className={`text-xs ${darkModeTextColor} ${darkModeBgColor} border ${textColor} ${bgColor} px-1 py-0.5 rounded-full ${className}`}
+      className={`text-xs ${darkModeTextColor} ${darkModeBgColor}  ${textColor} ${bgColor} rounded p-0.5 ${className}`}
     >
       {tagContent}
     </span>

@@ -5,26 +5,14 @@ const { validationResult, matchedData } = require("express-validator");
 // import enviroment variables
 require("dotenv").config();
 
-const SECRET_KEY = process.env.SECRET_KEY;
-
-const bcrypt = require("bcryptjs");
-
 const prisma = require("../lib/prisma");
-
-// verification code utilities
-const {
-  createVerificationCode,
-  sendEmailVerification,
-  sendSmsVerification,
-  verifyCode,
-} = require("../utils/verificationCode");
+const authService = require("../services/auth/authService");
+const conversationService = require("../services/conversation/conversationService");
+const { sign } = require("../services/auth/utils/jwt");
 
 // pre defined colors for account to choose from randomly whenever a new user create an account
-const accountColors = ["#16a34a", "#a855f7", "#d97706", "#1e40af", "#ff4d91"];
 
-const signupPost = async (req, res) => {
-  const randomColor =
-    accountColors[Math.floor(Math.random() * accountColors.length)];
+const signupPost = async (req, res, next) => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -32,53 +20,13 @@ const signupPost = async (req, res) => {
         errors: errors.array(),
       });
     }
-    const { firstname, lastname, username, password, passwordConfirmation } =
-      matchedData(req);
+    const data = matchedData(req, { locations: ["body"] });
 
-    const previousUser = await prisma.user.findUnique({
-      where: {
-        username: username,
-      },
-    });
+    const createdUser = await authService.register(data);
 
-    if (previousUser) {
-      return res.status(401).json({
-        message: "Username is already used.",
-      });
-    }
-    const hashedPassword = await bcrypt.hash(password, 10);
+    /*  Let the user join to a global chat with ID of 14 */
+    await conversationService.joinConversation(createdUser.id, 14);
 
-    const createdUser = await prisma.user.create({
-      data: {
-        firstname,
-        lastname,
-        username,
-        password: hashedPassword,
-        profile: {
-          create: {},
-        },
-        preferences: {
-          create: {},
-        },
-        accountColor: randomColor,
-      },
-    });
-    /*  Let the user join to a global chat */
-    const currentGroupGlobalParticipant =
-      await prisma.conversationParticipant.create({
-        data: {
-          user: {
-            connect: {
-              id: createdUser.id,
-            },
-          },
-          conversation: {
-            connect: {
-              id: 28,
-            },
-          },
-        },
-      });
     const payLoad = {
       user: {
         id: createdUser.id,
@@ -88,51 +36,24 @@ const signupPost = async (req, res) => {
         email: createdUser.email,
       },
     };
-    jwt.sign(payLoad, SECRET_KEY, (err, token) => {
-      if (err) {
-        return res.status(500).json({
-          message: "Token error",
-        });
-      }
-      return res.json({
-        message: "Your account is created successfully.",
-        token: token,
-        user: payLoad.user,
-      });
+
+    const token = sign(payLoad);
+
+    return res.json({
+      message: "Your account is created successfully.",
+      token: token,
+      user: payLoad.user,
     });
   } catch (err) {
-    return res.status(500).json({
-      message: "Unexpected error happened while creating the account.",
-      error: err.message,
-    });
+    next(err);
   }
 };
 
-const loginPost = async (req, res) => {
+const loginPost = async (req, res, next) => {
   const { username, password } = req.body;
 
   try {
-    const user = await prisma.user.findUnique({
-      where: {
-        username: username,
-      },
-      include: {
-        profile: {
-          select: {
-            email: true,
-          },
-        },
-      },
-    });
-
-    if (!user) {
-      return res.status(401).json({ message: "Username is incorrect." });
-    }
-    const doesMatch = await bcrypt.compare(password, user.password);
-    const doesitMatchDirectly = password === user.password;
-    if (!doesMatch && !doesitMatchDirectly) {
-      return res.status(401).json({ message: "Password is incorrect." });
-    }
+    const user = await authService.verifyCredentials(username, password);
 
     const payload = {
       user: {
@@ -143,96 +64,33 @@ const loginPost = async (req, res) => {
         email: user?.profile.email || "",
       },
     };
-    const token = jwt.sign(payload, SECRET_KEY);
+    const token = sign(payload);
     return res.json({ token: token, user: payload.user });
   } catch (err) {
-    return res.status(500).json({
-      message: "Unexpected error happened while logging in",
-      error: err,
-    });
+    next(err);
   }
 };
 
-const verifyPost = async (req, res) => {
-  const { username, code } = req.body;
-  try {
-    const user = await prisma.user.findUnique({ where: { username } });
-    if (!user) {
-      return res.status(404).json({
-        message: "User is not found.",
-      });
-    }
-    const isValid = await verifyCode(user.id, code);
-    if (!isValid) {
-      return res
-        .status(401)
-        .json({ message: "Verification code is incorrect." });
-    }
-
-    const payload = {
-      user: {
-        id: user.id,
-        firstname: user.firstname,
-        lastname: user.lastname,
-        username: user.username,
-        email: user.email,
-      },
-    };
-
-    const token = jwt.sign(payload, SECRET_KEY);
-
-    return res.json({ token, user: payload.user });
-  } catch (err) {
-    return res.status(500).json({
-      message: "Unexpected error happened while verifying",
-      error: err.stack,
-    });
-  }
-};
-
-const changePasswordPatch = async (req, res) => {
+const changePasswordPatch = async (req, res, next) => {
   const currentUser = req.currentUser;
   const newPassword = req.body.newPassword;
   const previousPassword = req.body.previousPassword;
   try {
-    const user = await prisma.user.findUnique({
-      where: {
-        id: currentUser.id,
-      },
-    });
-    if (!user) {
-      return res.status(404).json({
-        message: "User is not found.",
-      });
-    }
-    const match = await bcrypt.compare(previousPassword, user.password);
-    if (!match) {
-      return res.status(401).json({
-        message: "Password is incorrect.",
-      });
-    }
-    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
-    const updatedUser = await prisma.user.update({
-      where: {
-        id: currentUser.id,
-      },
-      data: {
-        password: hashedNewPassword,
-      },
-    });
+    const updatedUser = await authService.changePassword(
+      currentUser.id,
+      previousPassword,
+      newPassword,
+    );
     return res.json({
       user: updatedUser,
     });
   } catch (err) {
-    return res.status(500).json({
-      message: "unexpected error happened while changing the password",
-    });
+    next(err);
   }
 };
 
 module.exports = {
   loginPost,
   signupPost,
-  verifyPost,
   changePasswordPatch,
 };

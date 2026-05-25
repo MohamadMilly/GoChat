@@ -2,6 +2,7 @@ import { PanelRight } from "lucide-react";
 import { useSocket } from "../../contexts/SocketContext";
 import translations from "../../translations";
 import { useLanguage } from "../../contexts/LanguageContext";
+import Button from "../ui/Button";
 
 export function ChatsListHeader() {
   const { isConnected } = useSocket();
@@ -32,13 +33,27 @@ export function ChatsListHeader() {
             </div>
           </div>
         </div>
-        <button
+        <Button
           command="show-modal"
           commandfor="drawer"
-          className="rounded-md dark:hover:bg-gray-800/50 p-2 text-sm font-semibold text-cyan-600 dark:text-cyan-400 hover:bg-gray-100 cursor-pointer"
+          className="rounded-md flex justify-center items-center dark:hover:bg-gray-800/50 p-2 text-sm font-semibold text-cyan-600 dark:text-cyan-400 hover:bg-gray-100 cursor-pointer"
         >
-          <PanelRight />
-        </button>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            width="24"
+            height="24"
+            color="currentColor"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M4 9L20 9"></path>
+            <path d="M4 15L14 15"></path>
+          </svg>
+        </Button>
       </nav>
     </header>
   );

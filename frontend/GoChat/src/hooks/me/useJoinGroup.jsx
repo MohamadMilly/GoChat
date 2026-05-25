@@ -25,11 +25,13 @@ export function useJoinGroup() {
     },
     onSuccess: (data, conversationId, context) => {
       navigate(`/chats/group/${conversationId}`);
+      socket.emit("join conversation", conversationId);
       socket.emit(
-        "join conversation",
+        "join conversation broadcast",
         conversationId,
         `${user.firstname} ${user.lastname}`,
       );
+
       queryClient.invalidateQueries({
         queryKey: ["conversation", conversationId],
         exact: true,

@@ -53,7 +53,7 @@ export function GroupPermisstionsPage() {
   };
   return (
     <main className="max-w-200 mx-auto bg-gray-50 dark:bg-gray-900 font-rubik relative pb-6">
-      <div className="flex justify-between items-center p-2 bg-white dark:bg-gray-800/80 rounded-lg my-2 shadow-xs">
+      <div className="flex justify-between items-center p-2 bg-white dark:bg-gray-800/80 rounded-lg my-2 shadow-xs mx-2">
         <Button
           onClick={() => navigate(-1)}
           className="text-gray-600 dark:text-gray-300"

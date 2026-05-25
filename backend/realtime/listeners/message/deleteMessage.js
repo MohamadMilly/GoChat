@@ -1,4 +1,4 @@
-const prisma = require("../../lib/prisma");
+const prisma = require("../../../lib/prisma");
 
 module.exports = async (socket, io, messageId, conversationId, callback) => {
   const userId = socket.handshake.auth.userId;

@@ -1,8 +1,8 @@
 import { SearchBar } from "../ui/SearchBar";
 import { Chats } from "./Chats";
 import { useMyConversations } from "../../hooks/me/useMyConversations";
-import { memo, useContext, useEffect } from "react";
-import { socket } from "../../socket";
+import { memo, useContext } from "react";
+
 import { useSearchParams } from "react-router";
 import { filterConversations } from "../../utils/filterConversations";
 import translations from "../../translations";
@@ -40,17 +40,6 @@ export const ChatsPanel = memo(() => {
     useContext(ChatsListContext);
 
   const query = searchParams.get("name");
-
-  useEffect(() => {
-    if (isFetching || conversations.length === 0) return;
-    conversations.forEach((c) => {
-      socket.auth.serverOffset[c.id.toString()] =
-        c.messages[c.messages.length - 1]?.id || 0;
-      socket.auth.isInitialDataLoading = false;
-
-      socket.emit("join chat", String(c.id));
-    });
-  }, [conversations, isFetching]);
 
   const filteredConversations = filterConversations(conversations, query);
   return (

@@ -1,4 +1,4 @@
-const prisma = require("../../lib/prisma");
+const prisma = require("../../../lib/prisma");
 
 async function reactToMessage(
   socket,
@@ -19,7 +19,7 @@ async function reactToMessage(
     const userInConversation = await prisma.conversationParticipant.findUnique({
       where: {
         conversationId_userId: {
-          conversationId: conversationId,
+          conversationId: Number(conversationId),
           userId: userId,
         },
       },
@@ -92,7 +92,7 @@ async function reactToMessage(
         reactor: {
           connect: {
             conversationId_userId: {
-              conversationId: conversationId,
+              conversationId: Number(conversationId),
               userId: userId,
             },
           },
@@ -118,7 +118,7 @@ async function reactToMessage(
     callback({
       status: 500,
     });
-    console.error(err.stack);
+    console.error(err);
   }
 }
 

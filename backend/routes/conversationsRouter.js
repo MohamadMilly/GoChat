@@ -2,27 +2,13 @@ const express = require("express");
 
 const conversationsRouter = express.Router();
 
-const verifyToken = require("../middlewares/verifyToken");
+const verifyToken = require("../middlewares/auth/verifyToken");
+const extractToken = require("../middlewares/auth/extractToken");
 // controllers
 const conversationsController = require("../controllers/conversationsController");
 const messagesCountroller = require("../controllers/messagesController");
 
-const jwt = require("jsonwebtoken");
-
-require("dotenv").config();
-const SECRET_KEY = process.env.SECRET_KEY;
-
-conversationsRouter.get(
-  "/:conversationId",
-  conversationsController.getSpecificConversationGet,
-);
-
 conversationsRouter.get("/", conversationsController.queryGroupsGet);
-
-conversationsRouter.get(
-  "/:conversationId/messages",
-  messagesCountroller.getConversationMessagesGet,
-);
 
 conversationsRouter.get(
   "/:conversationId/messages/:messageId/readers",
@@ -34,19 +20,18 @@ conversationsRouter.get(
   conversationsController.conversationPermissionsGet,
 );
 
-conversationsRouter.use(verifyToken, (req, res, next) => {
-  const token = req.token;
-  try {
-    const authData = jwt.verify(token, SECRET_KEY);
-    const user = authData.user;
-    req.currentUser = user;
-    next();
-  } catch (err) {
-    return res.status(403).json({
-      message: "Invalid or expired token",
-    });
-  }
-});
+conversationsRouter.use(extractToken);
+conversationsRouter.use(verifyToken);
+
+conversationsRouter.get(
+  "/:conversationId",
+  conversationsController.getSpecificConversationGet,
+);
+
+conversationsRouter.get(
+  "/:conversationId/messages",
+  messagesCountroller.getConversationMessagesGet,
+);
 
 conversationsRouter.post(
   "/",
@@ -60,6 +45,26 @@ conversationsRouter.post(
 conversationsRouter.post(
   "/:conversationId",
   conversationsController.joinConversationPost,
+);
+
+conversationsRouter.post(
+  "/:conversationId/participants",
+  conversationsController.addParticipantPost,
+);
+
+conversationsRouter.delete(
+  "/:conversationId/participants/:participantId",
+  conversationsController.removeParticipantDelete,
+);
+
+conversationsRouter.post(
+  "/:conversationId/admins",
+  conversationsController.addAdminPost,
+);
+
+conversationsRouter.delete(
+  "/:conversationId/admins/:userId",
+  conversationsController.removeAdminDelete,
 );
 
 conversationsRouter.delete(
