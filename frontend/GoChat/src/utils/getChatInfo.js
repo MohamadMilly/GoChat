@@ -14,7 +14,6 @@ export function getChatInfo(conversation, currentUserId) {
     ? conversation.avatar
     : chatPartner?.profile?.avatar || "";
   const lastMessage = conversation.lastMessage;
-  console.log(lastMessage);
   const color = chatPartner?.accountColor || null;
   return {
     chatTitle,

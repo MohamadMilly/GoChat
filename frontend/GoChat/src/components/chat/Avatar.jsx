@@ -12,6 +12,7 @@ export const Avatar = memo(
     viewTransitionName = null,
     dynamicTransitionId,
     titleSize = "18px",
+    style,
   }) => {
     const src = chatAvatar || avatar || null;
 
@@ -20,7 +21,7 @@ export const Avatar = memo(
       : null;
 
     return (
-      <div className={`relative ${className}`}>
+      <div style={style} className={`relative ${className}`}>
         <div
           className={`flex shadow-inner shadow-gray-200/60 justify-center items-center shrink-0 w-[var(--size)] h-[var(--size)] rounded-full overflow-hidden ${
             color ? "bg-[var(--chat-color)]" : "bg-gray-100"
@@ -42,8 +43,8 @@ export const Avatar = memo(
             />
           ) : (
             <span
-              className={`text-[var(--text-size)] ${color ? "text-gray-100" : "text-gray-600"}`}
-              style={{ "--text-size": titleSize }}
+              className={` text-[size:var(--title-size)] ${color ? "text-gray-100" : "text-gray-600"}`}
+              style={{ "--title-size": titleSize }}
             >
               {abbreviateText(chatTitle)}
             </span>

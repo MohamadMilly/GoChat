@@ -1,4 +1,6 @@
 const prisma = require("../../../lib/prisma");
+const conversationService = require("../../../services/conversation/conversationService");
+const filterUser = require("../../../shared/utils/filterUser");
 
 async function reactToMessage(
   socket,
@@ -23,6 +25,13 @@ async function reactToMessage(
           userId: userId,
         },
       },
+      include: {
+        user: {
+          select: {
+            preferences: true,
+          },
+        },
+      },
     });
     if (!userInConversation) {
       return callback({
@@ -30,7 +39,9 @@ async function reactToMessage(
         message: `User is not found in this conversation with ID ${conversationId}`,
       });
     }
-
+    const permissions = await conversationService.getConversationPermissions(
+      Number(conversationId),
+    );
     const message = await prisma.message.findUnique({
       where: {
         id: messageId,
@@ -106,13 +117,36 @@ async function reactToMessage(
               select: {
                 firstname: true,
                 lastname: true,
+                profile: true,
+                preferences: true,
+                accountColor: true,
+                profile: {
+                  select: {
+                    avatar: true,
+                  },
+                },
               },
             },
           },
         },
       },
     });
-    socket.broadcast.to(conversationId.toString()).emit("reaction", reaction);
+    const filteredReaction = {
+      ...reaction,
+      reactor: {
+        ...reaction.reactor,
+        user: filterUser(
+          reaction.reactor.user,
+          userInConversation.user.preferences,
+          permissions,
+          true,
+        ),
+      },
+    };
+    console.log(filteredReaction);
+    socket.broadcast
+      .to(conversationId.toString())
+      .emit("reaction", filteredReaction);
     callback({ status: "ok" });
   } catch (err) {
     callback({

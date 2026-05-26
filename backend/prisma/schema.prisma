@@ -13,7 +13,7 @@ generator client {
 datasource db {
   provider = "postgresql"
    url = env("DATABASE_URL")
-   directUrl = env("DIRECT_URL")
+    directUrl = env("DIRECT_URL")
 }
   
  
@@ -139,15 +139,19 @@ reactedAt DateTime @default(now())
 type ReactionType @default(LIKE)
 }
 
-
 enum ReactionType {
-LIKE
-LOVE
-LAUGH
-ANGER
-NAIL_POLISH
-FIRE
+  LIKE
+  LOVE
+  LAUGH
+  ANGER
+  CRY
+  FIRE
+  HEARTS_FACE
+  SAD
+  COOL
+  NAIL_POLISH
 }
+
 
 
 model Message {

@@ -136,7 +136,27 @@ async function getConversationMessages(
         },
       },
       readers: true,
-      reactions: true,
+      reactions: {
+        include: {
+          reactor: {
+            include: {
+              user: {
+                select: {
+                  firstname: true,
+                  lastname: true,
+                  accountColor: true,
+                  profile: {
+                    select: {
+                      avatar: true,
+                    },
+                  },
+                  preferences: true,
+                },
+              },
+            },
+          },
+        },
+      },
       ...(options.include || {}),
     },
   });

@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import Button from "../ui/Button";
 import { useAuth } from "../../contexts/AuthContext";
+import { useMe } from "../../hooks/me/useMe";
 
 const reactions = [
   {
@@ -32,12 +33,28 @@ const reactions = [
     type: "ANGER",
   },
   {
-    symbol: "💅",
-    type: "NAIL_POLISH",
+    symbol: "😭",
+    type: "CRY",
   },
   {
     symbol: "🔥",
     type: "FIRE",
+  },
+  {
+    symbol: "🥰",
+    type: "HEARTS_FACE",
+  },
+  {
+    symbol: "😢",
+    type: "SAD",
+  },
+  {
+    symbol: "😎",
+    type: "COOL",
+  },
+  {
+    symbol: "💅",
+    type: "NAIL_POLISH",
   },
 ];
 
@@ -50,7 +67,8 @@ function ReactionButton({
   setMessage,
 }) {
   const queryClient = useQueryClient();
-
+  const { user: fulluserData } = useMe();
+  const { user: storedUserData } = useAuth();
   const handleReact = (messageId, userId, conversationId, type) => {
     const optimisticDate = new Date();
     const queryKey = ["conversation", "messages", conversationId];
@@ -59,6 +77,17 @@ function ReactionButton({
       reactedAt: optimisticDate,
       type: reaction.type,
       reactorId: userId,
+      reactor: {
+        user: {
+          id: userId,
+          firstname: storedUserData.firstname,
+          lastname: storedUserData.lastname,
+          profile: {
+            avatar: fulluserData ? fulluserData?.profile?.avatar : null,
+          },
+          accountColor: fulluserData ? fulluserData?.accountColor : "",
+        },
+      },
       conversationId: Number(conversationId),
       messageId: messageId,
       status: "pending",

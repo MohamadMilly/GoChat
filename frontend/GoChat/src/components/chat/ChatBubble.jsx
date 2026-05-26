@@ -248,11 +248,36 @@ function useDrag(ref, maxDisplacement, triggerDisplacement, onTrigger) {
   }, [maxDisplacement, ref, triggerDisplacement]);
 }
 
-function Reaction({ type, symbol, count = 1 }) {
+function Reaction({ type, symbol, count = 1, reactors }) {
+  const firstThreeReactors = reactors.slice(0, 3);
   return (
-    <div className="w-8 shadow-inner border border-white dark:border-gray-100/50 shadow-gray-50/30 animate-pop h-8 rounded-full bg-gray-50/65 dark:bg-gray-300/40 flex justify-center items-center">
+    <div className="h-8 shadow-inner border border-white dark:border-gray-100/50 shadow-gray-50/30 animate-pop rounded-full bg-gray-50 dark:bg-gray-400 flex justify-center items-center">
       <span className="text-sm">{symbol}</span>
-      <span className="text-xs">{count}</span>
+      {reactors.length >= 4 && <span className="text-sm">{count}</span>}
+      {firstThreeReactors.length > 0 && reactors.length < 4 && (
+        <div
+          className="relative h-7"
+          style={{
+            width: 28 + (firstThreeReactors.length - 1) * 15 + "px",
+          }}
+        >
+          {firstThreeReactors.map((reactorObj, index) => {
+            const reactor = reactorObj.user;
+            const fullname = reactor.firstname + " " + reactor.lastname;
+            return (
+              <Avatar
+                className={"absolute! top-0"}
+                style={{ transform: `translateX(${index * 15}px)` }}
+                avatar={reactor.profile.avatar}
+                chatTitle={fullname}
+                color={reactor.accountColor}
+                size="28px"
+                titleSize="10px"
+              />
+            );
+          })}
+        </div>
+      )}
       <span className="sr-only">{type}</span>
     </div>
   );
@@ -332,7 +357,6 @@ export const ChatBubble = memo(
               avatar={avatar}
               chatTitle={fullname}
               color={color}
-              dynamicTransitionId={transitionId}
               size="42px"
             />
           </TransitionLink>
@@ -408,6 +432,7 @@ export const ChatBubble = memo(
                         type={type}
                         symbol={details.symbol}
                         count={details.count}
+                        reactors={details.reactors}
                       />
                     );
                   })}

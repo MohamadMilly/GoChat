@@ -14,6 +14,18 @@ function filterMessagesByPermissions(
         permissions,
         isCurrentUserParticipant,
       ),
+      reactions: message.reactions.map((reaction) => ({
+        ...reaction,
+        reactor: {
+          ...reaction.reactor,
+          user: filterUser(
+            reaction.reactor.user,
+            reaction.reactor.user.preferences,
+            permissions,
+            isCurrentUserParticipant,
+          ),
+        },
+      })),
     };
   });
   return filteredMessages;

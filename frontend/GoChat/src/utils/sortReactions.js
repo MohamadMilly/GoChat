@@ -3,8 +3,12 @@ const symbolToType = {
   LOVE: "❤️",
   LAUGH: "🤣",
   ANGER: "😡",
-  NAIL_POLISH: "💅",
+  CRY: "😭",
   FIRE: "🔥",
+  HEARTS_FACE: "🥰",
+  SAD: "😢",
+  COOL: "😎",
+  NAIL_POLISH: "💅",
 };
 
 export function sortReactions(reactions) {
@@ -13,8 +17,13 @@ export function sortReactions(reactions) {
     const type = reaction.type;
     if (sortedReactions[type]) {
       sortedReactions[type].count++;
+      sortedReactions[type].reactors.push(reaction.reactor);
     } else {
-      sortedReactions[type] = { count: 1, symbol: symbolToType[type] };
+      sortedReactions[type] = {
+        count: 1,
+        symbol: symbolToType[type],
+        reactors: [reaction.reactor],
+      };
     }
   }
   return Object.entries(sortedReactions);
