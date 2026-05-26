@@ -75,7 +75,7 @@ export function useSendMessage() {
         const { data, error } = await supabase.storage
           .from("files")
           .upload(
-            `${Date.now()}-${messageData.mediaFileData.file.name}`,
+            `${Date.now()}-${crypto.randomUUID()}`,
             messageData.mediaFileData.file,
           );
 
