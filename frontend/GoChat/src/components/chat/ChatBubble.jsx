@@ -251,7 +251,7 @@ function useDrag(ref, maxDisplacement, triggerDisplacement, onTrigger) {
 function Reaction({ type, symbol, count = 1, reactors }) {
   const firstThreeReactors = reactors.slice(0, 3);
   return (
-    <div className="h-8 shadow-inner border border-white dark:border-gray-100/50 shadow-gray-50/30 animate-pop rounded-full bg-gray-50 dark:bg-gray-400 flex justify-center items-center">
+    <div className="h-8 p-[1px] shadow-inner border border-cyan-400/18 dark:border-cyan-300/40 shadow-gray-50/30 animate-pop rounded-full bg-cyan-400/15 dark:bg-cyan-300/35 flex justify-center items-center gap-1">
       <span className="text-sm">{symbol}</span>
       {reactors.length >= 4 && <span className="text-sm">{count}</span>}
       {firstThreeReactors.length > 0 && reactors.length < 4 && (
