@@ -5,7 +5,7 @@ import { LoadingLayer } from "../../ui/LoadingLayer";
 import { Sticker } from "../ChatBubble";
 import { useContext, useEffect, useRef, useState } from "react";
 import { SendMessageFormContext } from "../SendMessageForm";
-import { AddStickerButton } from "./addStickerButton";
+import { AddStickerButton } from "./AddStickerButton";
 
 function StickerButton({ stickerURL, setOpen }) {
   const { id: conversationId } = useParams();
