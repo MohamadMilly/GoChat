@@ -2,12 +2,14 @@ import { useQueryClient } from "@tanstack/react-query";
 import { socket } from "../../socket";
 import { supabase } from "../../utils/supabase";
 import { toast } from "react-toastify";
+import { useAuth } from "../../contexts/AuthContext";
 
 let counter = 0;
 
 export function useSendMessage() {
   const queryClient = useQueryClient();
-  const sendMessage = async (messageData, user, conversationId) => {
+  const { user } = useAuth();
+  const sendMessage = async (messageData, user_, conversationId) => {
     const client_offset = `${socket.id}-${++counter}`;
     const now = new Date();
     const message = messageData.message;
@@ -21,11 +23,13 @@ export function useSendMessage() {
       file: mediaFileData.file,
       fileURL: messageData.previewFileURL,
       mimeType: mediaFileData?.mimeType || "text/plain",
-      type: mediaFileData.mimeType
-        ? mediaFileData.mimeType.includes("image")
-          ? "IMAGE"
-          : "FILE"
-        : "TEXT",
+      type: messageData.type
+        ? messageData.type
+        : mediaFileData.mimeType
+          ? mediaFileData.mimeType.includes("image")
+            ? "IMAGE"
+            : "FILE"
+          : "TEXT",
       status: "pending",
       repliedMessage: repliedMessage,
       reactions: [],
@@ -70,8 +74,7 @@ export function useSendMessage() {
 
     try {
       let finalFileURL = "";
-
-      if (messageData.mediaFileData.file) {
+      if (messageData.mediaFileData.file && messageData.type !== "STICKER") {
         const { data, error } = await supabase.storage
           .from("files")
           .upload(
@@ -91,13 +94,18 @@ export function useSendMessage() {
         {
           createdAt: optimisticMessage.createdAt,
           content: messageData.message,
-          fileURL: finalFileURL,
+          fileURL:
+            messageData.type === "STICKER"
+              ? messageData.previewFileURL
+              : finalFileURL,
           mimeType: messageData.mediaFileData?.mimeType || "text/plain",
-          type: finalFileURL
-            ? messageData.mediaFileData.mimeType.includes("image")
-              ? "IMAGE"
-              : "FILE"
-            : "TEXT",
+          type: messageData.type
+            ? messageData.type
+            : finalFileURL
+              ? messageData.mediaFileData.mimeType.includes("image")
+                ? "IMAGE"
+                : "FILE"
+              : "TEXT",
           repliedMessageId: messageData.repliedMessage?.id || null,
           reactions: [],
         },

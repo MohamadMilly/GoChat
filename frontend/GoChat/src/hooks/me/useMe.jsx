@@ -14,5 +14,6 @@ export function useMe() {
   });
   const user = data ? data.user : null;
   const preferences = data ? data.preferences : null;
-  return { user, preferences, error, isFetching };
+  const stickers = data ? data.user.stickers : null;
+  return { user, preferences, stickers, error, isFetching };
 }

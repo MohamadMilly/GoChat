@@ -31,6 +31,7 @@
   }
   .animate-slideup {
     animation: slideup 0.5s 1 forwards;
+    animation-timing-function: cubic-bezier(0.25, 1, 0.5, 1);
   }
   .animate-slidedown {
     animation: slidedown 0.5s 1 forwards;
@@ -58,14 +59,14 @@
     to {
       display: hidden;
       opacity: 0;
-      transform: translateY(50px);
+      transform: translateY(var(--slide-offset, 80px));
     }
   }
   @keyframes slideup {
     from {
       display: hidden;
       opacity: 0;
-      transform: translateY(50px);
+      transform: translateY(var(--slide-offset, 80px));
     }
     to {
       display: block;

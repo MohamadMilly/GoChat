@@ -102,7 +102,7 @@ async function getMyConversations(userId) {
     },
     orderBy: { updatedAt: "desc" },
   });
-  
+
   conversations = conversations.map((conversation) => ({
     ...conversation,
     participants: conversation.participants.map((participant) => ({
@@ -230,13 +230,13 @@ async function getCurrentUser(userId) {
       accountColor: true,
       bannedUsers: { select: { bannedUserId: true } },
       banningUsers: true,
+      stickers: true,
+      preferences: true,
     },
   });
   if (!user) throw new HttpError("This account is not found.", 404);
-  const userPreferences = await prisma.preferences.findUnique({
-    where: { userId: Number(userId) },
-  });
-  return { user, preferences: userPreferences };
+
+  return { user, preferences: user.preferences };
 }
 
 async function getCurrentUserPreferences(userId) {
@@ -276,13 +276,15 @@ async function editUser(userId, payload) {
     passwordConfirmation,
     accountColor,
     blockedUserId,
+    addStickers: addStickersStrings,
+    removeStickers: removeStickersStrings,
   } = payload;
 
   const data = {};
   if (firstname) data.firstname = firstname;
   if (lastname) data.lastname = lastname;
   if (accountColor) data.accountColor = accountColor;
-  
+
   if (blockedUserId) {
     const blockedUserRecord = await prisma.ban.findUnique({
       where: {
@@ -327,7 +329,12 @@ async function editUser(userId, payload) {
       throw new HttpError("This username is already used.", 401);
     data.username = username;
   }
-
+  if (addStickersStrings && addStickersStrings.length > 0) {
+    await addStickers(userId, addStickersStrings);
+  }
+  if (removeStickersStrings && removeStickers.length > 0) {
+    await removeStickers(userId, removeStickersStrings);
+  }
   const updatedUser = await prisma.user.update({
     where: { id: Number(userId) },
     data,
@@ -342,6 +349,60 @@ async function editUser(userId, payload) {
   return { message: "User is updated successfully.", user: updatedUser };
 }
 
+async function addStickers(currentUserId, stickersURLsStrings) {
+  const stickerURLs = stickersURLsStrings.map(
+    (urlString) => new URL(urlString),
+  );
+  const user = await prisma.user.findUnique({
+    where: {
+      id: currentUserId,
+    },
+    select: {
+      stickers: true,
+    },
+  });
+  const previousStickers = user.stickers;
+  await prisma.user.update({
+    where: {
+      id: currentUserId,
+    },
+    data: {
+      stickers: [
+        ...previousStickers,
+        ...stickerURLs.map((url) => url.toString()),
+      ],
+    },
+  });
+  return { message: "Stickers are added successfully." };
+}
+
+async function removeStickers(currentUserId, stickersURLsStrings) {
+  const stickerURLs = stickersURLsStrings.map(
+    (urlString) => new URL(urlString),
+  );
+  const user = await prisma.user.findUnique({
+    where: {
+      id: currentUserId,
+    },
+    select: {
+      stickers: true,
+    },
+  });
+  const stringsURL = stickerURLs.map((url) => url.toString());
+  user.stickers = user.stickers.filter((url) => !stringsURL?.includes(url));
+  await prisma.user.update({
+    where: {
+      id: currentUserId,
+    },
+    data: {
+      stickers: user.stickers,
+    },
+  });
+  return {
+    message: "Stickers are removed successfully.",
+  };
+}
+
 module.exports = {
   editProfile,
   updatePreferences,
@@ -353,4 +414,6 @@ module.exports = {
   getCurrentUserPreferences,
   deleteAccount,
   editUser,
+  addStickers,
+  removeStickers,
 };

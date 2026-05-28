@@ -157,6 +157,22 @@ export function MediaFilePreview({
   );
 }
 
+export function Sticker({ stickerURL, size = 120 }) {
+  return (
+    <div className="w-fit h-fit overflow-hidden">
+      <img
+        className={`w-[var(--size)] h-[var(--size)] rounded-xl object-contain`}
+        style={{
+          "--size": size + "px",
+        }}
+        src={stickerURL}
+        alt="sticker"
+        loading="lazy"
+      />
+    </div>
+  );
+}
+
 function useObserve(ref) {
   const [observing, setObserving] = useState(false);
 
@@ -364,19 +380,21 @@ export const ChatBubble = memo(
         <div
           className={`w-fit max-w-[85%] md:max-w-[75%] ${isMyMessage ? "ml-auto" : ""}`}
         >
-          {message.type !== "TEXT" && (
+          {message.type === "STICKER" ? (
+            <Sticker stickerURL={message.fileURL} />
+          ) : message.type !== "TEXT" ? (
             <MediaFilePreview
               fileURL={message.fileURL}
               mimeType={message.mimeType}
               handlePreview={handlePreview}
             />
-          )}
+          ) : null}
           <div
             onClick={(e) => {
               handleShowChatBubbleMenu(message, e.clientX, e.clientY);
             }}
             ref={messageContentContainerRef}
-            className={`group relative w-full px-2 py-1 font-rubik rounded-t-xl ${isMyMessage ? "bg-cyan-700 dark:bg-cyan-600 rounded-br-none rounded-bl-xl text-gray-100" : "bg-gray-100 text-gray-600 dark:bg-gray-700 rounded-bl-none rounded-br-xl"} cursor-grab`}
+            className={`group relative w-full px-2 py-0.5 font-rubik rounded-t-xl ${isMyMessage ? "bg-cyan-700 dark:bg-cyan-600 rounded-br-none rounded-bl-xl text-gray-100" : "bg-gray-100 text-gray-600 dark:bg-gray-700 rounded-bl-none rounded-br-xl"} cursor-grab`}
           >
             <div className="min-w-0 w-full">
               {isGroupMessage && !isMyMessage && !hideName && (

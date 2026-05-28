@@ -13,7 +13,7 @@ generator client {
 datasource db {
   provider = "postgresql"
    url = env("DATABASE_URL")
-    directUrl = env("DIRECT_URL")
+   directUrl = env("DIRECT_URL")
 }
   
  
@@ -34,9 +34,11 @@ datasource db {
   bannedUsers Ban[] @relation("bannedRelation")
   accountColor String?
   readMessages MessageOnReader[]
+  stickers String[]
   @@map("users")
   }
   
+
 model Profile {
 id Int @id @default(autoincrement())
 user User @relation(fields: [userId],references: [id])
@@ -201,4 +203,5 @@ enum MessageType {
   TEXT
   IMAGE 
   FILE
+  STICKER
 }

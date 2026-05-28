@@ -46,10 +46,10 @@ export function ChatsListHeader() {
             color="currentColor"
             fill="none"
             stroke="currentColor"
-            stroke-width="1.5"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          > 
             <path d="M4 9L20 9"></path>
             <path d="M4 15L14 15"></path>
           </svg>

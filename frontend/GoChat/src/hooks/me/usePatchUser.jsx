@@ -37,6 +37,13 @@ export function usePatchUser() {
                     { bannedUserId: data.blockedUserId },
                   ]
                 : old.user.bannedUsers,
+            stickers: [
+              ...(old.user.stickers || []).filter(
+                (stickerURL) => !data.removeStickers?.includes(stickerURL),
+              ),
+
+              ...(data.addStickers || []),
+            ],
           },
         };
       });

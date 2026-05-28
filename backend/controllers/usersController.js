@@ -68,7 +68,7 @@ const preferencesPatch = async (req, res) => {
 
 const myConversationsGet = async (req, res) => {
   const currentUser = req.currentUser;
- 
+
   try {
     const conversations = await userService.getMyConversations(currentUser.id);
     return res.json({ conversations });
@@ -178,6 +178,9 @@ const editUserPatch = async (req, res, next) => {
     passwordConfirmation,
     accountColor,
     blockedUserId,
+    stickers,
+    addStickers,
+    removeStickers,
   } = req.body;
 
   try {
@@ -189,6 +192,8 @@ const editUserPatch = async (req, res, next) => {
       passwordConfirmation,
       accountColor,
       blockedUserId,
+      addStickers,
+      removeStickers,
     });
     return res.json(result);
   } catch (err) {
