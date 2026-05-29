@@ -5,7 +5,7 @@ import { Braces, FileText, FileArchive, File } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
 import { socket } from "../../socket";
 import { ChatBubbleStatus } from "./chatBubbleStatus";
-
+import { Sticker as StickerIcon } from "lucide-react";
 import { ChatPageContext } from "../../routes/ChatPage";
 
 import { useParams } from "react-router";
@@ -378,7 +378,7 @@ export const ChatBubble = memo(
           </TransitionLink>
         )}
         <div
-          className={`w-fit max-w-[85%] md:max-w-[75%] ${isMyMessage ? "ml-auto" : ""}`}
+          className={`w-fit flex flex-col max-w-[85%] md:max-w-[75%] ${isMyMessage ? "ml-auto items-end" : "items-start"}`}
         >
           {message.type === "STICKER" ? (
             <Sticker stickerURL={message.fileURL} />
@@ -421,9 +421,18 @@ export const ChatBubble = memo(
                         " " +
                         message.repliedMessage.sender.lastname}
                   </strong>
-                  <p className="text-xs line-clamp-2 text-balance w-full text-start">
-                    {message.repliedMessage.content}
-                  </p>
+                  <div className="text-xs flex gap-1 items-center w-full text-start">
+                    {message.repliedMessage.type === "STICKER" ? (
+                      <>
+                        {" "}
+                        <StickerIcon size={15} /> <span>Sticker</span>
+                      </>
+                    ) : (
+                      <p className="line-clamp-2 text-balance">
+                        {message.repliedMessage.content}
+                      </p>
+                    )}
+                  </div>
                 </button>
               )}
               {message.content && (

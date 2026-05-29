@@ -70,15 +70,17 @@ export const ChatEntry = memo(
                   <span>typing...</span>
                 )
               ) : (
-                <span className="truncate flex gap-1 items-center">
+                <div className="w-full flex gap-1 items-center">
                   {lastMessage && lastMessage?.type === "STICKER" ? (
                     <>
                       <Sticker size={15} /> <span>Sticker</span>
                     </>
                   ) : (
-                    lastMessage?.content || ""
+                    <p className="truncate line-clamp-1">
+                      {lastMessage?.content || ""}
+                    </p>
                   )}
-                </span>
+                </div>
               )}
               {lastMessage && (
                 <ChatBubbleStatus

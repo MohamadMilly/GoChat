@@ -153,9 +153,16 @@ export const SendMessageForm = memo(({ messagesListRef }) => {
                   repliedMessage.sender.lastname}
               </span>
             </p>
-            <p className="text-sm text-gray-600 dark:text-gray-300 line-clamp-1">
-              {repliedMessage.content}
-            </p>
+            <div className="text-sm text-gray-600 dark:text-gray-300 flex gap-1 items-center">
+              {repliedMessage.type === "STICKER" ? (
+                <>
+                  {" "}
+                  <Sticker size={15} /> <span>Sticker</span>
+                </>
+              ) : (
+                <p className="line-clamp-1">{repliedMessage?.content}</p>
+              )}
+            </div>
             <button
               className={
                 "absolute top-2 right-2 text-gray-600 dark:text-gray-300 cursor-pointer"
