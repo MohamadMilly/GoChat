@@ -23,6 +23,7 @@ import { getChatInfo } from "../utils/getChatInfo";
 import { useAuth } from "../contexts/AuthContext";
 import { useUser } from "../hooks/useUser";
 import { useMessages } from "../hooks/useMessages";
+import { StickerActionDialog } from "../components/chat/dialogs/StickerActionsDialog";
 
 export const ChatPageContext = createContext({
   conversationId: null,
@@ -78,10 +79,12 @@ export function ChatPage() {
   const { isChatsPanelCollapsed } = useContext(ChatsListContext);
   const [repliedMessage, setRepliedMessage] = useState(null);
   const [editedMessage, setEditedMessage] = useState(null);
+  const [activeSticker, setActiveSticker] = useState(null);
+
   const { language } = useLanguage();
   /* const messagesListRef = useRef(null); */
   const chatContentRef = useRef(null);
-  
+
   const { fetchNextPage, hasNextPage, isFetchingNextPage } = useMessages(id);
 
   return (
@@ -134,13 +137,20 @@ export function ChatPage() {
             overflowAnchor: "auto",
           }}
         >
-          <MessagesList ref={chatContentRef} />
+          <MessagesList
+            setActiveSticker={setActiveSticker}
+            ref={chatContentRef}
+          />
           <SendMessageForm messagesListRef={chatContentRef} />
           {editedMessage && <EditMessageDialog message={editedMessage} />}
+          <StickerActionDialog
+            stickerURL={activeSticker}
+            oncloseDialog={() => setActiveSticker(null)}
+          />
         </section>
 
         {isInPreviewMode && (
-          <div className="fixed z-900 inset-0 flex items-center justify-center bg-black/80 backdrop-blur-md animate-pop overflow-y-auto">
+          <div className="fixed z-900 inset-0 flex items-center justify-center bg-black/50 backdrop-blur-md animate-pop overflow-y-auto">
             <img
               src={previewImageURL}
               alt="Preview"

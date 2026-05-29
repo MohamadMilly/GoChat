@@ -12,6 +12,7 @@ import { useParams } from "react-router";
 import translations from "../../translations";
 import { useLanguage } from "../../contexts/LanguageContext";
 import { sortReactions } from "../../utils/sortReactions";
+import { StickerButton } from "./sendMessageForm/StickersPanel";
 
 function formatMessageDate(date) {
   const dateObj = new Date(date);
@@ -299,6 +300,18 @@ function Reaction({ type, symbol, count = 1, reactors }) {
   );
 }
 
+/* 
+TO DO : 
+i want when i click the sticker in the chat to appear a dialog
+the dialog is one for every sticker => we want to pass the sticker URL to it 
+but let's think where to put the dialog component 
+it should appear above all the content inside the app
+i have an easy option is to create a dialog for each sticker 
+it will save us from a lot of complexity and the performence
+but the first solution is fancy but complicated 
+so i will go with the 2th approach 
+*/
+
 export const ChatBubble = memo(
   ({
     message,
@@ -308,6 +321,7 @@ export const ChatBubble = memo(
     handleShowChatBubbleMenu,
     handleReply,
     handlePreview,
+    setActiveSticker,
   }) => {
     const { user } = useAuth();
     const [transitionId, setTransitionId] = useState(null);
@@ -381,7 +395,11 @@ export const ChatBubble = memo(
           className={`w-fit flex flex-col max-w-[85%] md:max-w-[75%] ${isMyMessage ? "ml-auto items-end" : "items-start"}`}
         >
           {message.type === "STICKER" ? (
-            <Sticker stickerURL={message.fileURL} />
+            <StickerButton
+              stickerURL={message.fileURL}
+              onClick={() => setActiveSticker(message.fileURL)}
+              size={120}
+            />
           ) : message.type !== "TEXT" ? (
             <MediaFilePreview
               fileURL={message.fileURL}

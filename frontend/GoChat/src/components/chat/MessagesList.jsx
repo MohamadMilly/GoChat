@@ -71,12 +71,16 @@ function ChatBubbleMenuContainer({ children }) {
   );
 }
 
-export function MessagesList({ ref = null }) {
+export function MessagesList({ ref = null, setActiveSticker }) {
   const { conversationId } = useContext(ChatPageContext);
 
   return (
     <ChatBubbleMenuContainer>
-      <MessagesListContent conversationId={conversationId} ref={ref} />
+      <MessagesListContent
+        conversationId={conversationId}
+        ref={ref}
+        setActiveSticker={setActiveSticker}
+      />
     </ChatBubbleMenuContainer>
   );
 }
@@ -142,7 +146,7 @@ export const MessagesListContent = forwardRef((props, ref) => {
       /* update conversation data is in socketContext*/
     }
     socket.on("join conversation broadcast", onUserJoin);
-    
+
     return () => {
       socket.off("join conversation broadcast", onUserJoin);
     };
@@ -271,6 +275,7 @@ export const MessagesListContent = forwardRef((props, ref) => {
                 handleShowChatBubbleMenu={handleShowChatBubbleMenu}
                 handleReply={handleReply}
                 handlePreview={handlePreview}
+                setActiveSticker={props.setActiveSticker}
               />
             </Fragment>
           );

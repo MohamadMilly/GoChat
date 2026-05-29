@@ -7,12 +7,35 @@ import { useContext, useEffect, useRef, useState } from "react";
 import { SendMessageFormContext } from "../SendMessageForm";
 import { AddStickerButton } from "./AddStickerButton";
 
-function StickerButton({ stickerURL, setOpen }) {
+export function StickerButton({ stickerURL, onClick, size = 96 }) {
+  return (
+    <button type="button" onClick={onClick} className="cursor-pointer">
+      <Sticker size={size} stickerURL={stickerURL} />
+    </button>
+  );
+}
+
+function StickersContent({ isFetching, stickers, setOpen }) {
   const { id: conversationId } = useParams();
   const { repliedMessage, scroll } = useContext(SendMessageFormContext);
-  const extension = stickerURL.split(".")[1];
+  
   const send = useSendMessage();
-  const handleSendSticker = () => {
+  if (isFetching) {
+    return <LoadingLayer title={"Loading..."} />;
+  }
+
+  if (stickers.length === 0) {
+    return (
+      <div className="grid place-items-center w-full h-full">
+        <p className="text-gray-500 dark:text-gray-400">
+          You have no stickers yet.
+        </p>
+        <AddStickerButton />
+      </div>
+    );
+  }
+  const handleSendSticker = (stickerURL) => {
+    const extension = stickerURL.split(".")[1];
     const messageData = {
       message: "",
       previewFileURL: stickerURL,
@@ -28,39 +51,12 @@ function StickerButton({ stickerURL, setOpen }) {
     scroll();
   };
   return (
-    <button
-      type="button"
-      onClick={handleSendSticker}
-      className="cursor-pointer"
-    >
-      <Sticker size={96} stickerURL={stickerURL} />
-    </button>
-  );
-}
-
-function StickersContent({ isFetching, stickers, setOpen }) {
-  if (isFetching) {
-    return <LoadingLayer title={"Loading..."} />;
-  }
-
-  if (stickers.length === 0) {
-    return (
-      <div className="grid place-items-center w-full h-full">
-        <p className="text-gray-500 dark:text-gray-400">
-          You have no stickers yet.
-        </p>
-        <AddStickerButton />
-      </div>
-    );
-  }
-
-  return (
     <div className="flex flex-row flex-wrap gap-1.5">
       {stickers.map((stickerURL) => (
         <StickerButton
           key={stickerURL}
           stickerURL={stickerURL}
-          setOpen={setOpen}
+          onClick={() => handleSendSticker(stickerURL)}
         />
       ))}
       <AddStickerButton />
@@ -94,12 +90,12 @@ export function StickersPanel({ open, setOpen }) {
     };
   }, [setOpen, open]);
   if (!open) return null;
-  
+
   return (
     <aside
       ref={stickersPanelRef}
       className={`pt-6 pb-4 md:-mb-4 -mb-2 px-2 [--slide-offset:100%] overflow-y-auto  w-full dakr:border-gray-800 border backdrop-blur-md border-dashed bg-linear-to-t dark:from-gray-800 dark:to-gray-900 border-gray-700/40 from-gray-100 to-gray-50 absolute z-900 bottom-0 h-90 rounded-t-lg shadow-lg ${isSlidingDown ? "animate-slidedown" : "animate-slideup"}`}
-    > 
+    >
       <span className="absolute left-[50%] translate-x-[-50%] top-0 translate-y-[-50%]  w-8 h-2 dark:bg-gray-600 bg-gray-700 rounded-full"></span>
       <StickersContent
         isFetching={isFetching}

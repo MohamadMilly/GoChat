@@ -3,6 +3,7 @@ import { usePatchUser } from "../../../hooks/me/usePatchUser";
 import { useUpload } from "../../../hooks/utils/useUpload";
 import Button from "../../ui/Button";
 import { useRef } from "react";
+import { LoadingLayer } from "../../ui/LoadingLayer";
 
 export function AddStickerButton() {
   const {
@@ -31,17 +32,25 @@ export function AddStickerButton() {
   return (
     <div>
       <Button
+        disabled={isUploading}
         className={
           "rounded-xl max-w-md overflow-hidden relative w-24 h-24 flex items-center justify-center"
         }
         onClick={triggerInput}
       >
-        <Plus size={30} />
+        {isUploading ? (
+          <LoadingLayer title={"Uploading"} className={"rounded-lg"} />
+        ) : isPending ? (
+          <LoadingLayer title={"Pending..."} className={"rounded-lg"} />
+        ) : (
+          <Plus size={30} />
+        )}
         <input
           type="file"
           hidden={true}
           onChange={handleAddSticker}
           ref={inputRef}
+          accept="image/*"
         />
       </Button>
     </div>
