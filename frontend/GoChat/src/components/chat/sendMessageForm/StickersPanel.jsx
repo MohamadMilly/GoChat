@@ -94,12 +94,12 @@ export function StickersPanel({ open, setOpen }) {
     };
   }, [setOpen, open]);
   if (!open) return null;
-
+  
   return (
     <aside
       ref={stickersPanelRef}
       className={`pt-6 pb-4 md:-mb-4 -mb-2 px-2 [--slide-offset:100%] overflow-y-auto  w-full dakr:border-gray-800 border backdrop-blur-md border-dashed bg-linear-to-t dark:from-gray-800 dark:to-gray-900 border-gray-700/40 from-gray-100 to-gray-50 absolute z-900 bottom-0 h-90 rounded-t-lg shadow-lg ${isSlidingDown ? "animate-slidedown" : "animate-slideup"}`}
-    >
+    > 
       <span className="absolute left-[50%] translate-x-[-50%] top-0 translate-y-[-50%]  w-8 h-2 dark:bg-gray-600 bg-gray-700 rounded-full"></span>
       <StickersContent
         isFetching={isFetching}

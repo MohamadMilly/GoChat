@@ -71,7 +71,7 @@ export const ChatEntry = memo(
                 )
               ) : (
                 <span className="truncate flex gap-1 items-center">
-                  {lastMessage.type === "STICKER" ? (
+                  {lastMessage && lastMessage?.type === "STICKER" ? (
                     <>
                       <Sticker size={15} /> <span>Sticker</span>
                     </>
