@@ -3,6 +3,7 @@ import { Avatar } from "../chat/Avatar";
 import { NavLink } from "react-router";
 import { memo } from "react";
 import { ChatBubbleStatus } from "../chat/chatBubbleStatus";
+import { Sticker } from "lucide-react";
 
 export const ChatEntry = memo(
   ({
@@ -69,8 +70,14 @@ export const ChatEntry = memo(
                   <span>typing...</span>
                 )
               ) : (
-                <span className="truncate">
-                  {lastMessage ? lastMessage.content : ""}
+                <span className="truncate flex gap-1 items-center">
+                  {lastMessage.type === "STICKER" ? (
+                    <>
+                      <Sticker size={15} /> <span>Sticker</span>
+                    </>
+                  ) : (
+                    lastMessage.content || ""
+                  )}
                 </span>
               )}
               {lastMessage && (
