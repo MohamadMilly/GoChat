@@ -18,7 +18,7 @@ export function StickerButton({ stickerURL, onClick, size = 96 }) {
 function StickersContent({ isFetching, stickers, setOpen }) {
   const { id: conversationId } = useParams();
   const { repliedMessage, scroll } = useContext(SendMessageFormContext);
-  
+
   const send = useSendMessage();
   if (isFetching) {
     return <LoadingLayer title={"Loading..."} />;
@@ -68,6 +68,7 @@ export function StickersPanel({ open, setOpen }) {
   const { stickers, isFetching, error } = useMe();
   const [isSlidingDown, setIsSlidingDown] = useState(false);
   const stickersPanelRef = useRef(null);
+
   useEffect(() => {
     if (!open) return;
     const stickersPanelElement = stickersPanelRef.current;
@@ -89,19 +90,54 @@ export function StickersPanel({ open, setOpen }) {
       clearTimeout(timeoutId);
     };
   }, [setOpen, open]);
+
+  const handleManualClose = () => {
+    setIsSlidingDown(true);
+    setTimeout(() => {
+      setOpen(false);
+      setIsSlidingDown(false);
+    }, 500);
+  };
+
   if (!open) return null;
 
   return (
     <aside
       ref={stickersPanelRef}
-      className={`pt-6 pb-4 md:-mb-4 -mb-2 px-2 [--slide-offset:100%] overflow-y-auto  w-full dakr:border-gray-800 border backdrop-blur-md border-dashed bg-linear-to-t dark:from-gray-800 dark:to-gray-900 border-gray-700/40 from-gray-100 to-gray-50 absolute z-900 bottom-0 h-90 rounded-t-lg shadow-lg ${isSlidingDown ? "animate-slidedown" : "animate-slideup"}`}
+      className={`absolute bottom-0 left-0 right-0 z-700 flex h-90 w-full flex-col rounded-t-xl border border-dashed border-gray-300 bg-linear-to-t from-gray-100 to-gray-50 px-4 pt-8 pb-4 shadow-xl backdrop-blur-md transition-all duration-300 dark:border-gray-600 dark:from-gray-700 dark:to-gray-800 [--slide-offset:100%] ${
+        isSlidingDown ? "animate-slidedown" : "animate-slideup"
+      }`}
     >
-      <span className="absolute left-[50%] translate-x-[-50%] top-0 translate-y-[-50%]  w-8 h-2 dark:bg-gray-600 bg-gray-700 rounded-full"></span>
-      <StickersContent
-        isFetching={isFetching}
-        stickers={stickers}
-        setOpen={setOpen}
-      />
+      <span className="absolute top-2 left-1/2 h-1.5 w-12 -translate-x-1/2 rounded-full bg-gray-300 dark:bg-gray-600"></span>
+
+      <button
+        onClick={handleManualClose}
+        className="absolute top-3 right-3 flex h-7 w-7 items-center justify-center rounded-full bg-gray-200/50 text-gray-500 hover:bg-gray-200 hover:text-gray-700 dark:bg-gray-600/50 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-gray-100 transition-colors"
+        aria-label="Close panel"
+      >
+        <svg
+          xmlns="http://w3.org"
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+
+      <div className="h-full overflow-y-auto pr-1 md:-mb-2">
+        <StickersContent
+          isFetching={isFetching}
+          stickers={stickers}
+          setOpen={setOpen}
+        />
+      </div>
     </aside>
   );
 }

@@ -73,7 +73,7 @@ function ChatBubbleMenuContainer({ children }) {
 
 export function MessagesList({ ref = null, setActiveSticker }) {
   const { conversationId } = useContext(ChatPageContext);
-
+  
   return (
     <ChatBubbleMenuContainer>
       <MessagesListContent
