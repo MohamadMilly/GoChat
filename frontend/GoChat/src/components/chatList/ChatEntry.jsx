@@ -76,7 +76,7 @@ export const ChatEntry = memo(
                       <Sticker size={15} /> <span>Sticker</span>
                     </>
                   ) : (
-                    lastMessage.content || ""
+                    lastMessage?.content || ""
                   )}
                 </span>
               )}
