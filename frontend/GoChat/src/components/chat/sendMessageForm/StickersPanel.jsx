@@ -9,7 +9,7 @@ import { AddStickerButton } from "./AddStickerButton";
 
 export function StickerButton({ stickerURL, onClick, size = 96 }) {
   return (
-    <button type="button" onClick={onClick} className="cursor-pointer">
+    <button type="button" onClick={onClick} className="cursor-pointer mb-1">
       <Sticker size={size} stickerURL={stickerURL} />
     </button>
   );
@@ -35,7 +35,8 @@ function StickersContent({ isFetching, stickers, setOpen }) {
     );
   }
   const handleSendSticker = (stickerURL) => {
-    const extension = stickerURL.split(".")[1];
+    if (!stickerURL) return;
+    const extension = stickerURL.slice(stickerURL.lastIndexOf(".") + 1);
     const messageData = {
       message: "",
       previewFileURL: stickerURL,

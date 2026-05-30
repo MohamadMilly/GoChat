@@ -60,7 +60,7 @@ export const ChatEntry = memo(
                   : ""}
               </span>
             </div>
-            <div className="text-gray-600 dark:text-gray-300 text-sm text-left mt-1 flex items-center justify-between">
+            <div className="text-gray-600 w-full dark:text-gray-300 text-sm text-left mt-1 flex items-center justify-between">
               {typingUsers.length > 0 ? (
                 isGroup ? (
                   <span className="truncate">
@@ -70,15 +70,13 @@ export const ChatEntry = memo(
                   <span>typing...</span>
                 )
               ) : (
-                <div className="w-full flex gap-1 items-center">
+                <div className="flex gap-1 items-center">
                   {lastMessage && lastMessage?.type === "STICKER" ? (
                     <>
                       <Sticker size={15} /> <span>Sticker</span>
                     </>
                   ) : (
-                    <p className="truncate line-clamp-1">
-                      {lastMessage?.content || ""}
-                    </p>
+                    <p className="line-clamp-1">{lastMessage?.content || ""}</p>
                   )}
                 </div>
               )}

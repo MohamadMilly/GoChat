@@ -398,7 +398,7 @@ export const ChatBubble = memo(
             <StickerButton
               stickerURL={message.fileURL}
               onClick={() => setActiveSticker(message.fileURL)}
-              size={120}
+              size={150}
             />
           ) : message.type !== "TEXT" ? (
             <MediaFilePreview
@@ -455,14 +455,14 @@ export const ChatBubble = memo(
               )}
               {message.content && (
                 <p
-                  className="wrap-break-word whitespace-pre-wrap dark:text-gray-200 "
+                  className="wrap-break-word whitespace-pre-wrap dark:text-gray-200 w-full"
                   dir="auto"
                 >
                   {message.content}
                 </p>
               )}
             </div>
-
+            
             <div
               className={`flex items-end my-0.5 gap-2 ${isMyMessage ? "flex-row" : "flex-row-reverse"}`}
             >
