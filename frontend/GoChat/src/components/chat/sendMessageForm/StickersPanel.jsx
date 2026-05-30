@@ -7,9 +7,18 @@ import { useContext, useEffect, useRef, useState } from "react";
 import { SendMessageFormContext } from "../SendMessageForm";
 import { AddStickerButton } from "./AddStickerButton";
 
-export function StickerButton({ stickerURL, onClick, size = 96 }) {
+export function StickerButton({
+  stickerURL,
+  onClick,
+  size = 96,
+  className = "",
+}) {
   return (
-    <button type="button" onClick={onClick} className="cursor-pointer mb-1">
+    <button
+      type="button"
+      onClick={onClick}
+      className={`cursor-pointer mb-1 ${className}`}
+    >
       <Sticker size={size} stickerURL={stickerURL} />
     </button>
   );
@@ -52,12 +61,13 @@ function StickersContent({ isFetching, stickers, setOpen }) {
     scroll();
   };
   return (
-    <div className="flex flex-row flex-wrap gap-1.5">
+    <div className="flex flex-row flex-wrap">
       {stickers.map((stickerURL) => (
         <StickerButton
           key={stickerURL}
           stickerURL={stickerURL}
           onClick={() => handleSendSticker(stickerURL)}
+          className="grow basis-24"
         />
       ))}
       <AddStickerButton />
@@ -105,13 +115,14 @@ export function StickersPanel({ open, setOpen }) {
   return (
     <aside
       ref={stickersPanelRef}
-      className={`absolute bottom-0 left-0 right-0 z-700 flex h-90 w-full flex-col rounded-t-xl border border-dashed border-gray-300 bg-linear-to-t from-gray-100 to-gray-50 px-4 pt-8 pb-4 shadow-xl backdrop-blur-md transition-all duration-300 dark:border-gray-600 dark:from-gray-700 dark:to-gray-800 [--slide-offset:100%] ${
+      className={`absolute -mb-2 md:-mb-4 bottom-0 left-0 right-0 z-700 flex h-90 w-full flex-col rounded-t-xl border border-dashed border-gray-300 bg-gray-50 px-4 pt-8 pb-4 shadow-xl backdrop-blur-md transition-all duration-300 dark:border-gray-600 dark:bg-gray-800 [--slide-offset:100%] ${
         isSlidingDown ? "animate-slidedown" : "animate-slideup"
       }`}
     >
       <span className="absolute top-2 left-1/2 h-1.5 w-12 -translate-x-1/2 rounded-full bg-gray-300 dark:bg-gray-600"></span>
 
       <button
+        type="button"
         onClick={handleManualClose}
         className="absolute top-3 right-3 flex h-7 w-7 items-center justify-center rounded-full bg-gray-200/50 text-gray-500 hover:bg-gray-200 hover:text-gray-700 dark:bg-gray-600/50 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-gray-100 transition-colors"
         aria-label="Close panel"
@@ -132,7 +143,7 @@ export function StickersPanel({ open, setOpen }) {
         </svg>
       </button>
 
-      <div className="h-full overflow-y-auto pr-1 md:-mb-2">
+      <div className="h-full overflow-y-auto">
         <StickersContent
           isFetching={isFetching}
           stickers={stickers}
