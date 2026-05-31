@@ -84,8 +84,18 @@ async function getConversationMessages(
   options = {},
   currentUserId,
 ) {
-  const permissions =
-    await conversationService.getConversationPermissions(conversationId);
+  const conversation = await prisma.conversation.findUnique({
+    where: {
+      id: conversationId,
+    },
+    include: {
+      permissions: true,
+    },
+  });
+  if (!conversation) {
+    throw new HttpError("Conversation does not exist.", 404);
+  }  
+  const permissions = conversation.permissions;
 
   const existingParticipant = await prisma.conversationParticipant.findUnique({
     where: {
@@ -97,7 +107,7 @@ async function getConversationMessages(
   });
 
   const isCurrentUserParticipant = !!existingParticipant;
-  if (!isCurrentUserParticipant) {
+  if (!isCurrentUserParticipant && conversation.type === "DIRECT") {
     throw new HttpError(
       "It is unallowed to see others' conversation messages",
       403,

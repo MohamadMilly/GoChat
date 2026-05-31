@@ -34,19 +34,20 @@ const sendMessagePost = async (req, res) => {
 const getConversationMessagesGet = async (req, res, next) => {
   const { conversationId } = req.params;
   const userId = req.currentUser.id;
-  const conversation = await conversationService.getConversation(
-    Number(conversationId),
-  );
-  if (!conversation) {
-    throw new HttpError("Conversation is not found", 404);
-  }
-  
-  const oldCursor =
-    req.query.cursor && req.query.cursor !== "null"
-      ? Number(req.query.cursor)
-      : null;
 
   try {
+    const conversation = await conversationService.getConversation(
+      Number(conversationId),
+    );
+    if (!conversation) {
+      throw new HttpError("Conversation is not found", 404);
+    }
+
+    const oldCursor =
+      req.query.cursor && req.query.cursor !== "null"
+        ? Number(req.query.cursor)
+        : null;
+
     const options = {
       take: 20,
       skip: oldCursor ? 1 : 0,
@@ -55,12 +56,12 @@ const getConversationMessagesGet = async (req, res, next) => {
           id: oldCursor,
         },
       }),
-      
+
       orderBy: {
         createdAt: "desc",
       },
     };
-    
+
     const messages = await messageService.getConversationMessages(
       Number(conversationId),
       options,
@@ -70,7 +71,7 @@ const getConversationMessagesGet = async (req, res, next) => {
     let reversedMessages = messages.reverse();
     let nextCursor =
       reversedMessages.length > 0 ? reversedMessages[0].id : null;
-    
+
     return res.json({
       type: conversation.type,
       messages: reversedMessages,

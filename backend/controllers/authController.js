@@ -45,6 +45,7 @@ const signupPost = async (req, res, next) => {
       user: payLoad.user,
     });
   } catch (err) {
+    console.log(err);
     next(err);
   }
 };

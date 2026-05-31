@@ -49,7 +49,7 @@ export const ChatEntry = memo(
             )}
           </div>
 
-          <div className="flex-1 min-w-0">
+          <div className="flex-1 min-w-0 w-full">
             <div className="flex items-center justify-between gap-x-2">
               <strong className="text-gray-800 dark:text-gray-50 truncate">
                 {chatTitle}
@@ -60,7 +60,7 @@ export const ChatEntry = memo(
                   : ""}
               </span>
             </div>
-            <div className="text-gray-600 w-full dark:text-gray-300 text-sm text-left mt-1 flex items-center justify-between">
+            <div className="text-gray-600 max-w- min-w-0 gap-x-2 dark:text-gray-300 text-sm text-left mt-1 flex items-center justify-between">
               {typingUsers.length > 0 ? (
                 isGroup ? (
                   <span className="truncate">
@@ -70,7 +70,7 @@ export const ChatEntry = memo(
                   <span>typing...</span>
                 )
               ) : (
-                <div className="flex gap-1 items-center">
+                <div className="flex gap-1 items-center min-w-0">
                   {lastMessage && lastMessage?.type === "STICKER" ? (
                     <>
                       <Sticker size={15} /> <span>Sticker</span>
