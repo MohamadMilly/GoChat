@@ -25,7 +25,7 @@ const signupPost = async (req, res, next) => {
     const createdUser = await authService.register(data);
 
     /*  Let the user join to a global chat with ID of 14 */
-    await conversationService.joinConversation(createdUser.id, 14);
+    // await conversationService.joinConversation(createdUser.id, 14);
 
     const payLoad = {
       user: {

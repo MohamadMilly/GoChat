@@ -26,7 +26,7 @@ async function joinConversation(userId, conversationId) {
   if (!conversation) {
     throw new HttpError("Conversation does not exist.", 404);
   }
-  
+
   const existingParticipant = await prisma.conversationParticipant.findUnique({
     where: {
       conversationId_userId: {
