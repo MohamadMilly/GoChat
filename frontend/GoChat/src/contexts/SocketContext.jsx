@@ -4,6 +4,7 @@ import { useAuth } from "./AuthContext";
 import { useQueryClient } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { updateMessagesOffset } from "../utils/updateMessagesOffset";
+import { useSound } from "./SoundPreferencesContext";
 
 const SocketContext = createContext(null);
 
@@ -12,6 +13,8 @@ export function SocketProvider({ children }) {
   const [connectedUsers, setConnectedUsers] = useState([]);
   const [typingUsers, setTypingUsers] = useState([]);
   const { token, user } = useAuth();
+  const { preferences } = useSound();
+
   const queryClient = useQueryClient();
 
   useEffect(() => {
@@ -126,6 +129,7 @@ export function SocketProvider({ children }) {
                     return page;
                   }
                 }),
+
                 /* messages: old.messages.map((m) => {
                   const d1 = new Date(m.createdAt);
                   const d2 = new Date(optimisticMessageCreatedAt);
@@ -169,9 +173,12 @@ export function SocketProvider({ children }) {
 
       /* Whenever a message receieved , an effect will be triggered */
       const chatBubbleAudio = new Audio("/sounds/chatBubble_soundeffect.mp3");
-      chatBubbleAudio.play().catch((error) => {
-        console.error("Error playing audio: ", error);
-      });
+
+      if (preferences.chatBubbleSound) {
+        chatBubbleAudio.play().catch((error) => {
+          console.error("Error playing audio:", error);
+        });
+      }
       updateMessagesOffset(conversationId, serverOffset);
     }
     function onDeleteMessage(messageId, conversationId) {
@@ -281,7 +288,7 @@ export function SocketProvider({ children }) {
 
       queryClient.setQueryData(["conversations"], (old) => {
         if (!old?.conversations) return old;
-        console.log(old);
+
         return {
           ...old,
           conversations: old.conversations.map((c) => {
@@ -524,7 +531,7 @@ export function SocketProvider({ children }) {
       socket.off("reaction", onUserReact);
       socket.off("remove reaction", onUserRemovesReaction);
     };
-  }, [queryClient, user]);
+  }, [queryClient, user, preferences.chatBubbleSound]);
   const contextValue = useMemo(
     () => ({ isConnected, connectedUsers, typingUsers }),
     [isConnected, connectedUsers, typingUsers],

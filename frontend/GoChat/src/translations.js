@@ -502,6 +502,48 @@ const translations = {
       Telegram: "telegram account",
     },
   },
+  settings: {
+    Arabic: {
+      RouteTitle: "الإعدادات",
+      GoBackSR: "العودة",
+      AccountSectionTitle: "الحساب",
+      logOutButtonText: "تسجيل الخروج",
+      ChangePassword: "تغيير كلمة المرور",
+      GeneralSectionTitle: "عام",
+      LanguageLabel: "اللغة",
+      OptionArabic: "العربية",
+      OptionEnglish: "الإنجليزية",
+      ThemeLabel: "المظهر",
+      ThemeNames: { light: "فاتح", dark: "داكن" },
+      DangerZoneTitle: "منطقة الخطر",
+      DeleteAccountButtonText: "حذف الحساب",
+      DeleteAccountDialogTitle: "حذف الحساب",
+      DeleteAccountDialogBody:
+        "هل أنت متأكد أنك تريد حذف حسابك؟ لا يمكن التراجع عن هذا الإجراء.",
+      DeleteButtonText: "حذف",
+      CancelButtonText: "إلغاء",
+    },
+    English: {
+      RouteTitle: "Settings",
+      GoBackSR: "Go Back",
+      AccountSectionTitle: "Account",
+      logOutButtonText: "Log out",
+      ChangePassword: "Change password",
+      GeneralSectionTitle: "General",
+      LanguageLabel: "Language",
+      OptionArabic: "Arabic",
+      OptionEnglish: "English",
+      ThemeLabel: "Theme",
+      ThemeNames: { light: "light", dark: "dark" },
+      DangerZoneTitle: "Danger Zone",
+      DeleteAccountButtonText: "Delete Account",
+      DeleteAccountDialogTitle: "Delete account",
+      DeleteAccountDialogBody:
+        "Are you sure you want to delete your account? This action cannot be undone.",
+      DeleteButtonText: "Delete",
+      CancelButtonText: "Cancel",
+    },
+  },
 };
 
 export default translations;

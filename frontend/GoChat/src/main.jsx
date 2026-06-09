@@ -13,6 +13,7 @@ import { AuthProvider } from "./contexts/AuthContext.jsx";
 import { SocketProvider } from "./contexts/SocketContext.jsx";
 import { ThemeProvider } from "./contexts/ThemeContext.jsx";
 import { LanguageProvider } from "./contexts/LanguageContext.jsx";
+import { SoundPreferencesProvider } from "./contexts/SoundPreferencesContext.jsx";
 
 const router = createBrowserRouter(routes);
 
@@ -20,13 +21,15 @@ createRoot(document.getElementById("root")).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <SocketProvider>
-          <LanguageProvider>
-            <ThemeProvider>
-              <RouterProvider router={router} />
-            </ThemeProvider>
-          </LanguageProvider>
-        </SocketProvider>
+        <SoundPreferencesProvider>
+          <SocketProvider>
+            <LanguageProvider>
+              <ThemeProvider>
+                <RouterProvider router={router} />
+              </ThemeProvider>
+            </LanguageProvider>
+          </SocketProvider>
+        </SoundPreferencesProvider>
       </AuthProvider>
     </QueryClientProvider>
   </StrictMode>,

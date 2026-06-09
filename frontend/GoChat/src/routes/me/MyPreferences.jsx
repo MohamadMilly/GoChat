@@ -9,6 +9,7 @@ import { ArrowDown, ArrowUp } from "lucide-react";
 import translations from "../../translations";
 import { useLanguage } from "../../contexts/LanguageContext";
 import { ToggleInput } from "../../components/ui/ToggleInput";
+
 function PrefrenceSectionSelect({
   options,
   initialOption,
@@ -90,6 +91,7 @@ function PrefrenceSectionSelect({
     </section>
   );
 }
+
 
 function PreferenceSectionToggle({
   preferenceTitle,
